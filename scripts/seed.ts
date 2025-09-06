@@ -1,6 +1,6 @@
 import { db } from "../server/db";
 import { users, categories, professionals, reviews, payments, contacts } from "../shared/schema";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 async function seedDatabase() {
   console.log("🌱 Seeding database...");

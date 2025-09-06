@@ -6,7 +6,7 @@ import {
   contacts, 
   users 
 } from "../shared/schema";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 
 async function setupCompleteDatabase() {
