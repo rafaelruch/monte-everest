@@ -2,7 +2,7 @@
 FROM node:18-alpine
 
 # Set working directory
-WORKDIR /app
+WORKDIR /workspace
 
 # Copy package files
 COPY package*.json ./
@@ -13,13 +13,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the client application
 RUN npm run build
 
-# Build production server separately
-RUN npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server.js
-
-# Remove dev dependencies after build
+# Remove dev dependencies after build  
 RUN npm prune --production
 
 # Expose port
@@ -28,5 +25,5 @@ EXPOSE 5000
 # Set environment to production
 ENV NODE_ENV=production
 
-# Start the application with production server
-CMD ["node", "dist/server.js"]
+# Start the application with simple server
+CMD ["node", "server.js"]
