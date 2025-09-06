@@ -31,7 +31,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, and, like, sql, count, avg } from "drizzle-orm";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // Installation operations
