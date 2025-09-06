@@ -1,0 +1,265 @@
+# Requisitos da Plataforma Monte Everest
+
+## 1. Visão Geral do Projeto
+
+**Nome da Plataforma:** Monte Everest
+
+**Descrição:** Plataforma digital que conecta prestadores de serviços com clientes, oferecendo um sistema de cadastro, avaliações, ranking por categoria e facilitação de contato direto.
+
+**Objetivo Principal:** Criar um marketplace de serviços com foco na qualidade através de um sistema de avaliações e rankings.
+
+---
+
+## 2. Requisitos Funcionais
+
+### 2.1 Módulo de Cadastro e Gestão de Prestadores
+
+#### RF01 - Cadastro de Prestador de Serviço
+- **Descrição:** O prestador deve poder se cadastrar na plataforma
+- **Campos obrigatórios:**
+  - Nome completo
+  - Telefone
+  - Email
+  - Categoria de serviço
+  - Breve descrição dos serviços (máx. 500 caracteres)
+  - CPF/CNPJ
+  - CEP de atendimento
+- **Campos opcionais:**
+  - Foto de perfil
+  - Portfolio (até 5 imagens)
+  - Site/redes sociais
+  - Horário de atendimento
+- **Critério de aceite:** Cadastro só é efetivado após confirmação de email e aprovação do pagamento
+
+#### RF02 - Autenticação de Prestador
+- **Descrição:** Sistema de login/logout para prestadores
+- **Funcionalidades:**
+  - Login com email/senha
+  - Recuperação de senha
+  - Logout seguro
+- **Critério de aceite:** Acesso restrito apenas a prestadores com cadastro ativo e pagamento em dia
+
+#### RF03 - Edição de Perfil
+- **Descrição:** Prestador pode editar suas informações após o cadastro
+- **Restrições:** Alteração de categoria requer nova aprovação
+- **Critério de aceite:** Alterações são salvas em tempo real
+
+### 2.2 Módulo de Pagamento
+
+#### RF04 - Integração com Pagar.me
+- **Descrição:** Sistema de cobrança recorrente para prestadores
+- **Funcionalidades:**
+  - Cadastro de cartão de crédito
+  - Cobrança mensal automática
+  - Histórico de pagamentos
+  - Notificações de vencimento
+- **Critério de aceite:** Prestador só fica ativo na plataforma com pagamento aprovado
+
+#### RF05 - Gestão de Status de Pagamento
+- **Descrição:** Controle automático do status do prestador baseado no pagamento
+- **Status possíveis:**
+  - Ativo (pagamento em dia)
+  - Pendente (pagamento vencido até 5 dias)
+  - Suspenso (pagamento vencido há mais de 5 dias)
+- **Critério de aceite:** Perfis suspensos não aparecem nas buscas
+
+### 2.3 Módulo de Busca e Navegação (Cliente)
+
+#### RF06 - Busca por Categoria
+- **Descrição:** Clientes podem buscar prestadores por categoria de serviço
+- **Funcionalidades:**
+  - Filtro por categoria
+  - Filtro por localização (CEP)
+  - Filtro por avaliação mínima
+  - Ordenação por ranking
+- **Critério de aceite:** Resultados exibidos em ordem de ranking decrescente
+
+#### RF07 - Visualização de Perfil do Prestador
+- **Descrição:** Cliente pode visualizar perfil completo do prestador
+- **Informações exibidas:**
+  - Dados básicos (nome, telefone, descrição)
+  - Avaliações e comentários
+  - Ranking na categoria
+  - Portfolio
+- **Critério de aceite:** Todas as informações devem estar atualizadas
+
+### 2.4 Módulo de Avaliações
+
+#### RF08 - Sistema de Avaliação
+- **Descrição:** Clientes podem avaliar prestadores após contratação
+- **Componentes:**
+  - Nota de 1 a 5 estrelas
+  - Comentário opcional (máx. 300 caracteres)
+  - Data da avaliação
+- **Restrições:** Um cliente só pode avaliar o mesmo prestador uma vez por mês
+- **Critério de aceite:** Avaliações impactam diretamente no ranking
+
+#### RF09 - Cálculo de Ranking
+- **Descrição:** Sistema automático de ranking por categoria
+- **Fórmula:**
+  - Média ponderada das avaliações
+  - Considera número total de avaliações
+  - Peso maior para avaliações recentes (últimos 6 meses)
+- **Critério de aceite:** Ranking atualizado em tempo real
+
+### 2.5 Módulo de Contato
+
+#### RF10 - Contato Direto
+- **Descrição:** Facilitação do contato entre cliente e prestador
+- **Funcionalidades:**
+  - Exibição de telefone do prestador
+  - Botão "WhatsApp" (se informado)
+  - Formulário de contato interno
+- **Critério de aceite:** Contatos são registrados para fins estatísticos
+
+### 2.6 Dashboard Administrativa
+
+#### RF11 - Painel de Controle Geral
+- **Descrição:** Interface administrativa para gestão da plataforma
+- **Funcionalidades principais:**
+  - Visualização de prestadores cadastrados
+  - Controle de pagamentos
+  - Moderação de avaliações
+  - Estatísticas gerais
+- **Acesso:** Restrito a administradores
+
+#### RF12 - Gestão de Prestadores
+- **Descrição:** Ferramentas para gerenciar prestadores
+- **Funcionalidades:**
+  - Listar todos os prestadores
+  - Filtrar por status (ativo/pendente/suspenso)
+  - Editar informações de prestadores
+  - Suspender/reativar contas
+- **Critério de aceite:** Todas as ações devem ser logadas
+
+#### RF13 - Gestão de Categorias
+- **Descrição:** Sistema para gerenciar categorias de serviços
+- **Funcionalidades:**
+  - Criar novas categorias
+  - Editar categorias existentes
+  - Desativar categorias
+  - Migrar prestadores entre categorias
+- **Critério de aceite:** Alterações refletem imediatamente na busca
+
+#### RF14 - Relatórios e Analytics
+- **Descrição:** Geração de relatórios para tomada de decisão
+- **Relatórios disponíveis:**
+  - Prestadores por categoria
+  - Evolução de cadastros
+  - Receita mensal
+  - Avaliações por período
+  - Top prestadores por categoria
+- **Critério de aceite:** Dados atualizados diariamente
+
+---
+
+## 3. Requisitos Não-Funcionais
+
+### 3.1 Performance
+- **RNF01:** Tempo de carregamento da página inicial < 3 segundos
+- **RNF02:** Busca de prestadores deve retornar resultados em < 2 segundos
+- **RNF03:** Suporte para até 10.000 usuários simultâneos
+
+### 3.2 Usabilidade
+- **RNF04:** Design responsivo (mobile, tablet, desktop)
+- **RNF05:** Interface intuitiva com máximo 3 cliques para qualquer função
+- **RNF06:** Layout elegante e minimalista conforme especificado
+
+### 3.3 Segurança
+- **RNF07:** Criptografia SSL/TLS em todas as comunicações
+- **RNF08:** Senhas armazenadas com hash bcrypt
+- **RNF09:** Compliance com LGPD para dados pessoais
+- **RNF10:** Backup automático diário do banco de dados
+
+### 3.4 Disponibilidade
+- **RNF11:** Disponibilidade de 99.5% (SLA)
+- **RNF12:** Manutenções programadas apenas entre 2h-4h da madrugada
+
+### 3.5 Escalabilidade
+- **RNF13:** Arquitetura preparada para crescimento horizontal
+- **RNF14:** Cache implementado para otimização de consultas frequentes
+
+---
+
+## 4. Tecnologias e Integrações
+
+### 4.1 Integrações Obrigatórias
+- **Pagar.me API:** Para processamento de pagamentos
+- **ViaCEP API:** Para validação e busca de CEPs
+- **WhatsApp Business API:** Para integração de contato (opcional)
+
+### 4.2 Banco de Dados
+- **Estrutura principal:**
+  - Tabela de usuários (prestadores)
+  - Tabela de categorias
+  - Tabela de avaliações
+  - Tabela de pagamentos
+  - Tabela de logs de sistema
+
+---
+
+## 5. Fluxos de Uso Principais
+
+### 5.1 Fluxo de Cadastro do Prestador
+1. Prestador acessa página de cadastro
+2. Preenche formulário com dados pessoais e profissionais
+3. Sistema valida informações
+4. Prestador é redirecionado para pagamento (Pagar.me)
+5. Após pagamento aprovado, conta é ativada
+6. Prestador recebe email de confirmação
+
+### 5.2 Fluxo de Busca do Cliente
+1. Cliente acessa página inicial
+2. Seleciona categoria desejada
+3. Opcionalmente aplica filtros (localização, avaliação)
+4. Visualiza lista de prestadores ordenada por ranking
+5. Clica no prestador para ver perfil completo
+6. Entra em contato via WhatsApp direto ou formulário interno
+
+### 5.3 Fluxo de Avaliação
+1. Cliente contrata serviço (fora da plataforma)
+2. Cliente retorna à plataforma
+3. Busca o prestador contratado
+4. Deixa avaliação (estrelas + comentário)
+5. Sistema recalcula ranking do prestador
+6. Ranking é atualizado na listagem
+
+---
+
+## 6. Critérios de Aceite Gerais
+
+- ✅ Plataforma funcional em dispositivos móveis e desktop
+- ✅ Integração completa com Pagar.me funcionando
+- ✅ Sistema de ranking atualizado automaticamente
+- ✅ Painéis separados para Prestadores (`/prestador/dashboard`) e Administradores (`/admin/dashboard`)
+- ✅ Sistema de autenticação diferenciado por perfil
+- ✅ Design responsivo e minimalista implementado
+- ✅ Tempo de carregamento dentro dos limites especificados
+- ✅ Backup e segurança implementados
+- ✅ Testes de carga realizados e aprovados
+
+---
+
+## 7. Cronograma Sugerido
+
+### Fase 1 (4 semanas) - MVP
+- Configuração do design system (Shadcn/UI + 21st.dev)
+- Cadastro de prestadores com interface elegante
+- Sistema de pagamento
+- Busca básica por categoria
+- Dashboard administrativa básica
+
+### Fase 2 (3 semanas) - Funcionalidades Core
+- Sistema de avaliações com componentes animados
+- Cálculo de ranking
+- Contato direto via WhatsApp
+- Relatórios com visualizações interativas
+
+### Fase 3 (2 semanas) - Refinamentos e Polish
+- Animações e micro-interações finais
+- Otimizações de performance
+- Polimento da UX com componentes 21st.dev
+- Testes finais
+- Deploy em produção
+
+**Total estimado: 9 semanas**
