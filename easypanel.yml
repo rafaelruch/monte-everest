@@ -1,0 +1,41 @@
+name: monte-everest
+services:
+  - name: app
+    image:
+      dockerfile: Dockerfile
+    domains:
+      - host: monte-everest.yourdomain.com
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: PORT
+        value: "5000"
+      - name: DATABASE_URL
+        value: ${{ services.postgres.DATABASE_URL }}
+      - name: SESSION_SECRET
+        value: ${{ secrets.SESSION_SECRET }}
+      - name: PAGARME_API_KEY
+        value: ${{ secrets.PAGARME_API_KEY }}
+      - name: PAGARME_ENCRYPTION_KEY
+        value: ${{ secrets.PAGARME_ENCRYPTION_KEY }}
+    ports:
+      - published: 80
+        target: 5000
+    deploy:
+      replicas: 1
+      
+  - name: postgres
+    image: postgres:15-alpine
+    env:
+      - name: POSTGRES_DB
+        value: monte_everest
+      - name: POSTGRES_USER
+        value: postgres
+      - name: POSTGRES_PASSWORD
+        value: ${{ secrets.POSTGRES_PASSWORD }}
+    volumes:
+      - name: postgres-data
+        mountPath: /var/lib/postgresql/data
+    ports:
+      - published: 5432
+        target: 5432
