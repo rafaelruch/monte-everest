@@ -1,10 +1,11 @@
 {
   "name": "monte-everest",
   "version": "1.0.0",
-  "main": "app.cjs",
+  "type": "module",
+  "main": "app.js",
   "scripts": {
-    "dev": "node app.cjs",
-    "start": "node app.cjs",
+    "dev": "node app.js",
+    "start": "node app.js",
     "build": "echo 'Build completed'",
     "db:push": "echo 'Database push simulated'"
   },
