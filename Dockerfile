@@ -1,29 +1,26 @@
-# Use Node.js 18 LTS
-FROM node:18-alpine
-
-# Set working directory
-WORKDIR /workspace
-
-# Copy package files
+# Build stage
+FROM node:18-alpine AS builder
+WORKDIR /app
 COPY package*.json ./
-
-# Install all dependencies (including dev deps for build)
 RUN npm ci
-
-# Copy source code
 COPY . .
-
-# Build the client application
 RUN npm run build
 
-# Remove dev dependencies after build  
-RUN npm prune --production
+# Production stage  
+FROM node:18-alpine
+WORKDIR /workspace
+
+# Copy simple server and built files
+COPY package-simple.json ./package.json
+COPY app.js ./
+COPY --from=builder /app/dist ./dist
+
+# Install only express (CommonJS - no module issues)
+RUN npm install
 
 # Expose port
 EXPOSE 5000
-
-# Set environment to production
 ENV NODE_ENV=production
 
-# Start the application with simple server
-CMD ["node", "server.js"]
+# Start with simple CommonJS server
+CMD ["node", "app.js"]
