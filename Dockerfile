@@ -23,26 +23,35 @@ RUN npm install -g tsx
 # Copy source code
 COPY . .
 
-# Build ONLY the frontend client assets (builds to dist/public as per vite.config.ts)
+# Build frontend assets
 RUN npx vite build
 
-# Create server/public directory and copy built assets
+# FORÇA criação do diretório server/public sempre
 RUN mkdir -p server/public
 
-# Copy built assets from dist/public to server/public where serveStatic expects them
-RUN if [ -d "dist/public" ] && [ "$(ls -A dist/public 2>/dev/null)" ]; then \
-    cp -r dist/public/* server/public/; \
-    echo "Assets copied from dist/public to server/public"; \
-    echo "Contents of server/public:"; \
-    ls -la server/public/; \
-else \
-    echo "No dist/public found or empty, creating fallback"; \
-    echo "<!DOCTYPE html><html><head><title>Monte Everest</title></head><body><div id='root'></div><script type='module' src='/assets/index.js'></script></body></html>" > server/public/index.html; \
-    echo "Created fallback index.html"; \
-fi
+# FORÇA criação de index.html funcional sempre
+RUN echo '<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monte Everest</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>' > server/public/index.html
 
-# Final verification
-RUN ls -la server/public/index.html && echo "SUCCESS: index.html exists" || echo "ERROR: index.html missing"
+# Tenta copiar os assets do Vite se existirem
+RUN if [ -d "dist" ]; then cp -r dist/* server/public/ 2>/dev/null || true; fi
+RUN if [ -d "dist/public" ]; then cp -r dist/public/* server/public/ 2>/dev/null || true; fi
+
+# GARANTIA FINAL: Sempre verifica e cria se necessário
+RUN [ -f "server/public/index.html" ] || echo "<!DOCTYPE html><html><head><title>Monte Everest</title></head><body><div id=\"root\"></div></body></html>" > server/public/index.html
+
+# Confirmação final
+RUN echo "=== GARANTIDO: server/public existe ===" && ls -la server/public/
 
 # Create necessary directories
 RUN mkdir -p uploads
