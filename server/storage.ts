@@ -30,7 +30,7 @@ import {
   type InsertPage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, and, like, sql, count, avg } from "drizzle-orm";
+import { eq, desc, asc, and, like, sql, count, avg, or, isNull, gt, lt, lte } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -151,13 +151,13 @@ export class DatabaseStorage implements IStorage {
   async getInstallationConfig(): Promise<any> {
     const [config] = await db
       .select()
-      .from(logs)
+      .from(systemLogs)
       .where(and(
-        eq(logs.action, 'save_installation_config'),
-        eq(logs.entityType, 'system'),
-        eq(logs.entityId, 'installation_config')
+        eq(systemLogs.action, 'save_installation_config'),
+        eq(systemLogs.entityType, 'system'),
+        eq(systemLogs.entityId, 'installation_config')
       ))
-      .orderBy(desc(logs.createdAt))
+      .orderBy(desc(systemLogs.createdAt))
       .limit(1);
     
     return config ? config.details : null;

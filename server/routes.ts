@@ -234,8 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminUser = await storage.createUser({
         email: adminEmail,
         password: hashedPassword,
-        role: "admin",
-        name: "Administrador"
+        role: "admin"
       });
 
       // Create installation configuration record
