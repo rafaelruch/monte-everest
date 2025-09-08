@@ -224,6 +224,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email e senha do admin são obrigatórios" });
       }
 
+      // Se DATABASE_URL foi fornecida, criar tabelas automaticamente primeiro
+      if (databaseUrl) {
+        console.log("[install] Criando tabelas automaticamente com DATABASE_URL fornecida...");
+        
+        // Testar conexão primeiro
+        const connectionOk = await checkDatabaseConnection(databaseUrl);
+        if (!connectionOk) {
+          return res.status(400).json({ 
+            message: "Não foi possível conectar ao banco de dados. Verifique a URL de conexão." 
+          });
+        }
+
+        // Criar todas as tabelas
+        const tablesCreated = await createDatabaseTables(databaseUrl);
+        if (!tablesCreated) {
+          return res.status(500).json({ 
+            message: "Erro ao criar tabelas no banco de dados" 
+          });
+        }
+
+        console.log("[install] ✅ Tabelas criadas com sucesso!");
+      }
+
       // Check if already installed
       const adminUsers = await storage.getAdminUsers();
       if (adminUsers.length > 0) {

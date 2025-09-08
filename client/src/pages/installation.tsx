@@ -338,6 +338,31 @@ export default function Installation() {
                 </div>
 
                 <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Configuração do Banco de Dados</h3>
+                  
+                  <FormField
+                    control={form.control}
+                    name="databaseUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL do Banco PostgreSQL (Opcional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="postgres://user:pass@host:5432/database"
+                            data-testid="input-database-url"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                        <p className="text-xs text-muted-foreground">
+                          Para EasyPanel/produção: Cole a URL do PostgreSQL aqui e as tabelas serão criadas automaticamente
+                        </p>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Administrador do Sistema</h3>
                   
                   <FormField
@@ -379,30 +404,6 @@ export default function Installation() {
                   />
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Banco de Dados (Opcional)</h3>
-                  
-                  <FormField
-                    control={form.control}
-                    name="databaseUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL do Banco PostgreSQL</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="postgresql://user:pass@localhost:5432/monteeverest"
-                            data-testid="input-database-url"
-                            {...field}
-                          />
-                        </FormControl>
-                        <p className="text-sm text-muted-foreground">
-                          Deixe vazio para usar o banco padrão do Replit
-                        </p>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 {installationMutation.error && (
                   <Alert variant="destructive" data-testid="error-message">
