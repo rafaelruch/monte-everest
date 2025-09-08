@@ -23,6 +23,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
         email VARCHAR NOT NULL UNIQUE,
         password TEXT NOT NULL,
+        full_name VARCHAR,
         role VARCHAR NOT NULL DEFAULT 'admin',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
