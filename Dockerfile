@@ -23,26 +23,22 @@ RUN npm install -g tsx
 # Copy source code
 COPY . .
 
-# Build ONLY the frontend client assets
+# Build ONLY the frontend client assets (builds to dist/public as per vite.config.ts)
 RUN npx vite build
 
-# Create the public directory where serveStatic expects it
-RUN mkdir -p server/public
-
-# Copy built assets with proper fallback and ensure index.html exists
-RUN if [ -d "dist" ] && [ "$(ls -A dist)" ]; then \
-    cp -r dist/* server/public/ 2>/dev/null || true; \
+# Copy built assets from dist/public to server/public where serveStatic expects them
+RUN if [ -d "dist/public" ]; then \
+    cp -r dist/public/* server/; \
+    echo "Assets copied from dist/public to server/public"; \
+    ls -la server/public/ || echo "No public dir after copy"; \
 else \
-    echo "Creating fallback index.html"; \
+    echo "No dist/public found, creating fallback"; \
+    mkdir -p server/public; \
+    echo "<!DOCTYPE html><html><head><title>Monte Everest</title></head><body><div id='root'></div><script type='module' src='/assets/index.js'></script></body></html>" > server/public/index.html; \
 fi
 
-# Ensure index.html exists - create basic fallback if missing
-RUN if [ ! -f "server/public/index.html" ]; then \
-    echo "<!DOCTYPE html><html><head><title>Monte Everest</title></head><body><div id='root'></div><script src='/assets/index.js'></script></body></html>" > server/public/index.html; \
-fi
-
-# Remove any server JS files that might cause issues
-RUN find server/public -name "*.js" -path "*/server/*" -delete 2>/dev/null || true
+# Final verification
+RUN ls -la server/public/index.html && echo "SUCCESS: index.html exists" || echo "ERROR: index.html missing"
 
 # Create necessary directories
 RUN mkdir -p uploads
