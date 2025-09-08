@@ -10,6 +10,7 @@ import {
   ObjectNotFoundError,
 } from "./objectStorage";
 import { pagarmeService } from "./pagarme";
+import { createDatabaseTables, checkDatabaseConnection } from "./auto-installer";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
