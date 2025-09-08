@@ -45,5 +45,5 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# CRITICAL: Use script bash que garante tsx em produção
-CMD ["./production-start.sh"]
+# CRITICAL: Execute tsx diretamente sem dependências de scripts
+CMD ["npx", "tsx", "server/index.ts"]
