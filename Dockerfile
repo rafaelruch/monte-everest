@@ -29,6 +29,9 @@ RUN npx vite build
 # Remove any existing dist/index.js to prevent conflicts
 RUN rm -f dist/index.js
 
+# Remove entire dist directory except client build
+RUN find dist -name "*.js" -type f -delete 2>/dev/null || true
+
 # Ensure public directory points to built assets
 RUN ln -sf dist public 2>/dev/null || mkdir -p public
 
@@ -42,5 +45,5 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# CRITICAL: Always use tsx with TypeScript source, never compiled JS
-CMD ["tsx", "server/index.ts"]
+# CRITICAL: Use script alternativo que garante tsx em produção
+CMD ["node", "start-production.js"]
