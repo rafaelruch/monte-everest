@@ -30,18 +30,7 @@ RUN npx vite build
 RUN mkdir -p server/public
 
 # FORÇA criação de index.html funcional sempre
-RUN echo '<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monte Everest</title>
-</head>
-<body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-</body>
-</html>' > server/public/index.html
+RUN echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Monte Everest</title></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > server/public/index.html
 
 # Tenta copiar os assets do Vite se existirem
 RUN if [ -d "dist" ]; then cp -r dist/* server/public/ 2>/dev/null || true; fi
