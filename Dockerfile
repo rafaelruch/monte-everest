@@ -23,14 +23,17 @@ RUN npm install -g tsx
 # Copy source code
 COPY . .
 
-# Build the frontend client assets to dist/public
-RUN npx vite build || echo "Frontend build completed"
+# Build ONLY the frontend client assets - DO NOT BUILD SERVER
+RUN npx vite build
 
-# Create symbolic link for compatibility with serveStatic function
-RUN ln -sf dist public || echo "Public link created"
+# Remove any existing dist/index.js to prevent conflicts
+RUN rm -f dist/index.js
+
+# Ensure public directory points to built assets
+RUN ln -sf dist public 2>/dev/null || mkdir -p public
 
 # Create necessary directories
-RUN mkdir -p uploads public
+RUN mkdir -p uploads
 
 # Set environment variables
 ENV NODE_ENV=production
@@ -39,5 +42,5 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# Start the application with tsx directly bypassing npm start
+# CRITICAL: Always use tsx with TypeScript source, never compiled JS
 CMD ["tsx", "server/index.ts"]
