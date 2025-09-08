@@ -1,0 +1,433 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:30:11 PM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:30:17 PM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:202:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:30:26 PM [express] GET /api/install/status 200 in 51ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error checking installation status: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:202:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:30:48 PM [express] GET /api/install/status 200 in 11ms :: {"installed":false,"needsInstallation":t…
+Error fetching categories: error: relation "categories" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:91:26) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '112',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:30:48 PM [express] GET /api/categories 500 in 14ms :: {"message":"Erro interno do servidor"}
+3:30:49 PM [express] GET /api/professionals/search 500 in 12ms :: {"message":"Erro interno do servid…
+Error searching professionals: error: relation "professionals" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:399:12)
+    at async <anonymous> (/app/server/routes.ts:115:29) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '406',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Error fetching popular categories: error: relation "categories" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:101:33) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '112',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:30:49 PM [express] GET /api/categories/popular 500 in 16ms :: {"message":"Erro interno do servidor…
+Error during installation: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:227:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:30:54 PM [express] POST /api/install 500 in 11ms :: {"message":"relation \"users\" does not exist"}
+3:38:48 PM [express] GET /api/install/status 200 in 27ms :: {"installed":false,"needsInstallation":t…
+Error checking installation status: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:202:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+Error fetching categories: error: relation "categories" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:91:26) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '112',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:38:48 PM [express] GET /api/categories 500 in 13ms :: {"message":"Erro interno do servidor"}
+Error fetching popular categories: error: relation "categories" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:101:33) {
+  length: 110,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '112',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:38:48 PM [express] GET /api/categories/popular 500 in 13ms :: {"message":"Erro interno do servidor…
+Error searching professionals: error: relation "professionals" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:399:12)
+    at async <anonymous> (/app/server/routes.ts:115:29) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '406',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:38:48 PM [express] GET /api/professionals/search 500 in 18ms :: {"message":"Erro interno do servid…
+[static-server] Serving index.html for: /install
+Error checking installation status: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:202:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:40:14 PM [express] GET /api/install/status 200 in 14ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: error: relation "users" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:227:26) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '75',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+3:40:32 PM [express] POST /api/install 500 in 12ms :: {"message":"relation \"users\" does not exist"}
+[static-server] Serving index.html for: /robots.txt
+[static-server] Serving index.html for: /wp-sitemap.xml
+[static-server] Serving index.html for: /wp-sitemap-taxonomies-categoria-prestadore-1.xml
+[static-server] Serving index.html for: /wp-sitemap-taxonomies-cidade-1.xml
+[db] Using traditional PostgreSQL database
+[static-server] Serving index.html for: /install
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+4:02:14 PM [express] serving on port 5000
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /install
+Error checking installation status: error: password authentication failed for user "rafaelmiguel"
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:203:26) {
+  length: 108,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '329',
+  routine: 'auth_failed'
+}
+4:02:18 PM [express] GET /api/install/status 200 in 42ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+4:02:29 PM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: error: password authentication failed for user "rafaelmiguel"
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:203:26) {
+  length: 108,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '329',
+  routine: 'auth_failed'
+}
+4:02:31 PM [express] GET /api/install/status 200 in 46ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /install
+Error checking installation status: error: password authentication failed for user "rafaelmiguel"
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:134:12)
+    at async <anonymous> (/app/server/routes.ts:203:26) {
+  length: 108,
+  severity: 'FATAL',
+  code: '28P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'auth.c',
+  line: '329',
+  routine: 'auth_failed'
+}
+4:02:32 PM [express] GET /api/install/status 200 in 9ms :: {"installed":false,"needsInstallation":tr…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+4:03:52 PM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: TypeError: Cannot read properties of undefined (reading 'searchParams')
+    at parse (/app/node_modules/pg-connection-string/index.js:39:30)
+    at new ConnectionParameters (/app/node_modules/pg/lib/connection-parameters.js:56:42)
+    at new Client (/app/node_modules/pg/lib/client.js:18:33)
+    at BoundPool.newClient (/app/node_modules/pg-pool/index.js:233:20)
+    at BoundPool.connect (/app/node_modules/pg-pool/index.js:227:10)
+    at BoundPool.query (/app/node_modules/pg-pool/index.js:411:10)
+    at <anonymous> (/app/node_modules/src/node-postgres/session.ts:110:19)
+    at Object.startActiveSpan (/app/node_modules/src/tracing.ts:27:11)
+    at <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:32)
+    at Object.startActiveSpan (/app/node_modules/src/tracing.ts:27:11)
+4:03:57 PM [express] GET /api/install/status 200 in 15ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: TypeError: Cannot read properties of undefined (reading 'searchParams')
+    at parse (/app/node_modules/pg-connection-string/index.js:39:30)
+    at new ConnectionParameters (/app/node_modules/pg/lib/connection-parameters.js:56:42)
+    at new Client (/app/node_modules/pg/lib/client.js:18:33)
+    at BoundPool.newClient (/app/node_modules/pg-pool/index.js:233:20)
+    at BoundPool.connect (/app/node_modules/pg-pool/index.js:227:10)
+    at BoundPool.query (/app/node_modules/pg-pool/index.js:411:10)
+    at <anonymous> (/app/node_modules/src/node-postgres/session.ts:110:19)
+    at Object.startActiveSpan (/app/node_modules/src/tracing.ts:27:11)
+    at <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:32)
+    at Object.startActiveSpan (/app/node_modules/src/tracing.ts:27:11)
+4:04:14 PM [express] POST /api/install 500 in 3ms :: {"message":"Cannot read properties of undefined…
