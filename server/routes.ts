@@ -10,7 +10,7 @@ import {
   ObjectNotFoundError,
 } from "./objectStorage";
 import { pagarmeService } from "./pagarme";
-import { createDatabaseTables, checkDatabaseConnection } from "./auto-installer";
+import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
@@ -353,6 +353,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[setup-database] Erro:", error);
       res.status(500).json({ 
         message: "Erro interno durante configuração do banco",
+        error: error.message || "Erro desconhecido"
+      });
+    }
+  });
+
+  // Endpoint para instalar módulos específicos do banco de dados
+  app.post("/api/install/module", verifyAdminToken, async (req, res) => {
+    try {
+      const { module }: { module: DatabaseModule } = req.body;
+      
+      if (!module || !module.name || !module.tables) {
+        return res.status(400).json({ 
+          message: "Módulo inválido. Nome e tabelas são obrigatórios." 
+        });
+      }
+
+      console.log(`[install-module] Instalando módulo: ${module.name}`);
+      
+      const databaseUrl = process.env.DATABASE_URL;
+      if (!databaseUrl) {
+        return res.status(500).json({ 
+          message: "DATABASE_URL não configurada no servidor" 
+        });
+      }
+      
+      // Instalar o módulo específico
+      const moduleInstalled = await installDatabaseModule(databaseUrl, module);
+      if (!moduleInstalled) {
+        return res.status(500).json({ 
+          message: `Erro ao instalar módulo ${module.name}` 
+        });
+      }
+
+      console.log(`[install-module] ✅ Módulo ${module.name} instalado com sucesso!`);
+      
+      res.json({ 
+        success: true, 
+        message: `Módulo ${module.name} instalado com sucesso!`,
+        module: module.name,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("[install-module] Erro:", error);
+      res.status(500).json({ 
+        message: "Erro interno durante instalação do módulo",
         error: error.message || "Erro desconhecido"
       });
     }

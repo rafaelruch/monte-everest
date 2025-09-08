@@ -1,5 +1,24 @@
 import { Pool } from 'pg';
 
+// Interface para módulos adicionais do sistema
+export interface DatabaseModule {
+  name: string;
+  tables: string;
+  initialData?: string;
+  description: string;
+}
+
+// Lista de módulos adicionais que podem ser instalados
+export const availableModules: DatabaseModule[] = [
+  // Módulos futuros podem ser adicionados aqui
+  // {
+  //   name: 'notifications',
+  //   description: 'Sistema de notificações',
+  //   tables: `CREATE TABLE IF NOT EXISTS notifications (...);`,
+  //   initialData: `INSERT INTO notifications (...) VALUES (...);`
+  // }
+];
+
 export async function createDatabaseTables(databaseUrl: string): Promise<boolean> {
   console.log('[auto-installer] Iniciando criação automática das tabelas...');
   
@@ -210,6 +229,26 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     
     console.log('[auto-installer] ✅ Todas as tabelas criadas com sucesso!');
     
+    // Instalar módulos adicionais, se existirem
+    if (availableModules.length > 0) {
+      console.log('[auto-installer] Instalando módulos adicionais...');
+      for (const module of availableModules) {
+        console.log(`[auto-installer] Instalando módulo: ${module.name}`);
+        try {
+          if (module.tables) {
+            await client.query(module.tables);
+          }
+          if (module.initialData) {
+            await client.query(module.initialData);
+          }
+          console.log(`[auto-installer] ✅ Módulo ${module.name} instalado com sucesso!`);
+        } catch (moduleError) {
+          console.error(`[auto-installer] ⚠️ Erro ao instalar módulo ${module.name}:`, moduleError);
+          // Continua com outros módulos mesmo se um falhar
+        }
+      }
+    }
+    
     client.release();
     await pool.end();
     
@@ -236,6 +275,41 @@ export async function checkDatabaseConnection(databaseUrl: string): Promise<bool
     return true;
   } catch (error) {
     console.error('[auto-installer] ❌ Erro ao conectar com banco:', error);
+    await pool.end();
+    return false;
+  }
+}
+
+// Função para instalar um módulo específico
+export async function installDatabaseModule(databaseUrl: string, module: DatabaseModule): Promise<boolean> {
+  console.log(`[auto-installer] Instalando módulo específico: ${module.name}`);
+  
+  const pool = new Pool({
+    connectionString: databaseUrl,
+    ssl: databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : false
+  });
+
+  try {
+    const client = await pool.connect();
+    
+    if (module.tables) {
+      console.log(`[auto-installer] Criando tabelas do módulo ${module.name}...`);
+      await client.query(module.tables);
+    }
+    
+    if (module.initialData) {
+      console.log(`[auto-installer] Inserindo dados iniciais do módulo ${module.name}...`);
+      await client.query(module.initialData);
+    }
+    
+    console.log(`[auto-installer] ✅ Módulo ${module.name} instalado com sucesso!`);
+    
+    client.release();
+    await pool.end();
+    
+    return true;
+  } catch (error) {
+    console.error(`[auto-installer] ❌ Erro ao instalar módulo ${module.name}:`, error);
     await pool.end();
     return false;
   }
