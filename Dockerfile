@@ -23,8 +23,11 @@ RUN npm install -g tsx
 # Copy source code
 COPY . .
 
-# Build only the frontend client assets (avoid server build that includes vite)
+# Build the frontend client assets to dist/public
 RUN npx vite build || echo "Frontend build completed"
+
+# Create symbolic link for compatibility with serveStatic function
+RUN ln -sf dist public || echo "Public link created"
 
 # Create necessary directories
 RUN mkdir -p uploads public
