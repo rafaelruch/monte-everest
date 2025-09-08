@@ -258,7 +258,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminUser = await storage.createUser({
         email: adminEmail,
         password: hashedPassword,
-        role: "admin"
+        role: "admin",
+        isSystemAdmin: true
       });
 
       // Create installation configuration record
@@ -1344,6 +1345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        isSystemAdmin: user.isSystemAdmin,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       }));
@@ -1420,6 +1422,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Prevent deleting system admin (created during installation)
+      if (user.isSystemAdmin) {
+        return res.status(400).json({ message: "Não é possível excluir o administrador do sistema" });
       }
 
       await storage.deleteUser(userId);

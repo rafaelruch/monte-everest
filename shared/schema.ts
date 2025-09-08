@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   fullName: varchar("full_name"), // Nome completo do administrador
   role: varchar("role").notNull().default("admin"), // admin
+  isSystemAdmin: boolean("is_system_admin").default(false), // Admin criado na instalação
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

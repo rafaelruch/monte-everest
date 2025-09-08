@@ -2262,18 +2262,24 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="default">Ativo</Badge>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm(`Tem certeza que deseja remover o administrador "${admin.fullName || admin.email}"?`)) {
-                            deleteAdminMutation.mutate(admin.id);
-                          }
-                        }}
-                        disabled={deleteAdminMutation.isPending}
-                      >
-                        {deleteAdminMutation.isPending ? "Removendo..." : "Remover"}
-                      </Button>
+                      {admin.isSystemAdmin ? (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                          Sistema
+                        </Badge>
+                      ) : (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            if (confirm(`Tem certeza que deseja remover o administrador "${admin.fullName || admin.email}"?`)) {
+                              deleteAdminMutation.mutate(admin.id);
+                            }
+                          }}
+                          disabled={deleteAdminMutation.isPending}
+                        >
+                          {deleteAdminMutation.isPending ? "Removendo..." : "Remover"}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))
