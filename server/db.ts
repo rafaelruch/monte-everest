@@ -6,9 +6,9 @@ import ws from "ws";
 import * as schema from "@shared/schema";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  console.warn("[db] DATABASE_URL not configured. Database operations will fail until configured.");
+  // Set a dummy connection to prevent crashes
+  process.env.DATABASE_URL = "postgres://dummy:dummy@localhost:5432/dummy";
 }
 
 // Detectar se é Neon (serverless) ou PostgreSQL tradicional
