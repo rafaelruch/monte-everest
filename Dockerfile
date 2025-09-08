@@ -26,17 +26,27 @@ COPY . .
 # Build ONLY the frontend client assets - DO NOT BUILD SERVER
 RUN npx vite build
 
+# Debug: List what was built
+RUN echo "=== Contents of dist directory ===" && ls -la dist/ || echo "No dist directory"
+
 # Remove any existing dist/index.js to prevent conflicts
 RUN rm -f dist/index.js
-
-# Remove entire dist directory except client build
-RUN find dist -name "*.js" -type f -delete 2>/dev/null || true
 
 # Create the public directory where serveStatic expects it
 RUN mkdir -p server/public
 
 # Copy built assets to where serveStatic function expects them
-RUN cp -r dist/* server/public/ 2>/dev/null || mkdir -p server/public
+RUN if [ -d "dist" ]; then \
+    cp -r dist/* server/public/; \
+    echo "=== Assets copied to server/public ==="; \
+    ls -la server/public/; \
+else \
+    echo "No dist directory found, creating empty server/public"; \
+    touch server/public/index.html; \
+fi
+
+# Debug: Verify final structure
+RUN echo "=== Final server/public contents ===" && ls -la server/public/
 
 # Create necessary directories
 RUN mkdir -p uploads
