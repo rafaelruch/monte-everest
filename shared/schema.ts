@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").notNull().unique(),
   password: text("password").notNull(),
+  fullName: varchar("full_name"), // Nome completo do administrador
   role: varchar("role").notNull().default("admin"), // admin
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

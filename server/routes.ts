@@ -1330,6 +1330,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =========================================
+  // ADMIN USER MANAGEMENT ROUTES
+  // =========================================
+
+  // Get all admin users  
+  app.get("/api/admin/users", verifyAdminToken, async (req, res) => {
+    try {
+      const adminUsers = await storage.getAdminUsers();
+      // Remove password from response
+      const safeUsers = adminUsers.map(user => ({
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }));
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Create new admin user
+  app.post("/api/admin/users", verifyAdminToken, async (req, res) => {
+    try {
+      const { email, password, fullName } = req.body;
+      
+      if (!email || !password || !fullName) {
+        return res.status(400).json({ message: "Email, senha e nome completo são obrigatórios" });
+      }
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email já cadastrado" });
+      }
+
+      // Hash password and create admin
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newAdmin = await storage.createUser({
+        email,
+        password: hashedPassword,
+        fullName,
+        role: "admin"
+      });
+
+      // Log the action
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'create_admin_user',
+        entityType: 'user',
+        entityId: newAdmin.id,
+        details: { email, fullName },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      // Return user without password
+      const safeUser = {
+        id: newAdmin.id,
+        email: newAdmin.email,
+        fullName: newAdmin.fullName,
+        role: newAdmin.role,
+        createdAt: newAdmin.createdAt,
+        updatedAt: newAdmin.updatedAt
+      };
+
+      res.status(201).json(safeUser);
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Delete admin user
+  app.delete("/api/admin/users/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      
+      // Prevent deleting self
+      if (userId === req.user.id) {
+        return res.status(400).json({ message: "Não é possível excluir sua própria conta" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      await storage.deleteUser(userId);
+
+      // Log the action
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'delete_admin_user',
+        entityType: 'user',
+        entityId: userId,
+        details: { deletedEmail: user.email },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ message: "Administrador removido com sucesso" });
+    } catch (error) {
+      console.error("Error deleting admin user:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Object storage routes for professional photo upload
   app.post("/api/objects/upload", async (req, res) => {
     const objectStorageService = new ObjectStorageService();
