@@ -20,6 +20,7 @@ import ProfessionalProfile from "@/pages/professional-profile";
 import ProfessionalLogin from "@/pages/professional-login";
 import ProfessionalDashboard from "@/pages/professional-dashboard";
 import Installation from "@/pages/installation";
+import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
 import PageContent from "@/pages/page-content";
 import NotFound from "@/pages/not-found";
 
@@ -50,6 +51,7 @@ function Router() {
               <Route path="/professional-login" component={ProfessionalLogin} />
               <Route path="/professional-checkout" component={ProfessionalCheckout} />
               <Route path="/install" component={Installation} />
+              <Route path="/easypanel-installer" component={EasyPanelInstaller} />
               <Route path="/pagina/:slug" component={PageContent} />
               <Route component={NotFound} />
             </Switch>
