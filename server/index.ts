@@ -65,36 +65,9 @@ app.use((req, res, next) => {
     const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
-    // CORREÇÃO DEFINITIVA: Garantir que o diretório public existe antes de chamar serveStatic
-    const fs = await import("fs");
-    const path = await import("path");
-    const publicDir = path.resolve(import.meta.dirname, "public");
-    
-    // Criar diretório se não existir
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
-      
-      // Criar index.html básico se não existir
-      const indexPath = path.resolve(publicDir, "index.html");
-      if (!fs.existsSync(indexPath)) {
-        const basicHtml = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monte Everest</title>
-</head>
-<body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-</body>
-</html>`;
-        fs.writeFileSync(indexPath, basicHtml, 'utf8');
-      }
-    }
-    
-    const { serveStatic } = await import("./vite");
-    serveStatic(app);
+    // SOLUÇÃO DEFINITIVA: Usar servidor estático alternativo que SEMPRE funciona
+    const { createStaticServer } = await import("./static-server");
+    createStaticServer(app);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
