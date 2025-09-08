@@ -186,7 +186,7 @@ export default function AdminDashboard() {
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddAdminModalOpen, setIsAddAdminModalOpen] = useState(false);
-  const [newAdminData, setNewAdminData] = useState({ username: '', password: '', name: '' });
+  const [newAdminData, setNewAdminData] = useState({ email: '', password: '', fullName: '' });
   const [isMobile, setIsMobile] = useState(false);
   
   // Estados para paginação e busca
@@ -759,7 +759,7 @@ export default function AdminDashboard() {
   };
 
   const addAdminMutation = useMutation({
-    mutationFn: async (adminData: { username: string; password: string; name: string }) => {
+    mutationFn: async (adminData: { email: string; password: string; fullName: string }) => {
       const response = await fetch("/api/admin/users", {
         method: "POST",
         headers: {
@@ -777,7 +777,7 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({ title: "Administrador criado com sucesso!" });
       setIsAddAdminModalOpen(false);
-      setNewAdminData({ username: '', password: '', name: '' });
+      setNewAdminData({ email: '', password: '', fullName: '' });
     },
   });
 
@@ -886,7 +886,7 @@ export default function AdminDashboard() {
 
   const handleAddAdminSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdminData.username || !newAdminData.password || !newAdminData.name) {
+    if (!newAdminData.email || !newAdminData.password || !newAdminData.fullName) {
       toast({ title: "Por favor, preencha todos os campos", variant: "destructive" });
       return;
     }
@@ -2254,8 +2254,8 @@ export default function AdminDashboard() {
                 admins.map((admin: any) => (
                   <div key={admin.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h4 className="font-medium">{admin.name}</h4>
-                      <p className="text-sm text-gray-500">@{admin.username}</p>
+                      <h4 className="font-medium">{admin.fullName || admin.email}</h4>
+                      <p className="text-sm text-gray-500">{admin.email}</p>
                       <p className="text-xs text-gray-400">
                         Criado em: {admin.createdAt ? new Date(admin.createdAt).toLocaleDateString('pt-BR') : 'Data não disponível'}
                       </p>
@@ -2266,7 +2266,7 @@ export default function AdminDashboard() {
                         variant="destructive"
                         size="sm"
                         onClick={() => {
-                          if (confirm(`Tem certeza que deseja remover o administrador "${admin.name}"?`)) {
+                          if (confirm(`Tem certeza que deseja remover o administrador "${admin.fullName || admin.email}"?`)) {
                             deleteAdminMutation.mutate(admin.id);
                           }
                         }}
@@ -3700,20 +3700,21 @@ export default function AdminDashboard() {
               <Label htmlFor="admin-name">Nome Completo</Label>
               <Input
                 id="admin-name"
-                value={newAdminData.name}
-                onChange={(e) => setNewAdminData({...newAdminData, name: e.target.value})}
+                value={newAdminData.fullName}
+                onChange={(e) => setNewAdminData({...newAdminData, fullName: e.target.value})}
                 placeholder="Nome do administrador"
                 required
               />
             </div>
             
             <div>
-              <Label htmlFor="admin-username">Nome de Usuário</Label>
+              <Label htmlFor="admin-email">Email</Label>
               <Input
-                id="admin-username"
-                value={newAdminData.username}
-                onChange={(e) => setNewAdminData({...newAdminData, username: e.target.value})}
-                placeholder="usuario_admin"
+                id="admin-email"
+                type="email"
+                value={newAdminData.email}
+                onChange={(e) => setNewAdminData({...newAdminData, email: e.target.value})}
+                placeholder="admin@exemplo.com"
                 required
               />
             </div>
