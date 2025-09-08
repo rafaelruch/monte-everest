@@ -285,6 +285,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint especial para instalação automática de tabelas (EasyPanel)
+  app.post("/api/install/setup-database", async (req, res) => {
+    try {
+      const { databaseUrl } = req.body;
+      
+      if (!databaseUrl) {
+        return res.status(400).json({ 
+          message: "DATABASE_URL é obrigatória", 
+          example: "postgres://user:pass@host:5432/database" 
+        });
+      }
+
+      console.log("[setup-database] Testando conexão com banco...");
+      
+      // Testar conexão primeiro
+      const connectionOk = await checkDatabaseConnection(databaseUrl);
+      if (!connectionOk) {
+        return res.status(400).json({ 
+          message: "Não foi possível conectar ao banco de dados. Verifique a URL de conexão." 
+        });
+      }
+
+      console.log("[setup-database] Criando tabelas...");
+      
+      // Criar todas as tabelas
+      const tablesCreated = await createDatabaseTables(databaseUrl);
+      if (!tablesCreated) {
+        return res.status(500).json({ 
+          message: "Erro ao criar tabelas no banco de dados" 
+        });
+      }
+
+      console.log("[setup-database] ✅ Instalação completa!");
+      
+      res.json({ 
+        success: true, 
+        message: "Banco de dados configurado com sucesso!",
+        tablesCreated: true,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("[setup-database] Erro:", error);
+      res.status(500).json({ 
+        message: "Erro interno durante configuração do banco",
+        error: error.message || "Erro desconhecido"
+      });
+    }
+  });
+
   // Register new professional
   app.post("/api/professionals/register", async (req, res) => {
     try {
