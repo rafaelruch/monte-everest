@@ -45,5 +45,5 @@ ENV PORT=5000
 # Expose port
 EXPOSE 5000
 
-# CRITICAL: Use script alternativo que garante tsx em produção
-CMD ["node", "start-production.js"]
+# CRITICAL: Use script bash que garante tsx em produção
+CMD ["./production-start.sh"]
