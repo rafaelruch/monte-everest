@@ -1176,6 +1176,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const plan = await storage.createSubscriptionPlan(req.body);
       
+      // Tentar sincronizar automaticamente com Pagar.me
+      try {
+        console.log('[auto-sync] Tentando sincronizar novo plano com Pagar.me...');
+        const pagarmeResult = await pagarmeService.syncPlanWithPagarMe(plan);
+        const pagarmeId = pagarmeResult?.result?.id || pagarmeResult?.id;
+        
+        if (pagarmeId) {
+          // Atualizar plano com ID do Pagar.me
+          await storage.updateSubscriptionPlan(plan.id, { pagarmeProductId: pagarmeId });
+          console.log(`[auto-sync] ✅ Plano ${plan.name} sincronizado com Pagar.me (ID: ${pagarmeId})`);
+        }
+      } catch (syncError) {
+        console.error('[auto-sync] ⚠️ Erro na sincronização automática:', syncError);
+        // Continua sem falhar - sincronização pode ser feita manualmente depois
+      }
+      
       await storage.createLog({
         userId: req.user.id,
         action: 'create_subscription_plan',
@@ -1186,7 +1202,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userAgent: req.get('User-Agent') || null
       });
 
-      res.status(201).json(plan);
+      // Buscar plano atualizado para retornar com pagarmeProductId se foi sincronizado
+      const updatedPlan = await storage.getSubscriptionPlan(plan.id);
+      res.status(201).json(updatedPlan || plan);
     } catch (error) {
       console.error("Error creating plan:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
@@ -1196,6 +1214,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/plans/:id", verifyAdminToken, async (req, res) => {
     try {
       const plan = await storage.updateSubscriptionPlan(req.params.id, req.body);
+      
+      // Se há mudanças significativas (preço, nome, descrição), sincronizar com Pagar.me
+      if (req.body.monthlyPrice || req.body.name || req.body.description) {
+        try {
+          console.log('[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...');
+          const pagarmeResult = await pagarmeService.syncPlanWithPagarMe(plan);
+          const pagarmeId = pagarmeResult?.result?.id || pagarmeResult?.id;
+          
+          if (pagarmeId && pagarmeId !== plan.pagarmeProductId) {
+            // Atualizar com novo ID se mudou
+            await storage.updateSubscriptionPlan(plan.id, { pagarmeProductId: pagarmeId });
+            console.log(`[auto-sync] ✅ Plano ${plan.name} ressincronizado com Pagar.me (novo ID: ${pagarmeId})`);
+          }
+        } catch (syncError) {
+          console.error('[auto-sync] ⚠️ Erro na ressincronização automática:', syncError);
+          // Continua sem falhar - sincronização pode ser feita manualmente depois
+        }
+      }
       
       await storage.createLog({
         userId: req.user.id,
@@ -1207,7 +1243,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userAgent: req.get('User-Agent') || null
       });
 
-      res.json(plan);
+      // Buscar plano atualizado para retornar com possível novo pagarmeProductId
+      const updatedPlan = await storage.getSubscriptionPlan(req.params.id);
+      res.json(updatedPlan || plan);
     } catch (error) {
       console.error("Error updating plan:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
