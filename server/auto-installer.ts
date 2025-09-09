@@ -196,6 +196,18 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Tabela de imagens - para armazenar imagens diretamente no banco
+    CREATE TABLE IF NOT EXISTS images (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        filename VARCHAR NOT NULL,
+        mimetype VARCHAR NOT NULL,
+        size INTEGER NOT NULL,
+        data TEXT NOT NULL,
+        professional_id VARCHAR NOT NULL,
+        type VARCHAR NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- Criar índices para performance
     CREATE INDEX IF NOT EXISTS professionals_category_idx ON professionals(category_id);
     CREATE INDEX IF NOT EXISTS professionals_service_area_idx ON professionals(service_area);
@@ -204,6 +216,8 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     CREATE INDEX IF NOT EXISTS reviews_professional_idx ON reviews(professional_id);
     CREATE INDEX IF NOT EXISTS reviews_rating_idx ON reviews(rating);
     CREATE INDEX IF NOT EXISTS reviews_created_at_idx ON reviews(created_at);
+    CREATE INDEX IF NOT EXISTS images_professional_idx ON images(professional_id);
+    CREATE INDEX IF NOT EXISTS images_type_idx ON images(type);
 
     -- Atualizar tabelas existentes com colunas que podem estar faltando
     -- (Esta seção é executada sempre que setup-tables roda)
