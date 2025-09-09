@@ -336,6 +336,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Rota GET para setup das tabelas (acessível diretamente no navegador)
+  app.get("/setup-tables", async (req, res) => {
+    try {
+      console.log("[setup-tables] Iniciando criação das tabelas...");
+      
+      // Usar a URL do banco do ambiente atual
+      const databaseUrl = process.env.DATABASE_URL;
+      
+      if (!databaseUrl) {
+        return res.status(500).send(`
+          <html>
+            <body>
+              <h2>❌ Erro: DATABASE_URL não encontrada</h2>
+              <p>A variável de ambiente DATABASE_URL é obrigatória.</p>
+            </body>
+          </html>
+        `);
+      }
+
+      // Testar conexão primeiro
+      const connectionOk = await checkDatabaseConnection(databaseUrl);
+      if (!connectionOk) {
+        return res.status(500).send(`
+          <html>
+            <body>
+              <h2>❌ Erro de Conexão</h2>
+              <p>Não foi possível conectar ao banco de dados.</p>
+              <p>URL: ${databaseUrl.replace(/:[^:]*@/, ':***@')}</p>
+            </body>
+          </html>
+        `);
+      }
+
+      // Criar tabelas
+      const tablesCreated = await createDatabaseTables(databaseUrl);
+      if (!tablesCreated) {
+        return res.status(500).send(`
+          <html>
+            <body>
+              <h2>❌ Erro ao Criar Tabelas</h2>
+              <p>Erro ao criar tabelas no banco de dados.</p>
+            </body>
+          </html>
+        `);
+      }
+
+      console.log("[setup-tables] ✅ Tabelas criadas com sucesso!");
+      
+      res.send(`
+        <html>
+          <head>
+            <title>Setup Concluído</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 50px; }
+              .success { color: green; }
+              .info { background: #f0f8ff; padding: 20px; border-radius: 5px; margin: 20px 0; }
+            </style>
+          </head>
+          <body>
+            <h1 class="success">✅ Setup das Tabelas Concluído!</h1>
+            <div class="info">
+              <h3>Tabelas criadas com sucesso:</h3>
+              <ul>
+                <li>users</li>
+                <li>categories</li>
+                <li>subscription_plans</li>
+                <li>professionals</li>
+                <li>reviews</li>
+                <li>payments</li>
+                <li>contacts</li>
+                <li>system_logs</li>
+                <li>system_configs</li>
+                <li>pages</li>
+                <li><strong>images</strong> (nova tabela)</li>
+              </ul>
+            </div>
+            <p>🎉 Agora você pode usar a aplicação normalmente!</p>
+            <p><a href="/">← Voltar para a aplicação</a></p>
+          </body>
+        </html>
+      `);
+      
+    } catch (error) {
+      console.error("[setup-tables] Erro:", error);
+      res.status(500).send(`
+        <html>
+          <body>
+            <h2>❌ Erro Interno</h2>
+            <p>Erro: ${error instanceof Error ? error.message : "Erro desconhecido"}</p>
+          </body>
+        </html>
+      `);
+    }
+  });
+
   app.post("/api/setup-tables", async (req, res) => {
     try {
       const { databaseUrl } = req.body;
