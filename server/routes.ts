@@ -275,24 +275,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/install", async (req, res) => {
     try {
-      // Check if already installed first
-      try {
-        const adminUsers = await storage.getAdminUsers();
-        if (adminUsers.length > 0) {
-          return res.status(404).json({ message: "Página não encontrada" });
-        }
-      } catch (error) {
-        // If getAdminUsers fails, tables don't exist - proceed with installation
-        console.log("[install] Tabelas não existem - prosseguindo com instalação");
-      }
-
       const { adminEmail, adminPassword, siteName, databaseUrl, siteUrl } = req.body;
       
       if (!adminEmail || !adminPassword) {
         return res.status(400).json({ message: "Email e senha do admin são obrigatórios" });
       }
 
-      // Sempre criar tabelas automaticamente primeiro
+      // Always create tables first - this is the main installation process
       const targetDatabaseUrl = databaseUrl || process.env.DATABASE_URL;
       
       if (!targetDatabaseUrl) {
@@ -301,9 +290,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log("[install] Criando todas as tabelas automaticamente...");
+      console.log("[install] Criando tabelas automaticamente...");
       
-      // Testar conexão primeiro
+      // Test connection first
       const connectionOk = await checkDatabaseConnection(targetDatabaseUrl);
       if (!connectionOk) {
         return res.status(400).json({ 
@@ -311,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Criar todas as tabelas
+      // Create all tables
       const tablesCreated = await createDatabaseTables(targetDatabaseUrl);
       if (!tablesCreated) {
         return res.status(500).json({ 
@@ -319,8 +308,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("[install] ✅ Todas as tabelas criadas com sucesso!");
-      
+      console.log("[install] ✅ Tabelas criadas com sucesso!");
+
+      // NOW check if already installed (after tables exist)
+      try {
+        const adminUsers = await storage.getAdminUsers();
+        if (adminUsers.length > 0) {
+          return res.status(400).json({ message: "Sistema já foi instalado" });
+        }
+      } catch (error) {
+        // If still fails after creating tables, there's a bigger issue
+        console.error("[install] Erro após criar tabelas:", error);
+        return res.status(500).json({ message: "Erro ao verificar instalação após criar tabelas" });
+      }
+
       // Hash password and create admin
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
       const adminUser = await storage.createUser({
@@ -380,11 +381,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint especial para instalação automática de tabelas (EasyPanel)
   app.post("/api/install/setup-database", async (req, res) => {
     try {
-      // Check if already installed first
-      const adminUsers = await storage.getAdminUsers();
-      if (adminUsers.length > 0) {
-        return res.status(404).json({ message: "Página não encontrada" });
-      }
 
       const { databaseUrl } = req.body;
       
