@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/ImageUploader";
+import { ObjectUploader } from "@/components/ObjectUploader";
 import { useViaCep } from "@/hooks/useViaCep";
 
 const updateProfileSchema = z.object({
@@ -912,42 +913,21 @@ export default function ProfessionalDashboard() {
                     <p className="text-sm text-muted-foreground mb-3">
                       Adicione uma foto profissional para que os clientes possam identificá-lo facilmente.
                     </p>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        id="profile-upload-input"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          
-                          try {
-                            const params = await handleGetProfileImageUploadParameters();
-                            const uploadResponse = await fetch(params.url, {
-                              method: params.method,
-                              body: file,
-                              headers: { 'Content-Type': file.type },
-                            });
-                            
-                            if (uploadResponse.ok) {
-                              handleProfileImageUploadComplete({ uploadURL: params.url });
-                            }
-                          } catch (error) {
-                            console.error("Upload error:", error);
-                          }
-                        }}
-                      />
-                      <Button 
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => document.getElementById('profile-upload-input')?.click()}
-                      >
-                        <Camera className="h-4 w-4 mr-2" />
-                        {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
-                      </Button>
-                    </div>
+                    <ObjectUploader
+                      maxNumberOfFiles={1}
+                      maxFileSize={10485760}
+                      onGetUploadParameters={handleGetProfileImageUploadParameters}
+                      onComplete={(result) => {
+                        if (result.successful && result.successful.length > 0) {
+                          const uploadedFile = result.successful[0];
+                          handleProfileImageUploadComplete({ uploadURL: uploadedFile.uploadURL });
+                        }
+                      }}
+                      buttonClassName="flex items-center gap-2"
+                    >
+                      <Camera className="h-4 w-4" />
+                      {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
+                    </ObjectUploader>
                   </div>
                 </div>
 
