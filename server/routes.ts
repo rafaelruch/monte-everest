@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pg from 'pg';
 import crypto from 'crypto';
+import { Client as ObjectStorageClient } from '@replit/object-storage';
 
 const { Pool: PgPool } = pg;
 import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema } from "@shared/schema";
@@ -18,6 +19,47 @@ import { db } from "./db";
 import { emailService } from "./email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
+
+// Object Storage Service wrapper
+class ObjectStorageService {
+  private client: ObjectStorageClient;
+  
+  constructor() {
+    this.client = new ObjectStorageClient();
+  }
+  
+  async getObjectEntityUploadURL(): Promise<string> {
+    // This would typically return a presigned upload URL
+    // For now, return a placeholder that matches expected usage
+    return "/api/objects/upload";
+  }
+  
+  async getObjectEntityFile(path: string): Promise<{ name: string; path: string }> {
+    const result = await this.client.exists(path);
+    if (!result.ok) {
+      throw new ObjectNotFoundError(`Object not found: ${path}`);
+    }
+    if (!result.value) {
+      throw new ObjectNotFoundError(`Object not found: ${path}`);
+    }
+    return { name: path.split('/').pop() || '', path };
+  }
+  
+  downloadObject(objectFile: { path: string }, res: Response): void {
+    this.client.downloadAsStream(objectFile.path).pipe(res);
+  }
+  
+  normalizeObjectEntityPath(path: string): string {
+    return path.startsWith('/') ? path : `/${path}`;
+  }
+}
+
+class ObjectNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ObjectNotFoundError';
+  }
+}
 
 // Middleware to verify admin JWT token
 const verifyAdminToken = async (req: Request, res: Response, next: NextFunction) => {
