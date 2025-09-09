@@ -1,0 +1,231 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:18:29 AM [express] serving on port 5000
+[setup-database] Testando conexão com banco...
+[auto-installer] ❌ Erro ao conectar com banco: TypeError: Cannot read properties of undefined (reading 'searchParams')
+    at parse (/app/node_modules/pg-connection-string/index.js:39:30)
+    at new ConnectionParameters (/app/node_modules/pg/lib/connection-parameters.js:56:42)
+    at new Client (/app/node_modules/pg/lib/client.js:18:33)
+    at BoundPool.newClient (/app/node_modules/pg-pool/index.js:233:20)
+    at BoundPool.connect (/app/node_modules/pg-pool/index.js:227:10)
+    at checkDatabaseConnection (/app/server/auto-installer.ts:382:31)
+    at <anonymous> (/app/server/routes.ts:365:34)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+1:18:44 AM [express] POST /api/install/setup-database 400 in 19ms :: {"message":"Não foi possível co…
+[setup-database] Testando conexão com banco...
+[auto-installer] ✅ Conexão com banco testada com sucesso
+[setup-database] Criando tabelas...
+[auto-installer] Iniciando criação automática das tabelas...
+[auto-installer] Conectado ao banco PostgreSQL
+[auto-installer] Executando SQL de criação das tabelas...
+[auto-installer] ❌ Erro ao criar tabelas: error: column "meta_description" of relation "pages" does not exist
+    at /app/node_modules/pg/lib/client.js:545:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createDatabaseTables (/app/server/auto-installer.ts:340:5)
+    at async <anonymous> (/app/server/routes.ts:375:29) {
+  length: 136,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '7883',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+[static-server] Serving index.html for: /easypanel-installer
+Error checking installation status: error: column "full_name" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '35',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:43 AM [express] GET /api/install/status 200 in 24ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /install
+Error checking installation status: error: column "full_name" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '35',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:46 AM [express] GET /api/install/status 304 in 13ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+1:20:46 AM [express] GET /api/categories 304 in 23ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc1ddaa7…
+Error searching professionals: error: column "first_login" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+1:20:46 AM [express] GET /api/professionals/search 500 in 16ms :: {"message":"Erro interno do servid…
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:405:12)
+    at async <anonymous> (/app/server/routes.ts:116:29) {
+  length: 112,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '318',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:47 AM [express] GET /api/categories/popular 304 in 25ms :: [{"id":"a2d7c3cd-b48c-4758-bc8b-7ffc…
+[static-server] Serving index.html for: /favicon.ico
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+error: terminating connection due to administrator command
+    at Parser.parseErrorMessage (/app/node_modules/pg-protocol/src/parser.ts:369:69)
+    at Parser.handlePacket (/app/node_modules/pg-protocol/src/parser.ts:187:21)
+    at Parser.parse (/app/node_modules/pg-protocol/src/parser.ts:102:30)
+    at Socket.<anonymous> (/app/node_modules/pg-protocol/src/index.ts:7:48)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:191:23)
+Emitted 'error' event on Client instance at:
+    at Client._handleErrorEvent (/app/node_modules/pg/lib/client.js:350:10)
+    at Client._handleErrorMessage (/app/node_modules/pg/lib/client.js:361:12)
+    at Connection.emit (node:events:524:28)
+    at /app/node_modules/pg/lib/connection.js:116:12
+    at Parser.parse (/app/node_modules/pg-protocol/src/parser.ts:103:9)
+    at Socket.<anonymous> (/app/node_modules/pg-protocol/src/index.ts:7:48)
+    [... lines matching original stack trace ...]
+    at Readable.push (node:internal/streams/readable:392:5) {
+  length: 116,
+  severity: 'FATAL',
+  code: '57P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'postgres.c',
+  line: '3315',
+  routine: 'ProcessInterrupts'
+}
+
+Node.js v20.19.5
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:25:21 AM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:26:32 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:13 AM [express] GET /api/install/status 304 in 64ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:27:27 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:29 AM [express] GET /api/install/status 304 in 28ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:260:26)
+1:27:51 AM [express] POST /api/install 500 in 6ms :: {"message":"The server does not support SSL con…
+[static-server] Serving index.html for: /robots.txt
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:32:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:32:52 AM [express] GET /api/install/status 304 in 29ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:260:26)
+1:33:22 AM [express] POST /api/install 500 in 5ms :: {"message":"The server does not support SSL con…
