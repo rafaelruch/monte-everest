@@ -2377,18 +2377,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      // For PIX/Boleto payments, create a separate charge to get QR Code
-      if (paymentMethod === 'pix') {
-        console.log('Creating PIX charge to generate QR Code...');
+      // For PIX/Boleto payments, create boleto with PIX QR Code (30-day expiration)
+      if (paymentMethod === 'pix' || paymentMethod === 'boleto') {
+        console.log('Creating boleto with PIX QR Code (30-day expiration)...');
         
         try {
-          // Create PIX charge to get QR Code
-          const pixChargeData = {
+          // Create boleto with PIX QR Code (30-day expiration)
+          const chargeData = {
             amount: priceInCentavos,
             payment: {
-              payment_method: 'pix',
-              pix: {
-                expires_in: 86400 // 24 hours in seconds
+              payment_method: 'boleto',
+              boleto: {
+                due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+                type: 'DM',
+                instructions: 'Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.'
               }
             },
             customer: {
@@ -2422,58 +2424,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
 
-          console.log('Creating PIX charge with data:', JSON.stringify(pixChargeData, null, 2));
+          console.log('Creating boleto charge with data:', JSON.stringify(chargeData, null, 2));
 
-          const pixChargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
+          const chargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
             method: 'POST',
             headers: {
               'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(pixChargeData)
+            body: JSON.stringify(chargeData)
           });
 
-          if (pixChargeResponse.ok) {
-            const pixCharge = await pixChargeResponse.json();
-            console.log('PIX Charge created:', JSON.stringify(pixCharge, null, 2));
+          if (chargeResponse.ok) {
+            const charge = await chargeResponse.json();
+            console.log('Boleto charge created:', JSON.stringify(charge, null, 2));
             
-            if (pixCharge.last_transaction) {
-              const transaction = pixCharge.last_transaction;
-              console.log('PIX Transaction data:', JSON.stringify(transaction, null, 2));
+            if (charge.last_transaction) {
+              const transaction = charge.last_transaction;
+              console.log('Transaction from boleto charge:', JSON.stringify(transaction, null, 2));
               
               const paymentInfo = {
                 qrCode: transaction.qr_code, // PIX copy-paste code
                 qrCodeUrl: transaction.qr_code_url, // QR Code image URL
                 pixCode: transaction.qr_code, // PIX copy-paste code
-                expiresAt: transaction.expires_at || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-                amount: pixCharge.amount || priceInCentavos,
-                chargeId: pixCharge.id
+                line: transaction.line, // Boleto line
+                pdf: transaction.pdf, // Boleto PDF
+                expiresAt: transaction.due_at,
+                amount: charge.amount || priceInCentavos,
+                chargeId: charge.id
               };
               
               responseData.paymentInfo = paymentInfo;
               responseData.redirectTo = null; // Don't redirect yet, show payment info first
             } else {
-              console.error('No transaction found in PIX charge');
+              console.error('No transaction found in boleto charge');
               responseData.paymentInfo = {
                 amount: priceInCentavos,
-                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
               };
               responseData.redirectTo = null;
             }
           } else {
-            const errorText = await pixChargeResponse.text();
-            console.error('Failed to create PIX charge:', pixChargeResponse.status, errorText);
+            const errorText = await chargeResponse.text();
+            console.error('Failed to create boleto charge:', chargeResponse.status, errorText);
             responseData.paymentInfo = {
               amount: priceInCentavos,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
             };
             responseData.redirectTo = null;
           }
         } catch (error) {
-          console.error('Error creating PIX charge:', error);
+          console.error('Error creating boleto charge:', error);
           responseData.paymentInfo = {
             amount: priceInCentavos,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
           };
           responseData.redirectTo = null;
         }
