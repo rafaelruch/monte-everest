@@ -108,22 +108,22 @@ export default function ProfessionalDashboard() {
     }
   }, [setLocation]);
 
-  const { data: professional, isLoading: professionalLoading } = useQuery({
+  const { data: professional, isLoading: professionalLoading } = useQuery<any>({
     queryKey: ["/api/professionals", professionalAuth?.id],
     enabled: !!professionalAuth?.id,
   });
 
-  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery<any[]>({
     queryKey: ["/api/reviews", professionalAuth?.id],
     enabled: !!professionalAuth?.id,
   });
 
-  const { data: contacts = [], isLoading: contactsLoading } = useQuery({
+  const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: ["/api/contacts", professionalAuth?.id],
     enabled: !!professionalAuth?.id,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
 
@@ -687,14 +687,42 @@ export default function ProfessionalDashboard() {
                     <p className="text-sm text-muted-foreground mb-3">
                       Adicione uma foto profissional para que os clientes possam identificá-lo facilmente.
                     </p>
-                    <ImageUploader
-                      onGetUploadParameters={handleGetProfileImageUploadParameters}
-                      onComplete={handleProfileImageUploadComplete}
-                      maxFileSize={2 * 1024 * 1024} // 2MB
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
-                    </ImageUploader>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="profile-upload-input"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            const params = await handleGetProfileImageUploadParameters();
+                            const uploadResponse = await fetch(params.url, {
+                              method: params.method,
+                              body: file,
+                              headers: { 'Content-Type': file.type },
+                            });
+                            
+                            if (uploadResponse.ok) {
+                              handleProfileImageUploadComplete({ uploadURL: params.url });
+                            }
+                          } catch (error) {
+                            console.error("Upload error:", error);
+                          }
+                        }}
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('profile-upload-input')?.click()}
+                      >
+                        <Camera className="h-4 w-4 mr-2" />
+                        {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
