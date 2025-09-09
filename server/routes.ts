@@ -1015,6 +1015,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'delete_payment',
         entityType: 'payment',
         entityId: req.params.id,
+        details: {},
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
@@ -1022,6 +1023,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Pagamento removido com sucesso" });
     } catch (error) {
       console.error("Error deleting payment:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Sync payment with Pagar.me
+  app.post("/api/admin/payments/:id/sync", verifyAdminToken, async (req, res) => {
+    try {
+      const payment = await storage.getPayment(req.params.id);
+      if (!payment) {
+        return res.status(404).json({ message: "Pagamento não encontrado" });
+      }
+
+      const pagarmeData = await pagarmeService.syncPaymentWithPagarMe(payment);
+      
+      // Update payment with Pagar.me data if available
+      if (pagarmeData) {
+        const updateData: any = {};
+        
+        if (pagarmeData.status) {
+          updateData.status = pagarmeData.status === 'paid' ? 'paid' : 
+                             pagarmeData.status === 'pending' ? 'pending' : 
+                             pagarmeData.status === 'failed' ? 'failed' : 
+                             pagarmeData.status;
+        }
+        
+        if (pagarmeData.paid_at) {
+          updateData.paidAt = new Date(pagarmeData.paid_at);
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          await storage.updatePayment(req.params.id, updateData);
+        }
+      }
+
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'sync_payment_pagarme',
+        entityType: 'payment',
+        entityId: req.params.id,
+        details: { pagarmeData },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ 
+        message: "Sincronização realizada com sucesso",
+        pagarmeData 
+      });
+    } catch (error) {
+      console.error("Error syncing payment:", error);
+      res.status(500).json({ 
+        message: "Erro ao sincronizar com Pagar.me",
+        error: error.message 
+      });
+    }
+  });
+
+  // Get all payments with Pagar.me sync status
+  app.get("/api/admin/payments/sync-status", verifyAdminToken, async (req, res) => {
+    try {
+      const payments = await storage.getPayments();
+      const syncStatuses = await Promise.allSettled(
+        payments.map(async (payment) => {
+          try {
+            if (payment.pagarmeSubscriptionId || payment.transactionId) {
+              const pagarmeData = await pagarmeService.syncPaymentWithPagarMe(payment);
+              return {
+                paymentId: payment.id,
+                syncStatus: 'success',
+                pagarmeStatus: pagarmeData?.status,
+                localStatus: payment.status,
+                needsSync: pagarmeData?.status !== payment.status
+              };
+            }
+            return {
+              paymentId: payment.id,
+              syncStatus: 'no_pagarme_id',
+              needsSync: false
+            };
+          } catch (error) {
+            return {
+              paymentId: payment.id,
+              syncStatus: 'error',
+              error: error.message,
+              needsSync: true
+            };
+          }
+        })
+      );
+
+      const results = syncStatuses.map((result, index) => ({
+        payment: payments[index],
+        sync: result.status === 'fulfilled' ? result.value : { 
+          paymentId: payments[index].id, 
+          syncStatus: 'error', 
+          error: result.reason 
+        }
+      }));
+
+      res.json(results);
+    } catch (error) {
+      console.error("Error checking sync status:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

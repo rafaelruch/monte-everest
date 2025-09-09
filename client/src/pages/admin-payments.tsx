@@ -33,7 +33,10 @@ import {
   Calendar,
   User,
   Building2,
-  Receipt
+  Receipt,
+  RefreshCw,
+  Sync,
+  Activity
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -169,6 +172,24 @@ export default function AdminPayments() {
     },
   });
 
+  const syncMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/admin/payments/${id}/sync`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
+      toast({
+        title: "Sucesso",
+        description: "Pagamento sincronizado com Pagar.me",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao sincronizar pagamento",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (data: PaymentFormData) => {
     if (editingPayment) {
       updateMutation.mutate({ id: editingPayment.id, data });
@@ -197,6 +218,10 @@ export default function AdminPayments() {
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id);
+  };
+
+  const handleSync = (id: string) => {
+    syncMutation.mutate(id);
   };
 
   const openCreateDialog = () => {
@@ -315,7 +340,13 @@ export default function AdminPayments() {
       {/* Search and Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Buscar Pagamentos</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" />
+            Buscar Pagamentos
+          </CardTitle>
+          <CardDescription>
+            Pagamentos são sincronizados automaticamente com o Pagar.me via webhooks
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center space-x-2">
@@ -329,6 +360,13 @@ export default function AdminPayments() {
                 data-testid="input-search-payments"
               />
             </div>
+            <Button
+              variant="outline"
+              onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] })}
+              title="Atualizar lista"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -420,6 +458,18 @@ export default function AdminPayments() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
+                            {(payment.pagarmeSubscriptionId || payment.transactionId) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSync(payment.id)}
+                                disabled={syncMutation.isPending}
+                                title="Sincronizar com Pagar.me"
+                                data-testid={`button-sync-payment-${payment.id}`}
+                              >
+                                <Sync className="h-4 w-4" />
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"

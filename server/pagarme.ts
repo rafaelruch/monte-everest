@@ -68,6 +68,54 @@ class PagarMeService {
     }
   }
 
+  async getSubscription(subscriptionId: string) {
+    try {
+      console.log(`Getting subscription: ${subscriptionId}`);
+      const client = await createPagarmeClient();
+      const subscriptionsController = new SubscriptionsController(client);
+      const result = await subscriptionsController.getSubscription(subscriptionId);
+      console.log('Subscription retrieved successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Error getting subscription:', error);
+      throw error;
+    }
+  }
+
+  async getPayment(paymentId: string) {
+    try {
+      console.log(`Getting payment: ${paymentId}`);
+      const client = await createPagarmeClient();
+      // Note: Depending on Pagar.me SDK version, you might need different controller
+      // For now, we'll implement a basic approach
+      const result = await client.getCharges({chargeId: paymentId});
+      console.log('Payment retrieved successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('Error getting payment:', error);
+      throw error;
+    }
+  }
+
+  async syncPaymentWithPagarMe(localPayment: any) {
+    try {
+      console.log('Syncing payment with Pagar.me...');
+      if (localPayment.pagarmeSubscriptionId) {
+        // If it has a subscription ID, get subscription data
+        const subscription = await this.getSubscription(localPayment.pagarmeSubscriptionId);
+        return subscription;
+      } else if (localPayment.transactionId) {
+        // If it has a transaction ID, get payment data
+        const payment = await this.getPayment(localPayment.transactionId);
+        return payment;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error syncing payment with Pagar.me:', error);
+      throw error;
+    }
+  }
+
   // Método para sincronizar plano local com Pagar.me
   async syncPlanWithPagarMe(localPlan: any) {
     try {
