@@ -35,7 +35,6 @@ import {
   Building2,
   Receipt,
   RefreshCw,
-  Sync,
   Activity
 } from "lucide-react";
 import { Link } from "wouter";
@@ -90,15 +89,15 @@ export default function AdminPayments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: payments = [], isLoading } = useQuery({
+  const { data: payments = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/payments"],
   });
 
-  const { data: professionals = [] } = useQuery({
+  const { data: professionals = [] } = useQuery<any[]>({
     queryKey: ["/api/professionals/search"],
   });
 
-  const { data: plans = [] } = useQuery({
+  const { data: plans = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/subscription-plans"],
   });
 
@@ -206,10 +205,10 @@ export default function AdminPayments() {
       amount: payment.amount,
       currency: payment.currency,
       status: payment.status,
-      paymentMethod: payment.paymentMethod,
+      paymentMethod: payment.paymentMethod || "credit_card",
       transactionId: payment.transactionId || undefined,
-      pagarmeSubscriptionId: payment.pagarmeSubscriptionId || undefined,
-      cardToken: payment.cardToken || undefined,
+      pagarmeSubscriptionId: payment.pagarmeSubscriptionId || "",
+      cardToken: payment.cardToken || "",
       dueDate: payment.dueDate ? new Date(payment.dueDate).toISOString().split('T')[0] : undefined,
       paidAt: payment.paidAt ? new Date(payment.paidAt).toISOString().split('T')[0] : undefined
     });
@@ -234,7 +233,7 @@ export default function AdminPayments() {
     setIsDialogOpen(true);
   };
 
-  const filteredPayments = payments.filter((payment: Payment) =>
+  const filteredPayments = payments.filter((payment: any) =>
     payment.professionalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.professionalEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     payment.transactionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -242,13 +241,13 @@ export default function AdminPayments() {
   );
 
   // Calculate summary stats
-  const totalAmount = payments.reduce((sum: number, payment: Payment) => 
+  const totalAmount = payments.reduce((sum: number, payment: any) => 
     sum + parseFloat(payment.amount), 0
   );
-  const paidAmount = payments.filter((p: Payment) => p.status === 'paid')
-    .reduce((sum: number, payment: Payment) => sum + parseFloat(payment.amount), 0);
-  const pendingAmount = payments.filter((p: Payment) => p.status === 'pending')
-    .reduce((sum: number, payment: Payment) => sum + parseFloat(payment.amount), 0);
+  const paidAmount = payments.filter((p: any) => p.status === 'paid')
+    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+  const pendingAmount = payments.filter((p: any) => p.status === 'pending')
+    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
 
   return (
     <div className="space-y-6">
@@ -301,7 +300,7 @@ export default function AdminPayments() {
               {formatCurrency(paidAmount)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {payments.filter((p: Payment) => p.status === 'paid').length} pagos
+              {payments.filter((p: any) => p.status === 'paid').length} pagos
             </p>
           </CardContent>
         </Card>
@@ -316,7 +315,7 @@ export default function AdminPayments() {
               {formatCurrency(pendingAmount)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {payments.filter((p: Payment) => p.status === 'pending').length} pendentes
+              {payments.filter((p: any) => p.status === 'pending').length} pendentes
             </p>
           </CardContent>
         </Card>
@@ -328,7 +327,7 @@ export default function AdminPayments() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold" data-testid="text-conversion-rate">
-              {payments.length > 0 ? Math.round((payments.filter((p: Payment) => p.status === 'paid').length / payments.length) * 100) : 0}%
+              {payments.length > 0 ? Math.round((payments.filter((p: any) => p.status === 'paid').length / payments.length) * 100) : 0}%
             </div>
             <p className="text-xs text-muted-foreground">
               Taxa de sucesso
@@ -405,7 +404,7 @@ export default function AdminPayments() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredPayments.map((payment: Payment) => (
+                    filteredPayments.map((payment: any) => (
                       <TableRow key={payment.id} data-testid={`row-payment-${payment.id}`}>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -467,7 +466,7 @@ export default function AdminPayments() {
                                 title="Sincronizar com Pagar.me"
                                 data-testid={`button-sync-payment-${payment.id}`}
                               >
-                                <Sync className="h-4 w-4" />
+                                <RefreshCw className="h-4 w-4" />
                               </Button>
                             )}
                             <Button

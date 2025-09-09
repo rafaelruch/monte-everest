@@ -86,9 +86,14 @@ class PagarMeService {
     try {
       console.log(`Getting payment: ${paymentId}`);
       const client = await createPagarmeClient();
-      // Note: Depending on Pagar.me SDK version, you might need different controller
-      // For now, we'll implement a basic approach
-      const result = await client.getCharges({chargeId: paymentId});
+      // Note: For now using a simple API call approach
+      // You might need to adjust this based on the actual Pagar.me SDK version
+      const response = await fetch(`https://api.pagar.me/1/transactions/${paymentId}`, {
+        headers: {
+          'Authorization': `Bearer ${await getPagarmeApiKey()}`
+        }
+      });
+      const result = await response.json();
       console.log('Payment retrieved successfully:', result);
       return result;
     } catch (error) {
