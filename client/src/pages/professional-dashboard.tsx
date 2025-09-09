@@ -424,9 +424,8 @@ export default function ProfessionalDashboard() {
     );
   }
 
-  const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : "0.0";
+  const averageRating = professional?.rating ? parseFloat(professional.rating).toFixed(1) : "0.0";
+  const totalReviews = professional?.totalReviews || 0;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -508,7 +507,7 @@ export default function ProfessionalDashboard() {
               <div className="flex items-center space-x-2">
                 <MessageSquare className="h-5 w-5 text-blue-500" />
                 <div>
-                  <p className="text-2xl font-bold" data-testid="total-reviews">{reviews.length}</p>
+                  <p className="text-2xl font-bold" data-testid="total-reviews">{totalReviews}</p>
                   <p className="text-sm text-muted-foreground">Avaliações</p>
                 </div>
               </div>
@@ -1078,7 +1077,7 @@ export default function ProfessionalDashboard() {
               <CardContent>
                 {reviewsLoading ? (
                   <p>Carregando avaliações...</p>
-                ) : reviews.length === 0 ? (
+                ) : totalReviews === 0 ? (
                   <p className="text-muted-foreground" data-testid="no-reviews">
                     Você ainda não possui avaliações.
                   </p>
