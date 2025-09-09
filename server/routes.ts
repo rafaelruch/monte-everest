@@ -966,7 +966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mimetype: req.file.mimetype,
           size: req.file.size,
           data: base64Data,
-          professionalId: professionalId,
+          professional_id: professionalId,
           type: 'portfolio'
         })
         .returning();
@@ -1130,7 +1130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mimetype: req.file.mimetype,
           size: req.file.size,
           data: base64Data,
-          professionalId: professionalId,
+          professional_id: professionalId,
           type: 'profile'
         })
         .returning();
