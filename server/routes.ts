@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pg from 'pg';
 import crypto from 'crypto';
+
+const { Pool: PgPool } = pg;
 import { insertProfessionalSchema, insertReviewSchema, insertContactSchema } from "@shared/schema";
 import { z } from "zod";
 import {
@@ -242,7 +244,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/install/status", async (req, res) => {
     try {
       // Direct database check without SSL for installation status
-      const { Pool: PgPool } = pg;
       const dbUrl = process.env.DATABASE_URL;
       
       if (!dbUrl) {
@@ -382,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // NOW check if already installed (after tables exist) using direct query
       try {
-        const { Pool: PgPool } = pg;
+
         const pool = new PgPool({ 
           connectionString: targetDatabaseUrl, 
           ssl: false 
@@ -408,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create admin user with direct SQL query
       try {
-        const { Pool: PgPool } = pg;
+
         const pool = new PgPool({ 
           connectionString: targetDatabaseUrl, 
           ssl: false 
