@@ -239,16 +239,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check if application is already installed
   app.get("/api/install/status", async (req, res) => {
     try {
-      const adminUsers = await storage.getAdminUsers();
-      const isInstalled = adminUsers.length > 0;
+      // Direct database check without SSL for installation status
+      const { Pool: PgPool } = require('pg');
+      const dbUrl = process.env.DATABASE_URL;
       
-      res.json({ 
-        installed: isInstalled,
-        needsInstallation: !isInstalled
+      if (!dbUrl) {
+        return res.json({ installed: false, needsInstallation: true });
+      }
+      
+      const pool = new PgPool({ 
+        connectionString: dbUrl, 
+        ssl: false // Force SSL false for installation check
       });
+      
+      try {
+        const client = await pool.connect();
+        const result = await client.query(`SELECT COUNT(*) as count FROM users WHERE role = 'admin'`);
+        const adminCount = parseInt(result.rows[0].count);
+        client.release();
+        await pool.end();
+        
+        const isInstalled = adminCount > 0;
+        res.json({ 
+          installed: isInstalled,
+          needsInstallation: !isInstalled
+        });
+      } catch (dbError) {
+        await pool.end();
+        // If table doesn't exist or other DB error, system needs installation
+        console.log("[install-status] DB error (likely tables don't exist):", dbError.message);
+        res.json({ 
+          installed: false,
+          needsInstallation: true
+        });
+      }
     } catch (error) {
       console.error("Error checking installation status:", error);
-      // If there's an error (like table doesn't exist), system needs installation
       res.json({ 
         installed: false,
         needsInstallation: true
@@ -310,26 +336,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("[install] ✅ Tabelas criadas com sucesso!");
 
-      // NOW check if already installed (after tables exist)
+      // NOW check if already installed (after tables exist) using direct query
       try {
-        const adminUsers = await storage.getAdminUsers();
-        if (adminUsers.length > 0) {
+        const { Pool: PgPool } = require('pg');
+        const pool = new PgPool({ 
+          connectionString: targetDatabaseUrl, 
+          ssl: false 
+        });
+        
+        const client = await pool.connect();
+        const result = await client.query(`SELECT COUNT(*) as count FROM users WHERE role = 'admin'`);
+        const adminCount = parseInt(result.rows[0].count);
+        client.release();
+        await pool.end();
+        
+        if (adminCount > 0) {
           return res.status(400).json({ message: "Sistema já foi instalado" });
         }
       } catch (error) {
-        // If still fails after creating tables, there's a bigger issue
+        // If still fails after creating tables, tables were not created properly
         console.error("[install] Erro após criar tabelas:", error);
         return res.status(500).json({ message: "Erro ao verificar instalação após criar tabelas" });
       }
 
-      // Hash password and create admin
+      // Hash password and create admin using direct SQL to avoid SSL issues
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
-      const adminUser = await storage.createUser({
-        email: adminEmail,
-        password: hashedPassword,
-        role: "admin",
-        isSystemAdmin: true
-      });
+      
+      // Create admin user with direct SQL query
+      try {
+        const { Pool: PgPool } = require('pg');
+        const pool = new PgPool({ 
+          connectionString: targetDatabaseUrl, 
+          ssl: false 
+        });
+        
+        const client = await pool.connect();
+        const adminId = require('crypto').randomUUID();
+        await client.query(`
+          INSERT INTO users (id, email, password, role, is_system_admin, created_at, updated_at)
+          VALUES ($1, $2, $3, 'admin', true, NOW(), NOW())
+        `, [adminId, adminEmail, hashedPassword]);
+        
+        client.release();
+        await pool.end();
+        
+        console.log("[install] ✅ Admin criado com sucesso!");
+      } catch (error) {
+        console.error("[install] Erro ao criar admin:", error);
+        return res.status(500).json({ message: "Erro ao criar usuário admin" });
+      }
 
       // Create installation configuration record
       const installConfig = {
