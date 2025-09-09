@@ -12,6 +12,7 @@ import SejaProfissional from "@/pages/seja-profissional";
 import Entrar from "@/pages/entrar";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminCategories from "@/pages/admin-categories";
+import AdminPayments from "@/pages/admin-payments";
 import AdminPlans from "@/pages/admin-plans";
 import AdminConfigurations from "@/pages/admin-configurations";
 import ProfessionalCheckout from "@/pages/professional-checkout";
@@ -30,6 +31,7 @@ function Router() {
       {/* Admin routes - sem header/footer */}
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/categories" component={AdminCategories} />
+      <Route path="/admin/payments" component={AdminPayments} />
       <Route path="/admin/plans" component={AdminPlans} />
       <Route path="/admin/configurations" component={AdminConfigurations} />
       
