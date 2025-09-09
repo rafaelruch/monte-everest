@@ -1459,7 +1459,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/plans/:id", verifyAdminToken, async (req, res) => {
     try {
-      const plan = await storage.updateSubscriptionPlan(req.params.id, req.body);
+      // Clean numeric fields - convert empty strings to null/undefined
+      const cleanedData = { ...req.body };
+      if (cleanedData.monthlyPrice === "" || cleanedData.monthlyPrice === null) {
+        cleanedData.monthlyPrice = undefined;
+      }
+      if (cleanedData.maxContacts === "" || cleanedData.maxContacts === null) {
+        cleanedData.maxContacts = undefined;
+      }
+      
+      const plan = await storage.updateSubscriptionPlan(req.params.id, cleanedData);
       
       // Se há mudanças significativas (preço, nome, descrição), sincronizar com Pagar.me
       if (req.body.monthlyPrice || req.body.name || req.body.description) {
