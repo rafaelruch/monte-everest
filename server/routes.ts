@@ -248,7 +248,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error checking installation status:", error);
+      // If there's an error (like table doesn't exist), system needs installation
       res.json({ 
+        installed: false,
+        needsInstallation: true
+      });
+    }
+  });
+
+  // Emergency reset endpoint - only works when tables don't exist
+  app.post("/api/install/force-reset", async (req, res) => {
+    try {
+      // Try to check if tables exist
+      const adminUsers = await storage.getAdminUsers();
+      // If this succeeds, system is already working
+      return res.status(400).json({ message: "Sistema já está funcionando" });
+    } catch (error) {
+      // Tables don't exist - allow reset
+      res.json({ 
+        message: "Reset realizado - sistema pronto para instalação",
         installed: false,
         needsInstallation: true
       });
@@ -258,9 +276,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/install", async (req, res) => {
     try {
       // Check if already installed first
-      const adminUsers = await storage.getAdminUsers();
-      if (adminUsers.length > 0) {
-        return res.status(404).json({ message: "Página não encontrada" });
+      try {
+        const adminUsers = await storage.getAdminUsers();
+        if (adminUsers.length > 0) {
+          return res.status(404).json({ message: "Página não encontrada" });
+        }
+      } catch (error) {
+        // If getAdminUsers fails, tables don't exist - proceed with installation
+        console.log("[install] Tabelas não existem - prosseguindo com instalação");
       }
 
       const { adminEmail, adminPassword, siteName, databaseUrl, siteUrl } = req.body;
