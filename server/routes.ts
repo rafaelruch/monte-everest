@@ -14,6 +14,7 @@ import {
   ObjectStorageService,
   ObjectNotFoundError,
 } from "./objectStorage";
+import { ReplitObjectStorageService } from "./replitObjectStorage";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
 import { db } from "./db";
@@ -776,12 +777,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("[photo-upload] Gerando URL de upload...");
-      const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      console.log("[photo-upload] Gerando URL de upload usando SDK oficial...");
+      const replitStorage = new ReplitObjectStorageService();
+      const result = await replitStorage.getUploadURL();
       
-      console.log("[photo-upload] URL gerada com sucesso:", uploadURL ? "SIM" : "NÃO");
-      res.json({ uploadURL });
+      console.log("[photo-upload] URL gerada com sucesso:", result.uploadURL ? "SIM" : "NÃO");
+      
+      // Armazenar o object path para uso posterior
+      req.session = req.session || {};
+      req.session.lastObjectPath = result.objectPath;
+      
+      res.json({ uploadURL: result.uploadURL });
     } catch (error) {
       console.error("[photo-upload] Erro ao obter URL de upload:", error);
       console.error("[photo-upload] Detalhes do erro:", {
@@ -889,12 +895,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      console.log("[profile-image] Gerando URL de upload para foto de perfil...");
-      const objectStorageService = new ObjectStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      console.log("[profile-image] Gerando URL de upload usando SDK oficial...");
+      const replitStorage = new ReplitObjectStorageService();
+      const result = await replitStorage.getUploadURL();
       
-      console.log("[profile-image] URL de upload gerada:", uploadURL ? "SIM" : "NÃO");
-      res.json({ uploadURL });
+      console.log("[profile-image] URL de upload gerada:", result.uploadURL ? "SIM" : "NÃO");
+      
+      // Armazenar o object path para uso posterior
+      req.session = req.session || {};
+      req.session.lastObjectPath = result.objectPath;
+      
+      res.json({ uploadURL: result.uploadURL });
     } catch (error) {
       console.error("[profile-image] Erro ao obter URL de upload:", error);
       console.error("[profile-image] Detalhes do erro:", {
