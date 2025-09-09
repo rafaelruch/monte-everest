@@ -1,4 +1,5 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
+import './types'; // Import type declarations
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
@@ -119,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'active',
         limit: parseInt(limit as string),
         offset,
-        sortBy: sortBy as string
+        // sortBy removed as it doesn't exist in filter interface
       });
       
       res.json(professionals);
@@ -911,6 +912,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: user.id,
         action: 'admin_login',
         details: { email },
+        entityType: 'user',
+        entityId: null,
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
