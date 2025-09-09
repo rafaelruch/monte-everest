@@ -105,6 +105,9 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         subscription_expires_at TIMESTAMP,
         first_login BOOLEAN DEFAULT true,
         photo VARCHAR,
+        pending_pix_code TEXT,
+        pending_pix_url TEXT,
+        pending_pix_expiry TIMESTAMP,
         rating DECIMAL(3,2) DEFAULT 0.00,
         total_reviews INTEGER DEFAULT 0,
         ranking_position INTEGER,
@@ -216,6 +219,34 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
             RAISE NOTICE 'Coluna card_token adicionada à tabela payments';
         ELSE
             RAISE NOTICE 'Coluna card_token já existe na tabela payments';
+        END IF;
+    END $$;
+
+    -- Adicionar colunas PIX na tabela professionals se não existirem
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='professionals' AND column_name='pending_pix_code') THEN
+            ALTER TABLE professionals ADD COLUMN pending_pix_code TEXT;
+            RAISE NOTICE 'Coluna pending_pix_code adicionada à tabela professionals';
+        ELSE
+            RAISE NOTICE 'Coluna pending_pix_code já existe na tabela professionals';
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='professionals' AND column_name='pending_pix_url') THEN
+            ALTER TABLE professionals ADD COLUMN pending_pix_url TEXT;
+            RAISE NOTICE 'Coluna pending_pix_url adicionada à tabela professionals';
+        ELSE
+            RAISE NOTICE 'Coluna pending_pix_url já existe na tabela professionals';
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='professionals' AND column_name='pending_pix_expiry') THEN
+            ALTER TABLE professionals ADD COLUMN pending_pix_expiry TIMESTAMP;
+            RAISE NOTICE 'Coluna pending_pix_expiry adicionada à tabela professionals';
+        ELSE
+            RAISE NOTICE 'Coluna pending_pix_expiry já existe na tabela professionals';
         END IF;
     END $$;
 
