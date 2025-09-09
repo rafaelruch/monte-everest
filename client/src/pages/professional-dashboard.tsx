@@ -38,7 +38,9 @@ import {
   Plus,
   Check,
   ChevronsUpDown,
-  Clock
+  Clock,
+  Smartphone,
+  Copy
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
@@ -502,6 +504,73 @@ export default function ProfessionalDashboard() {
                 >
                   Realizar Pagamento
                 </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* PIX Payment Pending Section */}
+      {professional?.paymentStatus === 'pending' && professional?.pendingPixCode && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert className="border-yellow-200 bg-yellow-50">
+            <Smartphone className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <div className="space-y-3">
+                <div>
+                  <strong>Pagamento PIX Pendente:</strong> Complete o pagamento via PIX para ativar sua conta.
+                  {professional.pendingPixExpiry && (
+                    <div className="flex items-center gap-1 mt-1 text-sm">
+                      <Clock className="h-3 w-3" />
+                      <span>Válido até: {new Date(professional.pendingPixExpiry).toLocaleString("pt-BR")}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* QR Code */}
+                {professional.pendingPixUrl && (
+                  <div className="flex flex-col items-center gap-2">
+                    <img 
+                      src={professional.pendingPixUrl} 
+                      alt="QR Code PIX" 
+                      className="w-32 h-32 bg-white p-2 rounded border"
+                      data-testid="pending-pix-qr-code"
+                    />
+                    <p className="text-xs text-center">Escaneie com seu app bancário</p>
+                  </div>
+                )}
+                
+                {/* PIX Code Copy */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Código PIX (Copia e Cola):</p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={professional.pendingPixCode}
+                      readOnly
+                      className="font-mono text-xs bg-white"
+                      data-testid="pending-pix-code"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(professional.pendingPixCode);
+                        // Assuming toast is available
+                        if (typeof toast !== 'undefined') {
+                          toast({ 
+                            title: "Código PIX copiado!", 
+                            description: "Cole no seu app bancário para pagar" 
+                          });
+                        }
+                      }}
+                      className="shrink-0"
+                      data-testid="button-copy-pending-pix"
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
               </div>
             </AlertDescription>
           </Alert>
