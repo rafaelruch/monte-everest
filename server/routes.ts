@@ -2387,8 +2387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Transaction found:', JSON.stringify(transaction, null, 2));
           
           paymentInfo = {
-            qrCode: transaction.qr_code,
-            qrCodeUrl: transaction.qr_code_url,
+            qrCode: transaction.qr_code, // PIX copy-paste code
+            qrCodeUrl: transaction.qr_code_url, // QR Code image URL
+            pixCode: transaction.qr_code, // PIX copy-paste code
             line: transaction.line,
             pdf: transaction.pdf,
             dueAt: transaction.due_at || lastCharge.due_at,
@@ -2399,8 +2400,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         else if (subscription.boleto && Object.keys(subscription.boleto).length > 0) {
           console.log('Using boleto data:', JSON.stringify(subscription.boleto, null, 2));
           paymentInfo = {
-            qrCode: subscription.boleto.qr_code,
-            qrCodeUrl: subscription.boleto.qr_code_url,
+            qrCode: subscription.boleto.qr_code, // PIX copy-paste code
+            qrCodeUrl: subscription.boleto.qr_code_url, // QR Code image URL
+            pixCode: subscription.boleto.qr_code, // PIX copy-paste code
             line: subscription.boleto.line,
             pdf: subscription.boleto.pdf,
             dueAt: subscription.boleto.due_at,
@@ -2461,8 +2463,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log('Transaction from new charge:', JSON.stringify(transaction, null, 2));
                 
                 paymentInfo = {
-                  qrCode: transaction.qr_code,
-                  qrCodeUrl: transaction.qr_code, // For boleto, qr_code is the PIX code
+                  qrCode: transaction.qr_code, // PIX copy-paste code
+                  qrCodeUrl: transaction.qr_code_url, // QR Code image URL
                   pixCode: transaction.qr_code, // PIX copy-paste code
                   line: transaction.line, // Boleto line
                   pdf: transaction.pdf, // Boleto PDF
