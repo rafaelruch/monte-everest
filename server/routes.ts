@@ -736,6 +736,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
+      // Check if professional is active
+      const professional = await storage.getProfessional(professionalId);
+      if (!professional) {
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+      
+      if (professional.status !== 'active') {
+        return res.status(403).json({ 
+          message: "Não é possível editar perfil. Status da conta: " + 
+                   (professional.status === 'pending' ? 'Pendente' : 'Inativo') 
+        });
+      }
+
       const { fullName, phone, description, serviceArea, city, categoryId } = req.body;
 
       // Validate required fields

@@ -487,6 +487,39 @@ export default function ProfessionalDashboard() {
         return null;
       })()}
 
+      {/* Link de pagamento para status pendente */}
+      {professional?.status === 'pending' && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert className="border-blue-200 bg-blue-50">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Conta Pendente:</strong> Complete seu pagamento para ativar seu perfil e aparecer nas buscas.
+              <div className="mt-2">
+                <Button 
+                  onClick={() => window.open('/subscription-plans', '_blank')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  Realizar Pagamento
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Bloqueio para status inativo */}
+      {professional?.status === 'inactive' && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Conta Inativa:</strong> Sua conta foi desativada. Entre em contato com o suporte para reativação.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {/* Stats Cards */}
@@ -645,23 +678,34 @@ export default function ProfessionalDashboard() {
                       Gerencie suas informações profissionais
                     </CardDescription>
                   </div>
-                  <Button
-                    variant={isEditing ? "outline" : "default"}
-                    onClick={() => setIsEditing(!isEditing)}
-                    data-testid={isEditing ? "button-cancel-edit" : "button-edit-profile"}
-                  >
-                    {isEditing ? (
-                      <>
-                        <X className="h-4 w-4 mr-2" />
-                        Cancelar
-                      </>
-                    ) : (
-                      <>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </>
-                    )}
-                  </Button>
+                  {professional?.status === 'active' ? (
+                    <Button
+                      variant={isEditing ? "outline" : "default"}
+                      onClick={() => setIsEditing(!isEditing)}
+                      data-testid={isEditing ? "button-cancel-edit" : "button-edit-profile"}
+                    >
+                      {isEditing ? (
+                        <>
+                          <X className="h-4 w-4 mr-2" />
+                          Cancelar
+                        </>
+                      ) : (
+                        <>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled
+                      data-testid="button-edit-disabled"
+                    >
+                      <Lock className="h-4 w-4 mr-2" />
+                      Edição Bloqueada
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
