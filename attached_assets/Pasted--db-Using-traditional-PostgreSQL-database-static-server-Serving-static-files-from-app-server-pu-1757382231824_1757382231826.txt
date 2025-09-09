@@ -1,0 +1,107 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:25:21 AM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:26:32 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:13 AM [express] GET /api/install/status 304 in 64ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:27:27 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:29 AM [express] GET /api/install/status 304 in 28ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:260:26)
+1:27:51 AM [express] POST /api/install 500 in 6ms :: {"message":"The server does not support SSL con…
+[static-server] Serving index.html for: /robots.txt
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:32:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:32:52 AM [express] GET /api/install/status 304 in 29ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:260:26)
+1:33:22 AM [express] POST /api/install 500 in 5ms :: {"message":"The server does not support SSL con…
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:38:45 AM [express] GET /api/install/status 200 in 7ms :: {"installed":false,"needsInstallation":tr…
+[static-server] Serving index.html for: /favicon.ico
+Error fetching categories: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:92:26)
+Error fetching popular categories: Error: The server does not support SSL connections
+1:38:46 AM [express] GET /api/categories 500 in 10ms :: {"message":"Erro interno do servidor"}
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:102:33)
+1:38:46 AM [express] GET /api/categories/popular 500 in 12ms :: {"message":"Erro interno do servidor…
+Error searching professionals: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:405:12)
+    at async <anonymous> (/app/server/routes.ts:116:29)
+1:38:46 AM [express] GET /api/professionals/search 500 in 12ms :: {"message":"Erro interno do servid…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:42:58 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:242:26)
+1:43:00 AM [express] GET /api/install/status 304 in 77ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /wp-sitemap.xml
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:261:26)
+1:43:31 AM [express] POST /api/install 500 in 6ms :: {"message":"The server does not support SSL con…

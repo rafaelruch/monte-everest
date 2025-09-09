@@ -29,7 +29,7 @@ if (isNeonDatabase) {
   console.log('[db] Using traditional PostgreSQL database');
   pool = new PgPool({ 
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: false // Disable SSL for traditional PostgreSQL
   });
   db = drizzlePg(pool, { schema });
 }
