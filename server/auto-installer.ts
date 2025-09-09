@@ -24,7 +24,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
   
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : false
+    ssl: false // Disable SSL for local PostgreSQL
   });
 
   try {
@@ -44,6 +44,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         password TEXT NOT NULL,
         full_name VARCHAR,
         role VARCHAR NOT NULL DEFAULT 'admin',
+        is_system_admin BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -375,7 +376,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
 export async function checkDatabaseConnection(databaseUrl: string): Promise<boolean> {
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : false
+    ssl: false // Disable SSL for local PostgreSQL
   });
 
   try {
@@ -398,7 +399,7 @@ export async function installDatabaseModule(databaseUrl: string, module: Databas
   
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : false
+    ssl: false // Disable SSL for local PostgreSQL
   });
 
   try {
