@@ -423,10 +423,10 @@ export default function ProfessionalDashboard() {
 
       // Refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
-      toast.success("Foto de perfil atualizada com sucesso!");
+      toast({ title: "Sucesso", description: "Foto de perfil atualizada com sucesso!" });
     } catch (error) {
       console.error("Erro no upload:", error);
-      toast.error(error instanceof Error ? error.message : "Erro durante upload");
+      toast({ title: "Erro", description: error instanceof Error ? error.message : "Erro durante upload", variant: "destructive" });
     }
   };
 
@@ -1261,10 +1261,10 @@ export default function ProfessionalDashboard() {
                             formData.append('photo', file);
                             
                             console.log("[frontend] Fazendo upload direto do arquivo do portfólio...");
-                            const uploadResponse = await fetch(`/api/professionals/${professionalData.id}/photos/upload`, {
+                            const uploadResponse = await fetch(`/api/professionals/${professionalAuth.id}/photos/upload`, {
                               method: 'POST',
                               headers: {
-                                'Authorization': `Bearer ${token}`
+                                'Authorization': `Bearer ${professionalAuth.token}`
                               },
                               body: formData
                             });
@@ -1276,10 +1276,10 @@ export default function ProfessionalDashboard() {
                               console.log("[frontend] Upload concluído, adicionando ao portfólio:", imageId);
                               
                               // Add to portfolio
-                              const addResponse = await fetch(`/api/professionals/${professionalData.id}/photos`, {
+                              const addResponse = await fetch(`/api/professionals/${professionalAuth.id}/photos`, {
                                 method: 'POST',
                                 headers: {
-                                  'Authorization': `Bearer ${token}`,
+                                  'Authorization': `Bearer ${professionalAuth.token}`,
                                   'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify({ imageId })
@@ -1287,7 +1287,7 @@ export default function ProfessionalDashboard() {
                               
                               if (addResponse.ok) {
                                 queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
-                                toast.success("Foto adicionada ao portfólio com sucesso!");
+                                toast({ title: "Sucesso", description: "Foto adicionada ao portfólio com sucesso!" });
                               } else {
                                 throw new Error("Erro ao adicionar foto ao portfólio");
                               }
@@ -1297,7 +1297,7 @@ export default function ProfessionalDashboard() {
                             }
                           } catch (error) {
                             console.error("[frontend] Erro durante upload do portfólio:", error);
-                            toast.error(error instanceof Error ? error.message : "Erro durante upload");
+                            toast({ title: "Erro", description: error instanceof Error ? error.message : "Erro durante upload", variant: "destructive" });
                           }
                         }}
                       />
