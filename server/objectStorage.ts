@@ -44,7 +44,14 @@ export class ObjectStorageService {
 
   // Gets the public object search paths.
   getPublicObjectSearchPaths(): Array<string> {
-    const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
+    let pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
+    
+    // Fallback para produção - usar bucket padrão se variável não estiver definida
+    if (!pathsStr && process.env.NODE_ENV === 'production') {
+      pathsStr = "/replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/public";
+      console.log("[object-storage] Usando fallback para PUBLIC_OBJECT_SEARCH_PATHS:", pathsStr);
+    }
+    
     const paths = Array.from(
       new Set(
         pathsStr
@@ -64,7 +71,14 @@ export class ObjectStorageService {
 
   // Gets the private object directory.
   getPrivateObjectDir(): string {
-    const dir = process.env.PRIVATE_OBJECT_DIR || "";
+    let dir = process.env.PRIVATE_OBJECT_DIR || "";
+    
+    // Fallback para produção - usar bucket padrão se variável não estiver definida
+    if (!dir && process.env.NODE_ENV === 'production') {
+      dir = "/replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/.private";
+      console.log("[object-storage] Usando fallback para PRIVATE_OBJECT_DIR:", dir);
+    }
+    
     if (!dir) {
       throw new Error(
         "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
