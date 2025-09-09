@@ -472,6 +472,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cleanup orphaned portfolio images (for production fix)
+  app.post("/api/admin/cleanup-portfolio-images", async (req, res) => {
+    try {
+      const { adminPassword } = req.body;
+      
+      // Simple password protection
+      if (adminPassword !== 'monte-everest-admin-2025') {
+        return res.status(401).json({ message: "Acesso negado" });
+      }
+
+      console.log("[cleanup] Iniciando limpeza de imagens órfãs do portfólio...");
+      
+      // Get all professionals with portfolios
+      const professionals = await db
+        .select({ id: schema.professionals.id, portfolio: schema.professionals.portfolio })
+        .from(schema.professionals)
+        .where(sql`${schema.professionals.portfolio} IS NOT NULL`);
+
+      let cleaned = 0;
+      
+      for (const prof of professionals) {
+        const portfolioUrls = prof.portfolio || [];
+        const validImageIds = portfolioUrls
+          .map(url => url.replace('/api/images/', ''))
+          .filter(id => id && id !== url); // Only valid IDs
+
+        // Delete images that are NOT in the portfolio array
+        if (validImageIds.length > 0) {
+          const result = await db
+            .delete(images)
+            .where(sql`
+              ${images.professional_id} = ${prof.id} 
+              AND ${images.type} = 'portfolio' 
+              AND ${images.id} NOT IN (${sql.join(validImageIds.map(id => sql`${id}`), sql`, `)})
+            `)
+            .returning();
+          
+          cleaned += result.length;
+          console.log(`[cleanup] Profissional ${prof.id}: removidas ${result.length} fotos órfãs`);
+        }
+      }
+
+      console.log(`[cleanup] ✅ Limpeza concluída: ${cleaned} imagens órfãs removidas`);
+      
+      res.json({ 
+        success: true,
+        message: `Limpeza concluída: ${cleaned} imagens órfãs removidas`,
+        cleanedCount: cleaned
+      });
+      
+    } catch (error) {
+      console.error("[cleanup] Erro:", error);
+      res.status(500).json({ 
+        message: `Erro na limpeza: ${error instanceof Error ? error.message : "Erro desconhecido"}` 
+      });
+    }
+  });
+
   // Emergency reset endpoint - only works when tables don't exist
   app.post("/api/install/force-reset", async (req, res) => {
     try {
