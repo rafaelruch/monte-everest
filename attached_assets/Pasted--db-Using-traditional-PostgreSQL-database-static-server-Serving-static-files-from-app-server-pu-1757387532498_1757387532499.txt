@@ -1,0 +1,658 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:57:28 AM [express] serving on port 5000
+Plan found: {
+  id: '0970052b-198b-4ba0-a996-28afb007df73',
+  name: 'Plano Premium',
+  monthlyPrice: '59.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_PyxZbvzhYPtGZnYl'
+}
+Price validation: {
+  planName: 'Plano Premium',
+  originalPrice: '59.90',
+  priceInReais: 59.9,
+  priceInCentavos: 5990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_87rPDYEhNWurGXk1",
+  "code": "SUB_75157284187_1757386662033",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_kJ2rzwFWKS2mlv5G",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:57:42Z",
+  "updated_at": "2025-09-09T02:57:42Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:04:29 AM [express] serving on port 5000
+[static-server] Serving index.html for: /entrar
+[static-server] Serving index.html for: /favicon.ico
+3:04:35 AM [express] GET /api/install/status 304 in 31ms :: {"installed":true,"needsInstallation":fa…
+3:04:41 AM [express] POST /api/auth/admin/login 200 in 74ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+3:04:41 AM [express] GET /api/admin/dashboard/stats 304 in 23ms :: {"activeProfessionals":0,"monthly…
+3:04:41 AM [express] GET /api/admin/plans 200 in 8ms :: [{"id":"7e6d27e8-32ab-45fe-bcf6-969427e9767c…
+[static-server] Serving index.html for: /favicon.ico
+3:04:41 AM [express] GET /api/admin/configs/PAGARME_API_KEY 304 in 11ms :: {"id":"3554ad96-72b0-4cfc…
+3:04:41 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 304 in 57ms :: {"id":"b8c33f3f-e0…
+3:04:41 AM [express] GET /api/admin/pages 304 in 64ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+3:04:41 AM [express] GET /api/admin/users 304 in 68ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+3:04:41 AM [express] GET /api/admin/professionals 304 in 78ms :: [{"id":"d2617323-23ea-481a-81b9-13f…
+3:04:41 AM [express] GET /api/admin/reviews 200 in 58ms :: [{"id":"957c8d95-4bb0-48e2-985b-28274e5b6…
+3:04:41 AM [express] GET /api/admin/payments 304 in 76ms :: []
+3:04:41 AM [express] GET /api/admin/categories 304 in 54ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+3:04:52 AM [express] DELETE /api/admin/plans/f5a52cde-9c5f-4bae-a5dd-f0020f0844a9 200 in 17ms :: {"m…
+3:04:52 AM [express] GET /api/admin/plans 200 in 5ms :: [{"id":"7e6d27e8-32ab-45fe-bcf6-969427e9767c…
+3:04:55 AM [express] DELETE /api/admin/plans/7e6d27e8-32ab-45fe-bcf6-969427e9767c 200 in 6ms :: {"me…
+3:04:55 AM [express] GET /api/admin/plans 200 in 4ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10…
+3:05:17 AM [express] PATCH /api/admin/professionals/d2617323-23ea-481a-81b9-13f331f78b5a/status 200 …
+3:05:17 AM [express] GET /api/admin/dashboard/stats 200 in 7ms :: {"activeProfessionals":1,"monthlyR…
+3:05:17 AM [express] GET /api/admin/professionals 200 in 13ms :: [{"id":"d2617323-23ea-481a-81b9-13f…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+3:05:32 AM [express] GET /api/subscription-plans 200 in 12ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+3:05:34 AM [express] GET /api/categories 304 in 3ms :: [{"id":"ae882751-68f1-41de-987b-05bb9262cb97"…
+3:05:34 AM [express] GET /api/categories/popular 304 in 4ms :: [{"id":"676b8100-d29b-4890-b1ea-e6f76…
+3:05:34 AM [express] GET /api/professionals/search 200 in 12ms :: [{"id":"d2617323-23ea-481a-81b9-13…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_wj81kPKIlIxQy45e",
+  "code": "SUB_70515410136_1757387182635",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_pRkmOdjiBix03Yrg",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:06:23Z",
+  "updated_at": "2025-09-09T03:06:23Z",
+  "customer": {
+    "id": "cus_72zoGKjCKCWOnkmp",
+    "name": "Teste Dois",
+    "email": "rafaeladapta01@gmail.com",
+    "code": "70515410136",
+    "document": "70515410136",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_Xwdl2R3h8hEk3Gz5",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-04T14:31:22Z",
+      "updated_at": "2025-09-09T03:06:23Z"
+    },
+    "created_at": "2025-09-04T14:31:22Z",
+    "updated_at": "2025-09-09T03:06:23Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_oyW54mltvt7xYrRZ",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:06:23Z",
+      "updated_at": "2025-09-09T03:06:23Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:06:23Z",
+      "updated_at": "2025-09-09T03:06:23Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Teste Dois",
+    "professional_email": "rafaeladapta01@gmail.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: column "card_token" of relation "payments" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createPayment (/app/server/storage.ts:555:23)
+    at async <anonymous> (/app/server/routes.ts:2318:23) {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:06:42 AM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:06:46 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+3:07:00 AM [express] GET /api/install/status 200 in 35ms :: {"installed":true,"needsInstallation":fa…
+3:07:00 AM [express] GET /api/subscription-plans 200 in 22ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_yqb4BkkI6XCweAdJ",
+  "code": "SUB_70515410136_1757387243107",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_Zrjm5lrsn3Tz9DNX",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:07:23Z",
+  "updated_at": "2025-09-09T03:07:23Z",
+  "customer": {
+    "id": "cus_M7orOxPCKHBmOngK",
+    "name": "Teste Tres",
+    "email": "3@teste.com",
+    "code": "70515410136",
+    "document": "70515410136",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_2A6mQkWfxNI5PEdj",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:07:23Z",
+      "updated_at": "2025-09-09T03:07:23Z"
+    },
+    "created_at": "2025-09-09T03:07:23Z",
+    "updated_at": "2025-09-09T03:07:23Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:10:54 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+[static-server] Serving index.html for: /favicon.ico
+3:10:57 AM [express] GET /api/install/status 304 in 60ms :: {"installed":true,"needsInstallation":fa…
+3:10:57 AM [express] GET /api/subscription-plans 304 in 17ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_qJBxK1oTeKS1ZmG2",
+  "code": "SUB_93192391923_1757387479980",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_RByVPqpF7juqJngK",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "failed",
+  "created_at": "2025-09-09T03:11:20Z",
+  "updated_at": "2025-09-09T03:11:20Z",
+  "customer": {
+    "id": "cus_8yQNdpAu83SzNW7r",
+    "name": "Teste 40",
+    "email": "40@teste.com",
+    "code": "93192391923",
+    "document": "93192391923",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_3KzmJecoYHb74pNP",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:11:20Z",
+      "updated_at": "2025-09-09T03:11:20Z"
+    },
+    "created_at": "2025-09-09T03:11:20Z",
+    "updated_at": "2025-09-09T03:11:20Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_w1mMX0FKQtPmMNJg",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:11:20Z",
+      "updated_at": "2025-09-09T03:11:20Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:11:20Z",
+      "updated_at": "2025-09-09T03:11:20Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Teste 40",
+    "professional_email": "40@teste.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Creating new professional with email 40@teste.com...
+Error creating subscription: error: column "card_token" of relation "payments" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createPayment (/app/server/storage.ts:555:23)
+    at async <anonymous> (/app/server/routes.ts:2337:23) {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+3:11:21 AM [express] POST /api/payments/create-subscription 500 in 1203ms :: {"success":false,"error…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_ZwM8l8Wsmt7dEjN4",
+  "code": "SUB_93192391923_1757387491535",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_b3nZqZACocd39JVN",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "failed",
+  "created_at": "2025-09-09T03:11:31Z",
+  "updated_at": "2025-09-09T03:11:31Z",
+  "customer": {
+    "id": "cus_8yQNdpAu83SzNW7r",
+    "name": "Teste 40",
+    "email": "40@teste.com",
+    "code": "93192391923",
+    "document": "93192391923",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_3KzmJecoYHb74pNP",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:11:20Z",
+      "updated_at": "2025-09-09T03:11:20Z"
+    },
+    "created_at": "2025-09-09T03:11:20Z",
+    "updated_at": "2025-09-09T03:11:20Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_OgJRqW4sw0ungrGb",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:11:31Z",
+      "updated_at": "2025-09-09T03:11:31Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:11:31Z",
+      "updated_at": "2025-09-09T03:11:31Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Teste 40",
+    "professional_email": "40@teste.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Professional with email 40@teste.com already exists, updating...
+Error creating subscription: error: column "card_token" of relation "payments" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createPayment (/app/server/storage.ts:555:23)
+    at async <anonymous> (/app/server/routes.ts:2337:23) {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+3:11:32 AM [express] POST /api/payments/create-subscription 500 in 1012ms :: {"success":false,"error…
