@@ -31,7 +31,14 @@ export default function SetupTables() {
       const data = await response.json();
       
       if (response.ok) {
-        setResult({ success: true, message: data.message });
+        setResult({ 
+          success: true, 
+          message: data.message + " 🎉 Redirecionando para instalação em 3 segundos..." 
+        });
+        // Redirecionar para a instalação após 3 segundos
+        setTimeout(() => {
+          window.location.href = "/install";
+        }, 3000);
       } else {
         setResult({ success: false, message: data.message || "Erro desconhecido" });
       }
@@ -49,9 +56,9 @@ export default function SetupTables() {
           <div className="mx-auto mb-4 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
             <Database className="w-6 h-6 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl font-bold">Criar Tabelas</CardTitle>
+          <CardTitle className="text-2xl font-bold">Passo 1: Criar Tabelas</CardTitle>
           <p className="text-gray-600">
-            Configure as tabelas do banco de dados
+            Primeiro, vamos criar as tabelas no banco de dados
           </p>
         </CardHeader>
         
@@ -104,6 +111,8 @@ export default function SetupTables() {
 
           <div className="text-xs text-gray-500 text-center">
             Este processo criará todas as tabelas necessárias no banco de dados.
+            <br />
+            Após criar as tabelas, você será redirecionado para a instalação completa.
             <br />
             Certifique-se de que o banco existe e está acessível.
           </div>
