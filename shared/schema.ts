@@ -9,7 +9,6 @@ import {
   boolean,
   jsonb,
   index,
-  bytea,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -307,7 +306,7 @@ export const images = pgTable("images", {
   filename: varchar("filename").notNull(),
   mimetype: varchar("mimetype").notNull(),
   size: integer("size").notNull(), // tamanho em bytes
-  data: bytea("data").notNull(), // dados binários da imagem
+  data: text("data").notNull(), // dados da imagem em base64
   professionalId: varchar("professional_id").notNull(), // quem fez upload
   type: varchar("type").notNull(), // 'profile' ou 'portfolio'
   createdAt: timestamp("created_at").defaultNow(),

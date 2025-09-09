@@ -8,13 +8,13 @@ import pg from 'pg';
 import crypto from 'crypto';
 
 const { Pool: PgPool } = pg;
-import { insertProfessionalSchema, insertReviewSchema, insertContactSchema } from "@shared/schema";
+import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema } from "@shared/schema";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 import {
   ObjectStorageService,
   ObjectNotFoundError,
 } from "./objectStorage";
-import { ReplitObjectStorageService } from "./replitObjectStorage";
 import multer from "multer";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
@@ -762,7 +762,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Professional portfolio photo upload direto
+  // Professional portfolio photo upload direto no banco
   app.post("/api/professionals/:id/photos/upload", verifyProfessionalToken, upload.single('photo'), async (req, res) => {
     try {
       console.log("[photo-upload] Upload direto de foto para profissional:", req.params.id);
@@ -788,31 +788,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const plan = await storage.getSubscriptionPlan(professional.subscriptionPlanId || '');
       const maxPhotos = plan?.maxPhotos || 3;
       
-      // Check current photo count
-      const currentPhotoCount = professional.portfolio?.length || 0;
-      console.log("[photo-upload] Fotos atuais:", currentPhotoCount, "/ Máximo:", maxPhotos);
+      // Check current photo count from database
+      const currentPhotos = await db
+        .select()
+        .from(images)
+        .where(sql`${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`);
       
-      if (currentPhotoCount >= maxPhotos) {
+      console.log("[photo-upload] Fotos atuais:", currentPhotos.length, "/ Máximo:", maxPhotos);
+      
+      if (currentPhotos.length >= maxPhotos) {
         console.log("[photo-upload] Limite de fotos atingido");
         return res.status(400).json({ 
           message: `Limite de ${maxPhotos} fotos atingido para seu plano` 
         });
       }
 
-      console.log("[photo-upload] Fazendo upload direto do arquivo...");
+      console.log("[photo-upload] Salvando arquivo no banco...");
       console.log("[photo-upload] Arquivo:", req.file.originalname, "Tamanho:", req.file.size, "bytes");
       
-      const replitStorage = new ReplitObjectStorageService();
-      const objectPath = await replitStorage.uploadFile(
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype
-      );
+      // Convert buffer to base64
+      const base64Data = req.file.buffer.toString('base64');
       
-      console.log("[photo-upload] Upload concluído:", objectPath);
+      // Save image to database
+      const [savedImage] = await db
+        .insert(images)
+        .values({
+          filename: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          data: base64Data,
+          professionalId: professionalId,
+          type: 'portfolio'
+        })
+        .returning();
+      
+      console.log("[photo-upload] Imagem salva no banco:", savedImage.id);
       
       res.json({ 
-        objectPath,
+        imageId: savedImage.id,
         message: "Upload realizado com sucesso" 
       });
     } catch (error) {
@@ -911,7 +924,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Profile image upload direto
+  // Profile image upload direto no banco
   app.post("/api/professionals/:id/profile-image/upload", verifyProfessionalToken, upload.single('photo'), async (req, res) => {
     try {
       console.log("[profile-image] Upload direto de foto de perfil:", req.params.id);
@@ -927,20 +940,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      console.log("[profile-image] Fazendo upload direto do arquivo...");
+      console.log("[profile-image] Salvando arquivo no banco...");
       console.log("[profile-image] Arquivo:", req.file.originalname, "Tamanho:", req.file.size, "bytes");
       
-      const replitStorage = new ReplitObjectStorageService();
-      const objectPath = await replitStorage.uploadFile(
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype
-      );
+      // Convert buffer to base64
+      const base64Data = req.file.buffer.toString('base64');
       
-      console.log("[profile-image] Upload concluído:", objectPath);
+      // Remove old profile image if exists
+      await db
+        .delete(images)
+        .where(sql`${images.professionalId} = ${professionalId} AND ${images.type} = 'profile'`);
+      
+      // Save new profile image to database
+      const [savedImage] = await db
+        .insert(images)
+        .values({
+          filename: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+          data: base64Data,
+          professionalId: professionalId,
+          type: 'profile'
+        })
+        .returning();
+      
+      console.log("[profile-image] Imagem salva no banco:", savedImage.id);
       
       res.json({ 
-        objectPath,
+        imageId: savedImage.id,
         message: "Upload realizado com sucesso" 
       });
     } catch (error) {
@@ -964,24 +991,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/professionals/:id/profile-image", verifyProfessionalToken, async (req, res) => {
     try {
       const professionalId = req.params.id;
-      const { objectPath } = req.body;
+      const { imageId } = req.body;
       
       if (professionalId !== req.professional.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      if (!objectPath) {
-        return res.status(400).json({ message: "Path do objeto é obrigatório" });
+      if (!imageId) {
+        return res.status(400).json({ message: "ID da imagem é obrigatório" });
       }
 
-      // Update professional profile image
+      // Update professional profile image with image ID
       await storage.updateProfessional(professionalId, {
-        profileImage: objectPath
+        profileImage: `/api/images/${imageId}`
       });
 
       res.json({ 
         message: "Foto de perfil atualizada com sucesso",
-        profileImage: objectPath 
+        profileImage: `/api/images/${imageId}` 
       });
     } catch (error) {
       console.error("Error updating profile image:", error);
@@ -2952,26 +2979,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Object storage serving routes - usando novo SDK
-  app.get("/objects/:objectPath(*)", async (req, res) => {
+  // Endpoint para servir imagens do banco de dados
+  app.get("/api/images/:imageId", async (req, res) => {
     try {
-      const replitStorage = new ReplitObjectStorageService();
-      const result = await replitStorage.downloadObject(req.path);
+      const imageId = req.params.imageId;
       
-      if (!result) {
-        return res.status(404).json({ error: "Objeto não encontrado" });
+      // Get image from database
+      const [image] = await db
+        .select()
+        .from(images)
+        .where(sql`${images.id} = ${imageId}`)
+        .limit(1);
+      
+      if (!image) {
+        return res.status(404).json({ error: "Imagem não encontrada" });
       }
       
-      // Configurar headers
+      // Convert base64 back to buffer
+      const imageBuffer = Buffer.from(image.data, 'base64');
+      
+      // Set headers
       res.set({
-        'Content-Type': result.mimeType || 'application/octet-stream',
-        'Cache-Control': 'public, max-age=3600'
+        'Content-Type': image.mimetype,
+        'Content-Length': imageBuffer.length.toString(),
+        'Cache-Control': 'public, max-age=3600',
+        'ETag': `"${imageId}"`,
       });
       
-      // Stream o objeto para a resposta
-      result.data.pipe(res);
+      // Send image
+      res.send(imageBuffer);
     } catch (error) {
-      console.error("Error serving object:", error);
+      console.error("Error serving image:", error);
       return res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
