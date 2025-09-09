@@ -999,13 +999,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Caminho da foto é obrigatório" });
       }
 
+      console.log("[photo-remove] Removendo foto:", photoPath, "do profissional:", professionalId);
+
+      // Extract image ID from path (e.g., "/api/images/123" -> "123")
+      const imageId = photoPath.replace('/api/images/', '');
+      
+      // Remove photo from database
+      const deletedImage = await db
+        .delete(images)
+        .where(sql`${images.id} = ${imageId} AND ${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`)
+        .returning();
+      
+      if (deletedImage.length === 0) {
+        console.log("[photo-remove] Foto não encontrada na base de dados");
+        return res.status(404).json({ message: "Foto não encontrada" });
+      }
+
       // Get professional to update portfolio
       const professional = await storage.getProfessional(professionalId);
       if (!professional) {
         return res.status(404).json({ message: "Profissional não encontrado" });
       }
 
-      // Remove photo from portfolio
+      // Remove photo from portfolio array
       const currentPortfolio = professional.portfolio || [];
       const updatedPortfolio = currentPortfolio.filter(path => path !== photoPath);
       
@@ -1013,6 +1029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         portfolio: updatedPortfolio
       });
 
+      console.log("[photo-remove] Foto removida com sucesso:", imageId);
       res.json({ message: "Foto removida com sucesso" });
     } catch (error) {
       console.error("Error removing photo from portfolio:", error);
