@@ -184,9 +184,11 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         title VARCHAR NOT NULL,
         slug VARCHAR NOT NULL UNIQUE,
         content TEXT NOT NULL,
-        excerpt TEXT,
-        status VARCHAR DEFAULT 'draft',
-        is_featured BOOLEAN DEFAULT false,
+        meta_description TEXT,
+        meta_keywords TEXT,
+        is_active BOOLEAN DEFAULT true,
+        show_in_footer BOOLEAN DEFAULT true,
+        sort_order INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -219,6 +221,97 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         ('Plano Básico', 'Plano básico para profissionais', 29.90, '["Perfil completo", "Até 50 contatos/mês", "5 fotos no portfólio"]', 50, true, true),
         ('Plano Premium', 'Plano premium com recursos avançados', 59.90, '["Perfil destacado", "Contatos ilimitados", "20 fotos no portfólio", "Suporte prioritário"]', null, true, true)
     ON CONFLICT DO NOTHING;
+
+    -- Inserir páginas iniciais do sistema
+    INSERT INTO pages (title, slug, content, meta_description, is_active, show_in_footer, sort_order) VALUES
+        ('Sobre Nós', 'sobre', 
+         '<h2>Sobre o Monte Everest</h2>
+         <p>O Monte Everest é a principal plataforma de conexão entre profissionais qualificados e clientes que buscam serviços de excelência.</p>
+         <p>Nossa missão é facilitar o encontro entre quem precisa de um serviço e quem tem a competência para realizá-lo, promovendo negócios justos e transparentes.</p>
+         <h3>Nossos Valores</h3>
+         <ul>
+         <li><strong>Qualidade:</strong> Conectamos apenas profissionais verificados</li>
+         <li><strong>Transparência:</strong> Reviews e avaliações reais dos clientes</li>
+         <li><strong>Confiança:</strong> Sistema seguro de pagamentos e contatos</li>
+         </ul>', 
+         'Conheça o Monte Everest, plataforma que conecta profissionais qualificados com clientes', true, true, 1),
+        
+        ('Termos de Uso', 'termos-de-uso',
+         '<h2>Termos de Uso</h2>
+         <p><strong>Última atualização:</strong> ' || CURRENT_DATE || '</p>
+         
+         <h3>1. Aceitação dos Termos</h3>
+         <p>Ao utilizar o Monte Everest, você concorda com estes termos de uso.</p>
+         
+         <h3>2. Descrição do Serviço</h3>
+         <p>O Monte Everest é uma plataforma que conecta prestadores de serviços com potenciais clientes.</p>
+         
+         <h3>3. Responsabilidades do Usuário</h3>
+         <p>Os usuários devem fornecer informações verdadeiras e manter seus dados atualizados.</p>
+         
+         <h3>4. Responsabilidades dos Profissionais</h3>
+         <p>Profissionais devem prestar serviços com qualidade e dentro dos prazos acordados.</p>
+         
+         <h3>5. Pagamentos</h3>
+         <p>Os pagamentos de assinaturas são processados mensalmente através do sistema Pagar.me.</p>
+         
+         <h3>6. Contato</h3>
+         <p>Para dúvidas sobre estes termos, entre em contato através do nosso suporte.</p>',
+         'Termos de uso da plataforma Monte Everest', true, true, 2),
+        
+        ('Política de Privacidade', 'politica-privacidade',
+         '<h2>Política de Privacidade</h2>
+         <p><strong>Última atualização:</strong> ' || CURRENT_DATE || '</p>
+         
+         <h3>1. Coleta de Informações</h3>
+         <p>Coletamos apenas as informações necessárias para o funcionamento da plataforma.</p>
+         
+         <h3>2. Uso das Informações</h3>
+         <p>Suas informações são utilizadas para:</p>
+         <ul>
+         <li>Conectar você com profissionais ou clientes</li>
+         <li>Processar pagamentos de forma segura</li>
+         <li>Melhorar nossos serviços</li>
+         <li>Enviar comunicações importantes</li>
+         </ul>
+         
+         <h3>3. Compartilhamento de Dados</h3>
+         <p>Não compartilhamos seus dados pessoais com terceiros, exceto quando necessário para o funcionamento do serviço.</p>
+         
+         <h3>4. Segurança</h3>
+         <p>Utilizamos as melhores práticas de segurança para proteger suas informações.</p>
+         
+         <h3>5. Seus Direitos</h3>
+         <p>Você tem direito a acessar, corrigir ou excluir seus dados pessoais a qualquer momento.</p>
+         
+         <h3>6. Contato</h3>
+         <p>Para questões sobre privacidade, entre em contato através do nosso suporte.</p>',
+         'Política de privacidade do Monte Everest', true, true, 3),
+        
+        ('Contato', 'contato',
+         '<h2>Entre em Contato</h2>
+         <p>Estamos aqui para ajudar! Entre em contato conosco através dos canais abaixo:</p>
+         
+         <h3>📧 Email</h3>
+         <p><strong>Suporte Geral:</strong> contato@monteeverest.com</p>
+         <p><strong>Suporte Profissionais:</strong> profissionais@monteeverest.com</p>
+         <p><strong>Parcerias:</strong> parceiros@monteeverest.com</p>
+         
+         <h3>📱 WhatsApp</h3>
+         <p><strong>Atendimento:</strong> (11) 99999-9999</p>
+         <p><em>Horário: Segunda a Sexta, 8h às 18h</em></p>
+         
+         <h3>🏢 Endereço</h3>
+         <p>Monte Everest Serviços Ltda<br>
+         Rua das Palmeiras, 123<br>
+         São Paulo - SP, 01234-567</p>
+         
+         <h3>⏰ Horário de Atendimento</h3>
+         <p><strong>Segunda a Sexta:</strong> 8h às 18h<br>
+         <strong>Sábado:</strong> 9h às 14h<br>
+         <strong>Domingo:</strong> Fechado</p>',
+         'Entre em contato com o Monte Everest', true, true, 4)
+    ON CONFLICT (slug) DO NOTHING;
 
     COMMIT;
     `;
