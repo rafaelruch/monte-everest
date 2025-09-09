@@ -1,0 +1,814 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:32:57 AM [express] serving on port 5000
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:51:55 AM [express] serving on port 5000
+[static-server] Serving index.html for: /profissional/d2617323-23ea-481a-81b9-13f331f78b5a
+3:51:56 AM [express] GET /api/install/status 304 in 32ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+Error fetching professional: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessional (/app/server/storage.ts:416:28)
+    at async <anonymous> (/app/server/routes.ts:140:28) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:51:56 AM [express] GET /api/professionals/d2617323-23ea-481a-81b9-13f331f78b5a 500 in 30ms :: {"me…
+3:51:56 AM [express] GET /api/professionals/d2617323-23ea-481a-81b9-13f331f78b5a/reviews 304 in 31ms…
+[static-server] Serving index.html for: /profissional/d2617323-23ea-481a-81b9-13f331f78b5a
+3:51:58 AM [express] GET /api/install/status 304 in 11ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+3:51:58 AM [express] GET /api/professionals/d2617323-23ea-481a-81b9-13f331f78b5a/reviews 304 in 4ms …
+Error fetching professional: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessional (/app/server/storage.ts:416:28)
+    at async <anonymous> (/app/server/routes.ts:140:28) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:51:58 AM [express] GET /api/professionals/d2617323-23ea-481a-81b9-13f331f78b5a 500 in 15ms :: {"me…
+[static-server] Serving index.html for: /favicon.ico
+3:51:58 AM [express] GET /api/categories/popular 304 in 7ms :: [{"id":"676b8100-d29b-4890-b1ea-e6f76…
+Error searching professionals: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:406:12)
+    at async <anonymous> (/app/server/routes.ts:121:29) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:54:52 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+3:54:55 AM [express] GET /api/install/status 200 in 27ms :: {"installed":true,"needsInstallation":fa…
+3:54:55 AM [express] GET /api/subscription-plans 200 in 17ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_Jj5VAQNtYtnW46Nw",
+  "code": "SUB_75157284187_1757390111644",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_Y0yq7xBsZsalNXKx",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:55:12Z",
+  "updated_at": "2025-09-09T03:55:12Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_GzMNZqYHgH0ZeB09",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:55:12Z",
+      "updated_at": "2025-09-09T03:55:12Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:55:12Z",
+      "updated_at": "2025-09-09T03:55:12Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionalByEmail (/app/server/storage.ts:421:28)
+    at async <anonymous> (/app/server/routes.ts:2309:26) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:55:13 AM [express] POST /api/payments/create-subscription 500 in 2031ms :: {"success":false,"error…
+[static-server] Serving index.html for: /seja-profissional
+3:56:50 AM [express] GET /api/install/status 200 in 16ms :: {"installed":true,"needsInstallation":fa…
+3:56:50 AM [express] GET /api/subscription-plans 200 in 17ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_4xdgp7yh4hxqzJyM",
+  "code": "SUB_75157284187_1757390233570",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_XK9RBmDFvF36DzWd",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:57:14Z",
+  "updated_at": "2025-09-09T03:57:14Z",
+  "customer": {
+    "id": "cus_AM3aN3aIjIqLXde2",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafael@agenciaadapta.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_gLqaP73ipiQP7QYm",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:57:14Z",
+      "updated_at": "2025-09-09T03:57:14Z"
+    },
+    "created_at": "2025-09-09T03:57:13Z",
+    "updated_at": "2025-09-09T03:57:13Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_OmQNYl0UdUMYreGz",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:57:14Z",
+      "updated_at": "2025-09-09T03:57:14Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:57:14Z",
+      "updated_at": "2025-09-09T03:57:14Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafael@agenciaadapta.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionalByEmail (/app/server/storage.ts:421:28)
+    at async <anonymous> (/app/server/routes.ts:2309:26) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:57:15 AM [express] POST /api/payments/create-subscription 500 in 1700ms :: {"success":false,"error…
+[static-server] Serving index.html for: /seja-profissional
+3:57:17 AM [express] GET /api/install/status 200 in 10ms :: {"installed":true,"needsInstallation":fa…
+3:57:17 AM [express] GET /api/subscription-plans 200 in 15ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /entrar
+3:57:29 AM [express] GET /api/install/status 304 in 12ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+3:57:34 AM [express] POST /api/auth/admin/login 200 in 69ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+Error fetching professionals: error: column "pending_pix_code" does not exist
+3:57:34 AM [express] GET /api/admin/professionals 500 in 6ms :: {"message":"Erro interno do servidor…
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAllProfessionalsForAdmin (/app/server/storage.ts:411:12)
+    at async <anonymous> (/app/server/routes.ts:1086:9) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+[static-server] Serving index.html for: /favicon.ico
+3:57:34 AM [express] GET /api/admin/reviews 304 in 50ms :: [{"id":"54d83d2b-e501-4207-890d-695ada035…
+3:57:34 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 304 in 54ms :: {"id":"b8c33f3f-e0…
+3:57:34 AM [express] GET /api/admin/configs/PAGARME_API_KEY 304 in 53ms :: {"id":"3554ad96-72b0-4cfc…
+3:57:34 AM [express] GET /api/admin/payments 304 in 60ms :: [{"id":"2068e804-2474-4e91-94f9-6dd3a841…
+3:57:34 AM [express] GET /api/admin/pages 304 in 48ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+3:57:34 AM [express] GET /api/admin/dashboard/stats 304 in 68ms :: {"activeProfessionals":2,"monthly…
+3:57:34 AM [express] GET /api/admin/users 304 in 49ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+3:57:34 AM [express] GET /api/admin/categories 304 in 64ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+3:57:34 AM [express] GET /api/admin/plans 304 in 57ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e1…
+[static-server] Serving index.html for: /admin/dashboard
+3:57:54 AM [express] GET /api/install/status 304 in 13ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+Error fetching professionals: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAllProfessionalsForAdmin (/app/server/storage.ts:411:12)
+    at async <anonymous> (/app/server/routes.ts:1086:9) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:57:54 AM [express] GET /api/admin/professionals 500 in 39ms :: {"message":"Erro interno do servido…
+3:57:55 AM [express] GET /api/admin/dashboard/stats 304 in 75ms :: {"activeProfessionals":2,"monthly…
+3:57:55 AM [express] GET /api/admin/users 304 in 84ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+3:57:55 AM [express] GET /api/admin/pages 304 in 86ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+3:57:55 AM [express] GET /api/admin/categories 304 in 86ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+3:57:55 AM [express] GET /api/admin/configs/PAGARME_API_KEY 304 in 90ms :: {"id":"3554ad96-72b0-4cfc…
+3:57:55 AM [express] GET /api/admin/plans 304 in 85ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e1…
+3:57:55 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 304 in 83ms :: {"id":"b8c33f3f-e0…
+3:57:55 AM [express] GET /api/admin/reviews 304 in 86ms :: [{"id":"54d83d2b-e501-4207-890d-695ada035…
+3:57:55 AM [express] GET /api/admin/payments 304 in 92ms :: [{"id":"2068e804-2474-4e91-94f9-6dd3a841…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+3:58:03 AM [express] GET /api/subscription-plans 304 in 6ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+[static-server] Serving index.html for: /seja-profissional
+3:58:05 AM [express] GET /api/install/status 200 in 10ms :: {"installed":true,"needsInstallation":fa…
+3:58:05 AM [express] GET /api/subscription-plans 200 in 2ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '0970052b-198b-4ba0-a996-28afb007df73',
+  name: 'Plano Premium',
+  monthlyPrice: '59.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_PyxZbvzhYPtGZnYl'
+}
+Price validation: {
+  planName: 'Plano Premium',
+  originalPrice: '59.90',
+  priceInReais: 59.9,
+  priceInCentavos: 5990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_2Xzwd4nh1CLVwODr",
+  "code": "SUB_75157284187_1757390335447",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_8bDMabzhMAS6a5wV",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:58:55Z",
+  "updated_at": "2025-09-09T03:58:55Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_PyxZbvzhYPtGZnYl",
+    "name": "Plano Premium",
+    "description": "Plano premium com recursos avançados",
+    "url": "plans/plan_PyxZbvzhYPtGZnYl/everest-servicos-ltda-conta-ativa-test/plano-premium",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:33Z",
+    "updated_at": "2025-09-09T02:30:33Z",
+    "metadata": {
+      "plan_id": "0970052b-198b-4ba0-a996-28afb007df73",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_Jm6NOjJuxHlOw7Rg",
+      "name": "Plano Premium",
+      "description": "Plano premium com recursos avançados",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:58:55Z",
+      "updated_at": "2025-09-09T03:58:55Z",
+      "pricing_scheme": {
+        "price": 5990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "0970052b-198b-4ba0-a996-28afb007df73",
+      "name": "Plano Premium",
+      "description": "Plano premium com recursos avançados",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:58:55Z",
+      "updated_at": "2025-09-09T03:58:55Z",
+      "pricing_scheme": {
+        "price": 5990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Premium"
+  }
+}
+Error creating subscription: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionalByEmail (/app/server/storage.ts:421:28)
+    at async <anonymous> (/app/server/routes.ts:2309:26) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:58:57 AM [express] POST /api/payments/create-subscription 500 in 1750ms :: {"success":false,"error…
+Plan found: {
+  id: '0970052b-198b-4ba0-a996-28afb007df73',
+  name: 'Plano Premium',
+  monthlyPrice: '59.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_PyxZbvzhYPtGZnYl'
+}
+Price validation: {
+  planName: 'Plano Premium',
+  originalPrice: '59.90',
+  priceInReais: 59.9,
+  priceInCentavos: 5990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_73kGQYJC1quQGAqQ",
+  "code": "SUB_11144477735_1757390345766",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_OANLRz5u8iOzLEDK",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:59:06Z",
+  "updated_at": "2025-09-09T03:59:06Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "11144477735",
+    "document": "11144477735",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T03:59:06Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T03:59:06Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_PyxZbvzhYPtGZnYl",
+    "name": "Plano Premium",
+    "description": "Plano premium com recursos avançados",
+    "url": "plans/plan_PyxZbvzhYPtGZnYl/everest-servicos-ltda-conta-ativa-test/plano-premium",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:33Z",
+    "updated_at": "2025-09-09T02:30:33Z",
+    "metadata": {
+      "plan_id": "0970052b-198b-4ba0-a996-28afb007df73",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_qo0VPLAiDi9XaWOj",
+      "name": "Plano Premium",
+      "description": "Plano premium com recursos avançados",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:59:06Z",
+      "updated_at": "2025-09-09T03:59:06Z",
+      "pricing_scheme": {
+        "price": 5990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "0970052b-198b-4ba0-a996-28afb007df73",
+      "name": "Plano Premium",
+      "description": "Plano premium com recursos avançados",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:59:06Z",
+      "updated_at": "2025-09-09T03:59:06Z",
+      "pricing_scheme": {
+        "price": 5990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Premium"
+  }
+}
+3:59:07 AM [express] POST /api/payments/create-subscription 500 in 1303ms :: {"success":false,"error…
+Error creating subscription: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionalByEmail (/app/server/storage.ts:421:28)
+    at async <anonymous> (/app/server/routes.ts:2309:26) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
