@@ -2952,6 +2952,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Object storage serving routes - usando novo SDK
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    try {
+      const replitStorage = new ReplitObjectStorageService();
+      const result = await replitStorage.downloadObject(req.path);
+      
+      if (!result) {
+        return res.status(404).json({ error: "Objeto não encontrado" });
+      }
+      
+      // Configurar headers
+      res.set({
+        'Content-Type': result.mimeType || 'application/octet-stream',
+        'Cache-Control': 'public, max-age=3600'
+      });
+      
+      // Stream o objeto para a resposta
+      result.data.pipe(res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

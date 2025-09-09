@@ -385,28 +385,50 @@ export default function ProfessionalDashboard() {
   };
 
   // Profile image upload functions
-  const handleGetProfileImageUploadParameters = async () => {
-    const response = await fetch(`/api/professionals/${professionalAuth.id}/profile-image/upload-url`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${professionalAuth.token}`,
-      },
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Erro ao obter URL de upload");
-    }
-    
-    const { uploadURL } = await response.json();
-    return {
-      method: "PUT" as const,
-      url: uploadURL,
-    };
-  };
+  const handleProfileImageUpload = async (file: File) => {
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append('photo', file);
+      
+      // Upload file directly
+      const uploadResponse = await fetch(`/api/professionals/${professionalAuth.id}/profile-image/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${professionalAuth.token}`
+        },
+        body: formData
+      });
 
-  const handleProfileImageUploadComplete = (result: { uploadURL: string }) => {
-    updateProfileImageMutation.mutate(result.uploadURL);
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || 'Erro no upload da imagem');
+      }
+
+      const { objectPath } = await uploadResponse.json();
+      
+      // Update profile with image path
+      const updateResponse = await fetch(`/api/professionals/${professionalAuth.id}/profile-image`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${professionalAuth.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ objectPath })
+      });
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.message || 'Erro ao atualizar perfil');
+      }
+
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
+      toast.success("Foto de perfil atualizada com sucesso!");
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      toast.error(error instanceof Error ? error.message : "Erro durante upload");
+    }
   };
 
   const handleLogout = () => {
@@ -923,31 +945,8 @@ export default function ProfessionalDashboard() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
-                          console.log("[frontend] Iniciando upload da foto de perfil:", file.name, file.size);
-                          
-                          try {
-                            console.log("[frontend] Obtendo parâmetros de upload...");
-                            const params = await handleGetProfileImageUploadParameters();
-                            console.log("[frontend] Parâmetros obtidos:", params.method, params.url ? "URL_OK" : "NO_URL");
-                            
-                            console.log("[frontend] Fazendo upload do arquivo...");
-                            const uploadResponse = await fetch(params.url, {
-                              method: params.method,
-                              body: file,
-                              headers: { 'Content-Type': file.type },
-                            });
-                            
-                            console.log("[frontend] Resposta do upload:", uploadResponse.status, uploadResponse.statusText);
-                            
-                            if (uploadResponse.ok) {
-                              console.log("[frontend] Upload concluído, atualizando perfil...");
-                              handleProfileImageUploadComplete({ uploadURL: params.url });
-                            } else {
-                              console.error("[frontend] Erro no upload:", await uploadResponse.text());
-                            }
-                          } catch (error) {
-                            console.error("[frontend] Erro durante upload da foto de perfil:", error);
-                          }
+                          console.log("[frontend] Iniciando upload direto da foto de perfil:", file.name, file.size);
+                          await handleProfileImageUpload(file);
                         }}
                       />
                       <Button 
@@ -1255,30 +1254,51 @@ export default function ProfessionalDashboard() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
-                          console.log("[frontend] Iniciando upload da foto do portfólio:", file.name, file.size);
+                          console.log("[frontend] Iniciando upload direto da foto do portfólio:", file.name, file.size);
                           
                           try {
-                            console.log("[frontend] Obtendo parâmetros de upload do portfólio...");
-                            const params = await handleGetUploadParameters();
-                            console.log("[frontend] Parâmetros obtidos:", params.method, params.url ? "URL_OK" : "NO_URL");
+                            // Create FormData
+                            const formData = new FormData();
+                            formData.append('photo', file);
                             
-                            console.log("[frontend] Fazendo upload do arquivo do portfólio...");
-                            const uploadResponse = await fetch(params.url, {
-                              method: params.method,
-                              body: file,
-                              headers: { 'Content-Type': file.type },
+                            console.log("[frontend] Fazendo upload direto do arquivo do portfólio...");
+                            const uploadResponse = await fetch(`/api/professionals/${professionalData.id}/photos/upload`, {
+                              method: 'POST',
+                              headers: {
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: formData
                             });
                             
                             console.log("[frontend] Resposta do upload:", uploadResponse.status, uploadResponse.statusText);
                             
                             if (uploadResponse.ok) {
-                              console.log("[frontend] Upload concluído, adicionando ao portfólio...");
-                              handleUploadComplete({ uploadURL: params.url });
+                              const { objectPath } = await uploadResponse.json();
+                              console.log("[frontend] Upload concluído, adicionando ao portfólio:", objectPath);
+                              
+                              // Add to portfolio
+                              const addResponse = await fetch(`/api/professionals/${professionalData.id}/photos`, {
+                                method: 'POST',
+                                headers: {
+                                  'Authorization': `Bearer ${token}`,
+                                  'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ objectPath })
+                              });
+                              
+                              if (addResponse.ok) {
+                                queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
+                                toast.success("Foto adicionada ao portfólio com sucesso!");
+                              } else {
+                                throw new Error("Erro ao adicionar foto ao portfólio");
+                              }
                             } else {
-                              console.error("[frontend] Erro no upload do portfólio:", await uploadResponse.text());
+                              const errorData = await uploadResponse.json();
+                              throw new Error(errorData.message || "Erro no upload");
                             }
                           } catch (error) {
                             console.error("[frontend] Erro durante upload do portfólio:", error);
+                            toast.error(error instanceof Error ? error.message : "Erro durante upload");
                           }
                         }}
                       />
