@@ -102,6 +102,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         last_payment_date TIMESTAMP,
         next_payment_date TIMESTAMP,
         subscription_expires_at TIMESTAMP,
+        first_login BOOLEAN DEFAULT true,
         photo VARCHAR,
         rating DECIMAL(3,2) DEFAULT 0.00,
         total_reviews INTEGER DEFAULT 0,
