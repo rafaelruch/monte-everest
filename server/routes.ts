@@ -15,6 +15,7 @@ import {
   ObjectNotFoundError,
 } from "./objectStorage";
 import { ReplitObjectStorageService } from "./replitObjectStorage";
+import multer from "multer";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
 import { db } from "./db";
@@ -744,16 +745,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Professional portfolio photo upload routes
-  app.post("/api/professionals/:id/photos/upload-url", verifyProfessionalToken, async (req, res) => {
+  // Configuração do multer para upload de arquivos
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB
+      files: 1
+    },
+    fileFilter: (req, file, cb) => {
+      // Aceitar apenas imagens
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Apenas arquivos de imagem são permitidos'));
+      }
+    }
+  });
+
+  // Professional portfolio photo upload direto
+  app.post("/api/professionals/:id/photos/upload", verifyProfessionalToken, upload.single('photo'), async (req, res) => {
     try {
-      console.log("[photo-upload] Solicitação de URL de upload para profissional:", req.params.id);
+      console.log("[photo-upload] Upload direto de foto para profissional:", req.params.id);
       
       const professionalId = req.params.id;
       
       if (professionalId !== req.professional.id) {
         console.log("[photo-upload] Acesso negado - IDs não coincidem");
         return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
       // Get professional and their plan to check photo limits
@@ -777,30 +799,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("[photo-upload] Gerando URL de upload usando SDK oficial...");
+      console.log("[photo-upload] Fazendo upload direto do arquivo...");
+      console.log("[photo-upload] Arquivo:", req.file.originalname, "Tamanho:", req.file.size, "bytes");
+      
       const replitStorage = new ReplitObjectStorageService();
-      const result = await replitStorage.getUploadURL();
+      const objectPath = await replitStorage.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype
+      );
       
-      console.log("[photo-upload] URL gerada com sucesso:", result.uploadURL ? "SIM" : "NÃO");
+      console.log("[photo-upload] Upload concluído:", objectPath);
       
-      // Armazenar o object path para uso posterior
-      req.session = req.session || {};
-      req.session.lastObjectPath = result.objectPath;
-      
-      res.json({ uploadURL: result.uploadURL });
+      res.json({ 
+        objectPath,
+        message: "Upload realizado com sucesso" 
+      });
     } catch (error) {
-      console.error("[photo-upload] Erro ao obter URL de upload:", error);
+      console.error("[photo-upload] Erro no upload:", error);
       console.error("[photo-upload] Detalhes do erro:", {
         message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        env: {
-          NODE_ENV: process.env.NODE_ENV,
-          hasObjectStorageVars: {
-            PUBLIC_OBJECT_SEARCH_PATHS: !!process.env.PUBLIC_OBJECT_SEARCH_PATHS,
-            PRIVATE_OBJECT_DIR: !!process.env.PRIVATE_OBJECT_DIR
-          }
-        }
+        stack: error instanceof Error ? error.stack : undefined
       });
+      
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "Arquivo muito grande. Limite: 10MB" });
+        }
+        return res.status(400).json({ message: "Erro no upload: " + error.message });
+      }
+      
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -883,10 +911,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Profile image upload routes
-  app.post("/api/professionals/:id/profile-image/upload-url", verifyProfessionalToken, async (req, res) => {
+  // Profile image upload direto
+  app.post("/api/professionals/:id/profile-image/upload", verifyProfessionalToken, upload.single('photo'), async (req, res) => {
     try {
-      console.log("[profile-image] Solicitação de URL de upload para foto de perfil:", req.params.id);
+      console.log("[profile-image] Upload direto de foto de perfil:", req.params.id);
       
       const professionalId = req.params.id;
       
@@ -895,30 +923,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      console.log("[profile-image] Gerando URL de upload usando SDK oficial...");
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhum arquivo enviado" });
+      }
+
+      console.log("[profile-image] Fazendo upload direto do arquivo...");
+      console.log("[profile-image] Arquivo:", req.file.originalname, "Tamanho:", req.file.size, "bytes");
+      
       const replitStorage = new ReplitObjectStorageService();
-      const result = await replitStorage.getUploadURL();
+      const objectPath = await replitStorage.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype
+      );
       
-      console.log("[profile-image] URL de upload gerada:", result.uploadURL ? "SIM" : "NÃO");
+      console.log("[profile-image] Upload concluído:", objectPath);
       
-      // Armazenar o object path para uso posterior
-      req.session = req.session || {};
-      req.session.lastObjectPath = result.objectPath;
-      
-      res.json({ uploadURL: result.uploadURL });
+      res.json({ 
+        objectPath,
+        message: "Upload realizado com sucesso" 
+      });
     } catch (error) {
-      console.error("[profile-image] Erro ao obter URL de upload:", error);
+      console.error("[profile-image] Erro no upload:", error);
       console.error("[profile-image] Detalhes do erro:", {
         message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        env: {
-          NODE_ENV: process.env.NODE_ENV,
-          hasObjectStorageVars: {
-            PUBLIC_OBJECT_SEARCH_PATHS: !!process.env.PUBLIC_OBJECT_SEARCH_PATHS,
-            PRIVATE_OBJECT_DIR: !!process.env.PRIVATE_OBJECT_DIR
-          }
-        }
+        stack: error instanceof Error ? error.stack : undefined
       });
+      
+      if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "Arquivo muito grande. Limite: 10MB" });
+        }
+        return res.status(400).json({ message: "Erro no upload: " + error.message });
+      }
+      
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
