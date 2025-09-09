@@ -1144,6 +1144,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete professional (admin only)
+  app.delete("/api/admin/professionals/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      if (!id) {
+        return res.status(400).json({ message: "ID do profissional é obrigatório" });
+      }
+
+      // Check if professional exists
+      const professional = await storage.getProfessionalById(id);
+      if (!professional) {
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+
+      // Delete the professional
+      await storage.deleteProfessional(id);
+
+      res.json({ message: "Profissional excluído com sucesso" });
+    } catch (error) {
+      console.error("Error deleting professional:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Update professional status
   app.patch("/api/admin/professionals/:id/status", verifyAdminToken, async (req, res) => {
     try {

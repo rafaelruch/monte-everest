@@ -482,6 +482,26 @@ export default function AdminDashboard() {
     },
   });
 
+  const deleteProfessionalMutation = useMutation({
+    mutationFn: async (professionalId: string) => {
+      return apiRequest("DELETE", `/api/admin/professionals/${professionalId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
+      toast({
+        title: "Sucesso",
+        description: "Profissional excluído com sucesso!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir profissional. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const seedCategoriesMutation = useMutation({
     mutationFn: async () => {
       return apiRequest("POST", "/api/admin/categories/seed", {});
@@ -1153,24 +1173,40 @@ export default function AdminDashboard() {
                           <TableCell>{getStatusBadge(professional.status)}</TableCell>
                           <TableCell>{getPaymentStatusBadge(professional.paymentStatus || "pending")}</TableCell>
                           <TableCell>
-                            <Select
-                              value={professional.status}
-                              onValueChange={(value) =>
-                                updateProfessionalStatusMutation.mutate({
-                                  id: professional.id,
-                                  status: value,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="active">Ativar</SelectItem>
-                                <SelectItem value="inactive">Desativar</SelectItem>
-                                <SelectItem value="pending">Pendente</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2">
+                              <Select
+                                value={professional.status}
+                                onValueChange={(value) =>
+                                  updateProfessionalStatusMutation.mutate({
+                                    id: professional.id,
+                                    status: value,
+                                  })
+                                }
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Ativar</SelectItem>
+                                  <SelectItem value="inactive">Desativar</SelectItem>
+                                  <SelectItem value="pending">Pendente</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm(`Tem certeza que deseja excluir o profissional "${professional.fullName}"? Esta ação não pode ser desfeita.`)) {
+                                    deleteProfessionalMutation.mutate(professional.id);
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                disabled={deleteProfessionalMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
