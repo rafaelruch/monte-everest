@@ -759,6 +759,25 @@ export default function ProfessionalDashboard() {
 
                       <FormField
                         control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Descrição dos Serviços</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                {...field} 
+                                placeholder="Descreva seus serviços, experiência e diferenciais..."
+                                rows={4}
+                                data-testid="textarea-description" 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
                         name="categoryId"
                         render={({ field }) => (
                           <FormItem>
