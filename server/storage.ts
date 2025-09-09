@@ -319,7 +319,7 @@ export class DatabaseStorage implements IStorage {
       .groupBy(categories.id)
       .orderBy(asc(categories.name));
     
-    return result.map(row => ({
+    return result.map((row: any) => ({
       ...row,
       professionalsCount: Number(row.professionalsCount) || 0
     }));

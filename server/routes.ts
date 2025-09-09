@@ -596,6 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
       
       // Create admin user with direct SQL query
+      const adminId = crypto.randomUUID();
       try {
 
         const pool = new PgPool({ 
@@ -604,7 +605,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         const client = await pool.connect();
-        const adminId = crypto.randomUUID();
         await client.query(`
           INSERT INTO users (id, email, password, role, is_system_admin, created_at, updated_at)
           VALUES ($1, $2, $3, 'admin', true, NOW(), NOW())
@@ -848,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professionalId = req.params.id;
       const { currentPassword, newPassword } = req.body;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       
@@ -903,7 +903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const professionalId = req.params.id;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         console.log("[photo-upload] Acesso negado - IDs não coincidem");
         return res.status(403).json({ message: "Acesso negado" });
       }
@@ -985,7 +985,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professionalId = req.params.id;
       const { imageId } = req.body;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
@@ -1034,7 +1034,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professionalId = req.params.id;
       const { photoPath } = req.body;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
@@ -1087,7 +1087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const professionalId = req.params.id;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         console.log("[profile-image] Acesso negado - IDs não coincidem");
         return res.status(403).json({ message: "Acesso negado" });
       }
@@ -1149,7 +1149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professionalId = req.params.id;
       const { imageId } = req.body;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
@@ -1177,7 +1177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const professionalId = req.params.id;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
@@ -1306,7 +1306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const professionalId = req.params.id;
       
-      if (professionalId !== req.professional.id) {
+      if (professionalId !== req.professional!.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
@@ -1489,7 +1489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const professional = await storage.updateProfessional(req.params.id, { status });
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'update_professional_status',
         entityType: 'professional',
         entityId: req.params.id,
@@ -1530,7 +1530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.createPayment(paymentData);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'create_payment',
         entityType: 'payment',
         entityId: payment.id,
@@ -1560,7 +1560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const payment = await storage.updatePayment(req.params.id, paymentData);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'update_payment',
         entityType: 'payment',
         entityId: req.params.id,
@@ -1581,7 +1581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePayment(req.params.id);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'delete_payment',
         entityType: 'payment',
         entityId: req.params.id,
@@ -1628,7 +1628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'sync_payment_pagarme',
         entityType: 'payment',
         entityId: req.params.id,
@@ -1715,7 +1715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const category = await storage.createCategory(req.body);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'create_category',
         entityType: 'category',
         entityId: category.id,
@@ -1736,7 +1736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const category = await storage.updateCategory(req.params.id, req.body);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'update_category',
         entityType: 'category',
         entityId: req.params.id,
@@ -1757,7 +1757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteCategory(req.params.id);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'delete_category',
         entityType: 'category',
         entityId: req.params.id,
@@ -1825,7 +1825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'seed_categories',
         entityType: 'category',
         entityId: null,
@@ -1895,7 +1895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'mark_popular_categories',
         entityType: 'category',
         entityId: null,
@@ -1947,7 +1947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'create_subscription_plan',
         entityType: 'subscription_plan',
         entityId: plan.id,
@@ -2010,7 +2010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'update_subscription_plan',
         entityType: 'subscription_plan',
         entityId: req.params.id,
@@ -2033,7 +2033,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deleteSubscriptionPlan(req.params.id);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'delete_subscription_plan',
         entityType: 'subscription_plan',
         entityId: req.params.id,
@@ -2087,7 +2087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = await storage.createPage(req.body);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'create_page',
         entityType: 'page',
         entityId: page.id,
@@ -2108,7 +2108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = await storage.updatePage(req.params.id, req.body);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'update_page',
         entityType: 'page',
         entityId: req.params.id,
@@ -2129,7 +2129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.deletePage(req.params.id);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'delete_page',
         entityType: 'page',
         entityId: req.params.id,
@@ -2176,7 +2176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const review = await storage.updateReviewVerification(req.params.id, isVerified);
       
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: isVerified ? 'verify_review' : 'unverify_review',
         entityType: 'review',
         entityId: req.params.id,
@@ -2243,7 +2243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log the action
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'create_admin_user',
         entityType: 'user',
         entityId: newAdmin.id,
@@ -2275,7 +2275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.params.id;
       
       // Prevent deleting self
-      if (userId === req.user.id) {
+      if (userId === req.user!.id) {
         return res.status(400).json({ message: "Não é possível excluir sua própria conta" });
       }
 
@@ -2294,7 +2294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Log the action
       await storage.createLog({
-        userId: req.user.id,
+        userId: req.user!.id,
         action: 'delete_admin_user',
         entityType: 'user',
         entityId: userId,
@@ -2721,7 +2721,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           city: professionalData.city || professional.city || 'Goiânia',
           status: subscription.status === 'active' ? 'active' : 'inactive',
           subscriptionPlanId: planId,
-          updatedAt: new Date()
         });
       } else {
         // Create new professional account
