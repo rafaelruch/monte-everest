@@ -2580,7 +2580,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.autoLogin = true;
         responseData.firstLogin = true;
         responseData.token = token;
-        responseData.redirectTo = '/professional-login';
+        responseData.redirectTo = '/professional-login?autoLogin=true';
         
         // Send email with login credentials for credit card payments
         try {

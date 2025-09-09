@@ -111,9 +111,10 @@ export default function SejaProfissional() {
         }
         
         setShowCheckout(false);
-        // Redirect to professional login with auto-login
+        // Use redirectTo from backend response, or fallback to professional login with auto-login
         setTimeout(() => {
-          setLocation("/professional-login?autoLogin=true");
+          const redirectPath = data.redirectTo || "/professional-login?autoLogin=true";
+          setLocation(redirectPath);
         }, 4000);
       }
     },
