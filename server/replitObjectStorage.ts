@@ -20,14 +20,14 @@ export class ReplitObjectStorageService {
       
       console.log("[replit-storage] Object path:", objectPath);
       
-      // O SDK oficial do Replit gera automaticamente URLs pressinadas
-      // que funcionam tanto em desenvolvimento quanto em produção
-      const uploadURL = await this.client.uploadUrl(objectPath);
+      // Usar método direto de upload do SDK
+      // Primeiro vamos tentar o upload direto em vez de URL
+      const url = `https://storage.googleapis.com/upload/storage/v1/b/replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/o?uploadType=media&name=${encodeURIComponent(objectPath)}`;
       
       console.log("[replit-storage] URL de upload gerada com sucesso");
       
       return {
-        uploadURL,
+        uploadURL: url,
         objectPath: `/objects/${objectPath}`
       };
     } catch (error) {
@@ -53,7 +53,7 @@ export class ReplitObjectStorageService {
   }
 
   // Download um objeto (para servir via endpoint)
-  async getObjectStream(objectPath: string): Promise<ReadableStream> {
+  async getObjectStream(objectPath: string): Promise<any> {
     const cleanPath = objectPath.replace('/objects/', 'uploads/');
     return this.client.downloadAsStream(cleanPath);
   }
