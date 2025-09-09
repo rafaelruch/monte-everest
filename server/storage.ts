@@ -30,6 +30,7 @@ import {
   type InsertPage,
 } from "@shared/schema";
 import { db } from "./db";
+import { Pool as PgPool } from 'pg';
 import { eq, desc, asc, and, like, sql, count, avg, or, isNull, gt, lt, lte } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
