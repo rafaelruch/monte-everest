@@ -204,6 +204,21 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     CREATE INDEX IF NOT EXISTS reviews_rating_idx ON reviews(rating);
     CREATE INDEX IF NOT EXISTS reviews_created_at_idx ON reviews(created_at);
 
+    -- Atualizar tabelas existentes com colunas que podem estar faltando
+    -- (Esta seção é executada sempre que setup-tables roda)
+    
+    -- Adicionar coluna card_token na tabela payments se não existir
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='payments' AND column_name='card_token') THEN
+            ALTER TABLE payments ADD COLUMN card_token TEXT;
+        END IF;
+    END $$;
+
+    -- Adicionar outras colunas que podem estar faltando no schema
+    -- (Adicione aqui outras colunas conforme necessário)
+
     -- Inserir categorias iniciais
     INSERT INTO categories (name, slug, description, icon, is_active, is_popular) VALUES
         ('Encanador', 'encanador', 'Serviços de encanamento e hidráulica', '🔧', true, true),
