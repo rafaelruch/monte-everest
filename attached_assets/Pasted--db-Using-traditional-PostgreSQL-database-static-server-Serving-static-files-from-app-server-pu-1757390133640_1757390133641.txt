@@ -1,0 +1,661 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:25:57 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+3:25:58 AM [express] GET /api/install/status 304 in 27ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+3:25:58 AM [express] GET /api/subscription-plans 304 in 15ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_wJm05zVUPUn5R1j4",
+  "code": "SUB_01203012030_1757388381916",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_jDGLePLtZtDegzNQ",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "failed",
+  "created_at": "2025-09-09T03:26:22Z",
+  "updated_at": "2025-09-09T03:26:22Z",
+  "customer": {
+    "id": "cus_lkPBo4Dszs8odbQ9",
+    "name": "Teste 99",
+    "email": "99@teste.com",
+    "code": "01203012030",
+    "document": "01203012030",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_DmZAMQKSkS5pBl3P",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:26:22Z",
+      "updated_at": "2025-09-09T03:26:22Z"
+    },
+    "created_at": "2025-09-09T03:26:22Z",
+    "updated_at": "2025-09-09T03:26:22Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_L3lR2PkhJh7gBmaj",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:26:22Z",
+      "updated_at": "2025-09-09T03:26:22Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:26:22Z",
+      "updated_at": "2025-09-09T03:26:22Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Teste 99",
+    "professional_email": "99@teste.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Creating new professional with email 99@teste.com...
+Processing PIX payment - searching for payment data...
+Subscription boleto field: {}
+Subscription charges: undefined
+Full subscription keys: [
+  'id',                   'code',
+  'start_at',             'interval',
+  'interval_count',       'billing_type',
+  'current_cycle',        'next_billing_at',
+  'payment_method',       'currency',
+  'statement_descriptor', 'installments',
+  'status',               'created_at',
+  'updated_at',           'customer',
+  'plan',                 'items',
+  'boleto',               'metadata'
+]
+No payment data found, creating boleto with PIX QR Code (30-day expiration)...
+Creating charge with data: {
+  "amount": 2990,
+  "payment": {
+    "payment_method": "boleto",
+    "boleto": {
+      "due_at": "2025-10-09T03:26:23.331Z",
+      "type": "DM",
+      "instructions": "Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias."
+    }
+  },
+  "customer": {
+    "id": "cus_lkPBo4Dszs8odbQ9",
+    "name": "Teste 99",
+    "email": "99@teste.com",
+    "document": "01203012030",
+    "type": "individual",
+    "address": {
+      "id": "addr_DmZAMQKSkS5pBl3P",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:26:22Z",
+      "updated_at": "2025-09-09T03:26:22Z"
+    },
+    "phones": {
+      "mobile_phone": {
+        "country_code": "55",
+        "area_code": "01",
+        "number": "230012300"
+      }
+    }
+  },
+  "statement_descriptor": "MONTE EVEREST"
+}
+Charge created: {
+  "id": "ch_6aDWRLVI0IakJX0z",
+  "code": "Q608HJHXVN",
+  "amount": 2990,
+  "status": "failed",
+  "currency": "BRL",
+  "payment_method": "boleto",
+  "created_at": "2025-09-09T03:26:23Z",
+  "updated_at": "2025-09-09T03:26:23Z",
+  "customer": {
+    "id": "cus_lkPBo4Dszs8odbQ9",
+    "name": "Teste 99",
+    "email": "99@teste.com",
+    "code": "01203012030",
+    "document": "01203012030",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_DmZAMQKSkS5pBl3P",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:26:22Z",
+      "updated_at": "2025-09-09T03:26:23Z"
+    },
+    "created_at": "2025-09-09T03:26:22Z",
+    "updated_at": "2025-09-09T03:26:23Z",
+    "phones": {
+      "mobile_phone": {
+        "country_code": "55",
+        "number": "230012300",
+        "area_code": "01"
+      }
+    },
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "last_transaction": {
+    "id": "tran_YWlKJDztbtArNpE7",
+    "transaction_type": "boleto",
+    "amount": 2990,
+    "status": "failed",
+    "success": false,
+    "type": "DM",
+    "bank": "001",
+    "instructions": "Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.",
+    "due_at": "2025-10-09T03:26:23Z",
+    "created_at": "2025-09-09T03:26:23Z",
+    "updated_at": "2025-09-09T03:26:23Z",
+    "gateway_response": {
+      "code": "400",
+      "errors": [
+        {
+          "message": "validation_error | customer | Invalid CPF"
+        }
+      ]
+    },
+    "antifraud_response": {}
+  }
+}
+Transaction from new charge: {
+  "id": "tran_YWlKJDztbtArNpE7",
+  "transaction_type": "boleto",
+  "amount": 2990,
+  "status": "failed",
+  "success": false,
+  "type": "DM",
+  "bank": "001",
+  "instructions": "Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.",
+  "due_at": "2025-10-09T03:26:23Z",
+  "created_at": "2025-09-09T03:26:23Z",
+  "updated_at": "2025-09-09T03:26:23Z",
+  "gateway_response": {
+    "code": "400",
+    "errors": [
+      {
+        "message": "validation_error | customer | Invalid CPF"
+      }
+    ]
+  },
+  "antifraud_response": {}
+}
+3:26:23 AM [express] POST /api/payments/create-subscription 200 in 2002ms :: {"success":true,"messag…
+[static-server] Serving index.html for: /seja-profissional
+3:32:48 AM [express] GET /api/install/status 304 in 24ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+3:32:48 AM [express] GET /api/subscription-plans 304 in 21ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+3:32:57 AM [express] serving on port 5000
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_K3AQ6ejTEspWRw4Z",
+  "code": "SUB_03010230102_1757388792659",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_vyWL7BcAXhV3Nqr7",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "failed",
+  "created_at": "2025-09-09T03:33:13Z",
+  "updated_at": "2025-09-09T03:33:13Z",
+  "customer": {
+    "id": "cus_ky8Jm5aforiYJ39N",
+    "name": "Vinte Cinco",
+    "email": "25@teste.com",
+    "code": "03010230102",
+    "document": "03010230102",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_NqdbAN1UYSb3k7Br",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T03:33:13Z",
+      "updated_at": "2025-09-09T03:33:13Z"
+    },
+    "created_at": "2025-09-09T03:33:13Z",
+    "updated_at": "2025-09-09T03:33:13Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_rGRwdpsj7hvNwEbL",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:33:13Z",
+      "updated_at": "2025-09-09T03:33:13Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:33:13Z",
+      "updated_at": "2025-09-09T03:33:13Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Vinte Cinco",
+    "professional_email": "25@teste.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Creating new professional with email 25@teste.com...
+Creating boleto with PIX QR Code (30-day expiration)...
+Creating boleto charge with data: {
+  "amount": 2990,
+  "payment": {
+    "payment_method": "boleto",
+    "boleto": {
+      "due_at": "2025-10-09T03:33:14.036Z",
+      "type": "DM",
+      "instructions": "Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias."
+    }
+  },
+  "customer": {
+    "name": "Vinte Cinco",
+    "email": "25@teste.com",
+    "document": "03010230102",
+    "type": "individual",
+    "address": {
+      "country": "BR",
+      "state": "GO",
+      "city": "Goiânia",
+      "zip_code": "74000000",
+      "street": "Rua Principal",
+      "number": "123",
+      "neighborhood": "Centro",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro"
+    },
+    "phones": {
+      "mobile_phone": {
+        "country_code": "55",
+        "area_code": "10",
+        "number": "230120301"
+      }
+    }
+  },
+  "metadata": {
+    "subscription_id": "sub_K3AQ6ejTEspWRw4Z",
+    "professional_id": "a721628c-152b-4840-8ae3-bf0d78199c30",
+    "plan_name": "Plano Básico"
+  }
+}
+Boleto charge created: {
+  "id": "ch_nxMgXxCezc3xgVkR",
+  "code": "04E3BV1T86",
+  "amount": 2990,
+  "status": "failed",
+  "currency": "BRL",
+  "payment_method": "boleto",
+  "created_at": "2025-09-09T03:33:14Z",
+  "updated_at": "2025-09-09T03:33:14Z",
+  "customer": {
+    "id": "cus_ky8Jm5aforiYJ39N",
+    "name": "Vinte Cinco",
+    "email": "25@teste.com",
+    "code": "03010230102",
+    "document": "03010230102",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_NqdbAN1UYSb3k7Br",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+[static-server] Serving index.html for: /seja-profissional
+3:54:55 AM [express] GET /api/install/status 200 in 27ms :: {"installed":true,"needsInstallation":fa…
+3:54:55 AM [express] GET /api/subscription-plans 200 in 17ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /favicon.ico
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_Jj5VAQNtYtnW46Nw",
+  "code": "SUB_75157284187_1757390111644",
+  "start_at": "2025-09-09T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_Y0yq7xBsZsalNXKx",
+    "start_at": "2025-09-09T00:00:00Z",
+    "end_at": "2025-10-08T23:59:59Z",
+    "billing_at": "2025-09-09T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-09T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T03:55:12Z",
+  "updated_at": "2025-09-09T03:55:12Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_GzMNZqYHgH0ZeB09",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:55:12Z",
+      "updated_at": "2025-09-09T03:55:12Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T03:55:12Z",
+      "updated_at": "2025-09-09T03:55:12Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: column "pending_pix_code" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionalByEmail (/app/server/storage.ts:421:28)
+    at async <anonymous> (/app/server/routes.ts:2309:26) {
+  length: 117,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '342',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+3:55:13 AM [express] POST /api/payments/create-subscription 500 in 2031ms :: {"success":false,"error…
