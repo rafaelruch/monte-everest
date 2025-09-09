@@ -313,6 +313,24 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
          'Entre em contato com o Monte Everest', true, true, 4)
     ON CONFLICT (slug) DO NOTHING;
 
+    -- Inserir avaliações iniciais de exemplo (apenas se profissionais existirem)
+    DO $$
+    DECLARE
+        prof_id VARCHAR;
+    BEGIN
+        -- Buscar um profissional existente para as avaliações de exemplo
+        SELECT id INTO prof_id FROM professionals LIMIT 1;
+        
+        -- Se existe profissional, inserir avaliações de exemplo
+        IF prof_id IS NOT NULL THEN
+            INSERT INTO reviews (professional_id, customer_name, customer_email, rating, comment, is_verified) VALUES
+                (prof_id, 'Maria Silva', 'maria@email.com', 5, 'Excelente profissional! Muito atencioso e pontual. Recomendo!', true),
+                (prof_id, 'João Santos', 'joao@email.com', 4, 'Bom trabalho, ficou conforme solicitado. Entrega no prazo.', true),
+                (prof_id, 'Ana Costa', 'ana@email.com', 5, 'Superou minhas expectativas! Qualidade excepcional do serviço.', true)
+            ON CONFLICT DO NOTHING;
+        END IF;
+    END $$;
+
     COMMIT;
     `;
 
