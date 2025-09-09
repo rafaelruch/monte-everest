@@ -2096,6 +2096,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { planId, professionalData, paymentMethod, cardData } = req.body;
       
       const plan = await storage.getSubscriptionPlan(planId);
+      
+      if (!plan) {
+        return res.status(400).json({ 
+          message: `Plano não encontrado. Plan ID: ${planId}` 
+        });
+      }
+      
       console.log('Plan found:', { 
         id: plan.id, 
         name: plan.name, 
@@ -2104,9 +2111,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pagarmeProductId: plan.pagarmeProductId 
       });
       
-      if (!plan || !plan.pagarmeProductId) {
+      if (!plan.pagarmeProductId) {
         return res.status(400).json({ 
-          message: `Plano não encontrado ou não sincronizado com Pagar.me. Plan ID: ${planId}, Pagar.me ID: ${plan?.pagarmeProductId || 'não definido'}` 
+          message: `Plano não sincronizado com Pagar.me. Plan ID: ${planId}, Pagar.me ID: ${plan.pagarmeProductId || 'não definido'}` 
         });
       }
 
@@ -2370,132 +2377,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
       
-      // For PIX/Boleto payments, include payment info and don't auto-login yet
-      if (paymentMethod === 'pix' || paymentMethod === 'boleto') {
-        console.log('Processing PIX payment - searching for payment data...');
-        console.log('Subscription boleto field:', JSON.stringify(subscription.boleto, null, 2));
-        console.log('Subscription charges:', JSON.stringify(subscription.charges, null, 2));
-        console.log('Full subscription keys:', Object.keys(subscription));
+      // For PIX/Boleto payments, create a separate charge to get QR Code
+      if (paymentMethod === 'pix') {
+        console.log('Creating PIX charge to generate QR Code...');
         
-        // Try to find payment info in different places
-        let paymentInfo = {};
-        
-        // Check charges first
-        const lastCharge = subscription.charges && subscription.charges[0];
-        if (lastCharge && lastCharge.last_transaction) {
-          const transaction = lastCharge.last_transaction;
-          console.log('Transaction found:', JSON.stringify(transaction, null, 2));
-          
-          paymentInfo = {
-            qrCode: transaction.qr_code, // PIX copy-paste code
-            qrCodeUrl: transaction.qr_code_url, // QR Code image URL
-            pixCode: transaction.qr_code, // PIX copy-paste code
-            line: transaction.line,
-            pdf: transaction.pdf,
-            dueAt: transaction.due_at || lastCharge.due_at,
-            amount: lastCharge.amount
-          };
-        }
-        // Check boleto field
-        else if (subscription.boleto && Object.keys(subscription.boleto).length > 0) {
-          console.log('Using boleto data:', JSON.stringify(subscription.boleto, null, 2));
-          paymentInfo = {
-            qrCode: subscription.boleto.qr_code, // PIX copy-paste code
-            qrCodeUrl: subscription.boleto.qr_code_url, // QR Code image URL
-            pixCode: subscription.boleto.qr_code, // PIX copy-paste code
-            line: subscription.boleto.line,
-            pdf: subscription.boleto.pdf,
-            dueAt: subscription.boleto.due_at,
-            amount: priceInCentavos
-          };
-        }
-        // If no payment data found, create a single charge for PIX payment
-        else {
-          console.log('No payment data found, creating boleto with PIX QR Code (30-day expiration)...');
-          
-          try {
-            // Create boleto with PIX QR Code (30-day expiration)
-            const chargeData = {
-              amount: priceInCentavos,
-              payment: {
-                payment_method: 'boleto',
-                boleto: {
-                  due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-                  type: 'DM',
-                  instructions: 'Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.'
-                }
-              },
-              customer: {
-                id: subscription.customer.id,
-                name: subscription.customer.name,
-                email: subscription.customer.email,
-                document: subscription.customer.document,
-                type: subscription.customer.type,
-                address: subscription.customer.address,
-                phones: {
-                  mobile_phone: {
-                    country_code: '55',
-                    area_code: professionalData.phone.substring(0, 2),
-                    number: professionalData.phone.substring(2)
-                  }
-                }
-              },
-              statement_descriptor: 'MONTE EVEREST'
-            };
-
-            console.log('Creating charge with data:', JSON.stringify(chargeData, null, 2));
-
-            const chargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(chargeData)
-            });
-
-            if (chargeResponse.ok) {
-              const charge = await chargeResponse.json();
-              console.log('Charge created:', JSON.stringify(charge, null, 2));
-              
-              if (charge.last_transaction) {
-                const transaction = charge.last_transaction;
-                console.log('Transaction from new charge:', JSON.stringify(transaction, null, 2));
-                
-                paymentInfo = {
-                  qrCode: transaction.qr_code, // PIX copy-paste code
-                  qrCodeUrl: transaction.qr_code_url, // QR Code image URL
-                  pixCode: transaction.qr_code, // PIX copy-paste code
-                  line: transaction.line, // Boleto line
-                  pdf: transaction.pdf, // Boleto PDF
-                  expiresAt: transaction.due_at,
-                  amount: charge.amount || priceInCentavos
-                };
-              } else {
-                paymentInfo = {
-                  amount: priceInCentavos,
-                  expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                };
+        try {
+          // Create PIX charge to get QR Code
+          const pixChargeData = {
+            amount: priceInCentavos,
+            payment: {
+              payment_method: 'pix',
+              pix: {
+                expires_in: 86400 // 24 hours in seconds
               }
-            } else {
-              const errorText = await chargeResponse.text();
-              console.log('Failed to create charge:', chargeResponse.status, errorText);
-              paymentInfo = {
-                amount: priceInCentavos,
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-              };
+            },
+            customer: {
+              name: professionalData.name,
+              email: professionalData.email,
+              document: professionalData.cpf,
+              type: 'individual',
+              address: {
+                country: 'BR',
+                state: 'GO',
+                city: professionalData.city || 'Goiânia',
+                zip_code: professionalData.cep || '74000000',
+                street: professionalData.street || 'Rua Principal',
+                number: professionalData.number || '123',
+                neighborhood: professionalData.neighborhood || 'Centro',
+                line_1: `${professionalData.street || 'Rua Principal'}, ${professionalData.number || '123'}`,
+                line_2: professionalData.neighborhood || 'Centro'
+              },
+              phones: {
+                mobile_phone: {
+                  country_code: '55',
+                  area_code: professionalData.phone.substring(0, 2),
+                  number: professionalData.phone.substring(2)
+                }
+              }
+            },
+            metadata: {
+              subscription_id: subscription.id,
+              professional_id: professional.id,
+              plan_name: plan.name
             }
-          } catch (error) {
-            console.error('Error creating charge:', error);
-            paymentInfo = {
+          };
+
+          console.log('Creating PIX charge with data:', JSON.stringify(pixChargeData, null, 2));
+
+          const pixChargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pixChargeData)
+          });
+
+          if (pixChargeResponse.ok) {
+            const pixCharge = await pixChargeResponse.json();
+            console.log('PIX Charge created:', JSON.stringify(pixCharge, null, 2));
+            
+            if (pixCharge.last_transaction) {
+              const transaction = pixCharge.last_transaction;
+              console.log('PIX Transaction data:', JSON.stringify(transaction, null, 2));
+              
+              const paymentInfo = {
+                qrCode: transaction.qr_code, // PIX copy-paste code
+                qrCodeUrl: transaction.qr_code_url, // QR Code image URL
+                pixCode: transaction.qr_code, // PIX copy-paste code
+                expiresAt: transaction.expires_at || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                amount: pixCharge.amount || priceInCentavos,
+                chargeId: pixCharge.id
+              };
+              
+              responseData.paymentInfo = paymentInfo;
+              responseData.redirectTo = null; // Don't redirect yet, show payment info first
+            } else {
+              console.error('No transaction found in PIX charge');
+              responseData.paymentInfo = {
+                amount: priceInCentavos,
+                expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+              };
+              responseData.redirectTo = null;
+            }
+          } else {
+            const errorText = await pixChargeResponse.text();
+            console.error('Failed to create PIX charge:', pixChargeResponse.status, errorText);
+            responseData.paymentInfo = {
               amount: priceInCentavos,
-              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
             };
+            responseData.redirectTo = null;
           }
+        } catch (error) {
+          console.error('Error creating PIX charge:', error);
+          responseData.paymentInfo = {
+            amount: priceInCentavos,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          };
+          responseData.redirectTo = null;
         }
-        
-        responseData.paymentInfo = paymentInfo;
-        responseData.redirectTo = null; // Don't redirect yet, show payment info first
       } else {
         // For credit card, proceed with auto-login
         responseData.autoLogin = true;
