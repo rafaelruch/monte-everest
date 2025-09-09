@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +22,7 @@ interface SubscriptionPlan {
 
 export default function SejaProfissional() {
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPaymentInfo, setShowPaymentInfo] = useState(false);
@@ -111,7 +113,7 @@ export default function SejaProfissional() {
         setShowCheckout(false);
         // Redirect to professional login with auto-login
         setTimeout(() => {
-          window.location.href = "/professional-login?autoLogin=true";
+          setLocation("/professional-login?autoLogin=true");
         }, 4000);
       }
     },

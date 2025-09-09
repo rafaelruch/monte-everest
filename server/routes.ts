@@ -17,6 +17,7 @@ import {
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
 import { db } from "./db";
+import { emailService } from "./email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
@@ -2575,11 +2576,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           responseData.redirectTo = null;
         }
       } else {
-        // For credit card, proceed with auto-login
+        // For credit card, proceed with auto-login and send credentials email
         responseData.autoLogin = true;
         responseData.firstLogin = true;
         responseData.token = token;
         responseData.redirectTo = '/professional-login';
+        
+        // Send email with login credentials for credit card payments
+        try {
+          const emailSent = await emailService.sendCredentialsEmail({
+            to: professionalData.email,
+            professionalName: professionalData.name,
+            email: professionalData.email,
+            password: 'senha123', // Default temporary password
+            planName: plan.name
+          });
+          
+          if (emailSent) {
+            console.log('✅ [EMAIL] Credenciais enviadas por email para:', professionalData.email);
+          } else {
+            console.log('⚠️ [EMAIL] Falha ao enviar credenciais por email para:', professionalData.email);
+          }
+        } catch (emailError) {
+          console.error('❌ [EMAIL ERROR] Erro ao enviar credenciais:', emailError);
+        }
       }
       
       res.json(responseData);
@@ -2636,6 +2656,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
               lastPaymentDate: new Date(),
               subscriptionExpiresAt: expiryDate,
             });
+            
+            // Send email with credentials for PIX payments after confirmation
+            try {
+              const professional = await storage.getProfessional(payment.professionalId);
+              const plan = await storage.getSubscriptionPlan(data.plan?.id || '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10');
+              
+              if (professional) {
+                const emailSent = await emailService.sendCredentialsEmail({
+                  to: professional.email,
+                  professionalName: professional.fullName,
+                  email: professional.email,
+                  password: 'senha123', // Default temporary password
+                  planName: plan?.name || 'Plano Básico'
+                });
+                
+                if (emailSent) {
+                  console.log('✅ [EMAIL] Credenciais PIX enviadas por email para:', professional.email);
+                } else {
+                  console.log('⚠️ [EMAIL] Falha ao enviar credenciais PIX por email para:', professional.email);
+                }
+              }
+            } catch (emailError) {
+              console.error('❌ [EMAIL ERROR] Erro ao enviar credenciais PIX:', emailError);
+            }
           }
           break;
           
