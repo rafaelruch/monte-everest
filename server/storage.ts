@@ -677,7 +677,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateProfessionalPhoto(id: string, photoPath: string): Promise<void> {
     await db.update(professionals)
-      .set({ photo: photoPath, updatedAt: new Date() })
+      .set({ profileImage: photoPath, updatedAt: new Date() })
       .where(eq(professionals.id, id));
   }
 
