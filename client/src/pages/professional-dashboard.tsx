@@ -53,7 +53,6 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/ImageUploader";
-import { ObjectUploader } from "@/components/ObjectUploader";
 import { useViaCep } from "@/hooks/useViaCep";
 
 const updateProfileSchema = z.object({

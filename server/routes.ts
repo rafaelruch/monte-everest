@@ -11,10 +11,6 @@ const { Pool: PgPool } = pg;
 import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema } from "@shared/schema";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
-import {
-  ObjectStorageService,
-  ObjectNotFoundError,
-} from "./objectStorage";
 import multer from "multer";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
