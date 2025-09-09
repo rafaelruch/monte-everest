@@ -149,13 +149,11 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     CREATE TABLE IF NOT EXISTS contacts (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
         professional_id VARCHAR NOT NULL,
-        client_name VARCHAR NOT NULL,
-        client_email VARCHAR,
-        client_phone VARCHAR,
+        customer_name VARCHAR,
+        customer_email VARCHAR,
+        customer_phone VARCHAR,
+        contact_method VARCHAR NOT NULL DEFAULT 'whatsapp',
         message TEXT,
-        contact_type VARCHAR NOT NULL DEFAULT 'whatsapp',
-        ip_address VARCHAR,
-        user_agent TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -247,6 +245,40 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
             RAISE NOTICE 'Coluna pending_pix_expiry adicionada à tabela professionals';
         ELSE
             RAISE NOTICE 'Coluna pending_pix_expiry já existe na tabela professionals';
+        END IF;
+    END $$;
+
+    -- Migrar dados da tabela contacts (se existir com schema antigo)
+    DO $$ 
+    BEGIN 
+        -- Verificar se existem colunas antigas e migrar para novas
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name='contacts' AND column_name='client_name') THEN
+            -- Adicionar novas colunas se não existirem
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='contacts' AND column_name='customer_name') THEN
+                ALTER TABLE contacts ADD COLUMN customer_name VARCHAR;
+                ALTER TABLE contacts ADD COLUMN customer_email VARCHAR;
+                ALTER TABLE contacts ADD COLUMN customer_phone VARCHAR;
+                ALTER TABLE contacts ADD COLUMN contact_method VARCHAR;
+                
+                -- Migrar dados das colunas antigas para novas
+                UPDATE contacts SET 
+                    customer_name = client_name,
+                    customer_email = client_email,
+                    customer_phone = client_phone,
+                    contact_method = COALESCE(contact_type, 'whatsapp');
+                
+                -- Remover colunas antigas
+                ALTER TABLE contacts DROP COLUMN IF EXISTS client_name;
+                ALTER TABLE contacts DROP COLUMN IF EXISTS client_email;
+                ALTER TABLE contacts DROP COLUMN IF EXISTS client_phone;
+                ALTER TABLE contacts DROP COLUMN IF EXISTS contact_type;
+                ALTER TABLE contacts DROP COLUMN IF EXISTS ip_address;
+                ALTER TABLE contacts DROP COLUMN IF EXISTS user_agent;
+                
+                RAISE NOTICE 'Tabela contacts migrada do schema antigo para o novo';
+            END IF;
         END IF;
     END $$;
 
