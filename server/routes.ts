@@ -16,6 +16,7 @@ import {
 } from "./objectStorage";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
+import { db } from "./db";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
@@ -286,6 +287,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ENDPOINT SIMPLES PARA CRIAR TABELAS
+  // Emergency endpoint to add PIX columns in production
+  app.post("/api/emergency-add-pix-columns", async (req, res) => {
+    try {
+      console.log("[emergency] Adicionando colunas PIX emergencialmente...");
+      
+      // Add PIX columns directly using current DATABASE_URL
+      const sql = `
+        BEGIN;
+        
+        -- Add PIX columns if they don't exist
+        DO $$ 
+        BEGIN 
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='professionals' AND column_name='pending_pix_code') THEN
+                ALTER TABLE professionals ADD COLUMN pending_pix_code TEXT;
+                RAISE NOTICE 'Coluna pending_pix_code adicionada';
+            END IF;
+            
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='professionals' AND column_name='pending_pix_url') THEN
+                ALTER TABLE professionals ADD COLUMN pending_pix_url TEXT;
+                RAISE NOTICE 'Coluna pending_pix_url adicionada';
+            END IF;
+            
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='professionals' AND column_name='pending_pix_expiry') THEN
+                ALTER TABLE professionals ADD COLUMN pending_pix_expiry TIMESTAMP;
+                RAISE NOTICE 'Coluna pending_pix_expiry adicionada';
+            END IF;
+        END $$;
+        
+        COMMIT;
+      `;
+      
+      await db.execute(sql);
+      console.log("[emergency] ✅ Colunas PIX adicionadas com sucesso!");
+      
+      res.json({ 
+        success: true,
+        message: "✅ Colunas PIX adicionadas com sucesso! Reinicie a aplicação." 
+      });
+      
+    } catch (error) {
+      console.error("[emergency] Erro:", error);
+      res.status(500).json({ 
+        message: `Erro ao adicionar colunas PIX: ${error instanceof Error ? error.message : "Erro desconhecido"}` 
+      });
+    }
+  });
+
   app.post("/api/setup-tables", async (req, res) => {
     try {
       const { databaseUrl } = req.body;
