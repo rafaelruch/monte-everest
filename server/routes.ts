@@ -964,31 +964,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/professionals/:id/profile-image", verifyProfessionalToken, async (req, res) => {
     try {
       const professionalId = req.params.id;
-      const { profileImage } = req.body;
+      const { objectPath } = req.body;
       
       if (professionalId !== req.professional.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      if (!profileImage) {
-        return res.status(400).json({ message: "URL da foto de perfil é obrigatória" });
+      if (!objectPath) {
+        return res.status(400).json({ message: "Path do objeto é obrigatório" });
       }
-
-      // Set object ACL policy for the uploaded profile image
-      const objectStorageService = new ObjectStorageService();
-      const normalizedPath = await objectStorageService.trySetObjectEntityAclPolicy(profileImage, {
-        owner: professionalId,
-        visibility: "public", // Profile images are public
-      });
 
       // Update professional profile image
       await storage.updateProfessional(professionalId, {
-        profileImage: normalizedPath
+        profileImage: objectPath
       });
 
       res.json({ 
         message: "Foto de perfil atualizada com sucesso",
-        profileImage: normalizedPath 
+        profileImage: objectPath 
       });
     } catch (error) {
       console.error("Error updating profile image:", error);
