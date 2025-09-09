@@ -2333,9 +2333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           serviceArea: professionalData.cep || '74000000', // Use provided CEP or default
           city: professionalData.city || 'Goiânia', // Use provided city or default
           description: '',
-          status: subscription.status === 'active' ? 'pending' : 'inactive',
-          averageRating: 0,
-          totalReviews: 0,
+          status: 'pending', // Always pending until payment is confirmed
+          paymentStatus: paymentMethod === 'pix' ? 'pending' : 'active',
           password: await bcrypt.hash('senha123', 10) // Default password: senha123
         });
       }
@@ -2461,8 +2460,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 qrCodeUrl: paymentInfo.qrCodeUrl
               });
               
+              // For PIX, save payment info to professional record and setup auto-login
+              await storage.updateProfessional(professional.id, {
+                pendingPixCode: paymentInfo.pixCode || paymentInfo.qrCode,
+                pendingPixUrl: paymentInfo.qrCodeUrl,
+                pendingPixExpiry: new Date(paymentInfo.expiresAt),
+                paymentStatus: 'pending'
+              });
+              
               responseData.paymentInfo = paymentInfo;
-              responseData.redirectTo = null; // Don't redirect yet, show payment info first
+              responseData.autoLogin = true;
+              responseData.firstLogin = true;
+              responseData.token = token;
+              responseData.redirectTo = '/professional-login?pixPayment=true';
             } else {
               console.error('No transaction found in boleto charge');
               responseData.paymentInfo = {

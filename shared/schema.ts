@@ -93,6 +93,9 @@ export const professionals = pgTable("professionals", {
   subscriptionExpiresAt: timestamp("subscription_expires_at"), // When subscription becomes inactive
   firstLogin: boolean("first_login").default(true), // Force password change on first login
   photo: varchar("photo"), // URL to professional's photo
+  pendingPixCode: text("pending_pix_code"), // PIX code for pending payment
+  pendingPixUrl: text("pending_pix_url"), // PIX QR Code URL for pending payment
+  pendingPixExpiry: timestamp("pending_pix_expiry"), // When PIX payment expires
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   totalReviews: integer("total_reviews").default(0),
   rankingPosition: integer("ranking_position"),
