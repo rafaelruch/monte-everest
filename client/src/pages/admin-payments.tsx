@@ -240,14 +240,14 @@ export default function AdminPayments() {
     payment.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calculate summary stats
+  // Calculate summary stats (converting from centavos to reais)
   const totalAmount = payments.reduce((sum: number, payment: any) => 
-    sum + parseFloat(payment.amount), 0
+    sum + (parseFloat(payment.amount) / 100), 0
   );
   const paidAmount = payments.filter((p: any) => p.status === 'paid')
-    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+    .reduce((sum: number, payment: any) => sum + (parseFloat(payment.amount) / 100), 0);
   const pendingAmount = payments.filter((p: any) => p.status === 'pending')
-    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
+    .reduce((sum: number, payment: any) => sum + (parseFloat(payment.amount) / 100), 0);
 
   return (
     <div className="space-y-6">
@@ -426,7 +426,7 @@ export default function AdminPayments() {
                           </div>
                         </TableCell>
                         <TableCell className="font-mono">
-                          {formatCurrency(parseFloat(payment.amount))}
+                          {formatCurrency(parseFloat(payment.amount) / 100)}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={payment.status} />
