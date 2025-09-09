@@ -1081,7 +1081,7 @@ export default function AdminDashboard() {
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium">R$ {(parseFloat(payment.amount) / 100).toFixed(2)}</p>
+                      <p className="font-medium">R$ {parseFloat(payment.amount).toFixed(2)}</p>
                       <p className="text-sm text-gray-500">ID: {payment.professionalId?.slice(0, 8)}</p>
                       <p className="text-xs text-gray-400">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('pt-BR') : 'Data não informada'}
@@ -1266,17 +1266,17 @@ export default function AdminDashboard() {
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
   });
 
-  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
-  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
+  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
   const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
   const activePayments = payments.filter((p: Payment) => p.status === 'active');
-  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
   const projectedAnnualRevenue = monthlyRecurringRevenue * 12;
 
   const validPayments = payments.filter((p: Payment) => p.status === 'paid' || p.status === 'active');
   const averageTicket = validPayments.length > 0 ? 
-    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / validPayments.length / 100 : 0;
+    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / validPayments.length : 0;
 
   const conversionRate = professionals.length > 0 ? 
     (activePayments.length / professionals.length * 100) : 0;

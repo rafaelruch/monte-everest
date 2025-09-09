@@ -240,14 +240,14 @@ export default function AdminPayments() {
     payment.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Calculate summary stats (converting from centavos to reais)
+  // Calculate summary stats (values already in reais from database)
   const totalAmount = payments.reduce((sum: number, payment: any) => 
-    sum + (parseFloat(payment.amount) / 100), 0
+    sum + parseFloat(payment.amount), 0
   );
   const paidAmount = payments.filter((p: any) => p.status === 'paid')
-    .reduce((sum: number, payment: any) => sum + (parseFloat(payment.amount) / 100), 0);
+    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
   const pendingAmount = payments.filter((p: any) => p.status === 'pending')
-    .reduce((sum: number, payment: any) => sum + (parseFloat(payment.amount) / 100), 0);
+    .reduce((sum: number, payment: any) => sum + parseFloat(payment.amount), 0);
 
   return (
     <div className="space-y-6">
