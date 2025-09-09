@@ -22,8 +22,8 @@ export default function InstallationGuard({ children }: InstallationGuardProps) 
   });
 
   useEffect(() => {
-    // Skip installation check if already on install page
-    if (location === '/install') {
+    // Skip installation check if already on install page or setup-tables
+    if (location === '/install' || location === '/setup-tables') {
       return;
     }
 
@@ -50,8 +50,8 @@ export default function InstallationGuard({ children }: InstallationGuardProps) 
     );
   }
 
-  // If on install page or system not installed, don't show guard
-  if (location === '/install' || (installStatus && !installStatus.installed)) {
+  // If on install page, setup-tables, or system not installed, don't show guard
+  if (location === '/install' || location === '/setup-tables' || (installStatus && !installStatus.installed)) {
     return <>{children}</>;
   }
 
