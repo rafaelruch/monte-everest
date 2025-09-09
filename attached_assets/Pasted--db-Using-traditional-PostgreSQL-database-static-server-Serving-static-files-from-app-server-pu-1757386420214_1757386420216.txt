@@ -1,0 +1,500 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:27:15 AM [express] serving on port 5000
+[static-server] Serving index.html for: /admin/dashboard
+[static-server] Serving index.html for: /favicon.ico
+2:27:22 AM [express] GET /api/install/status 304 in 25ms :: {"installed":true,"needsInstallation":fa…
+2:27:22 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 55ms :: {"error":"Configur…
+2:27:22 AM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 50ms :: {"error":"Configuration n…
+2:27:22 AM [express] GET /api/admin/plans 304 in 56ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df7…
+2:27:22 AM [express] GET /api/admin/users 304 in 54ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+2:27:22 AM [express] GET /api/admin/pages 304 in 50ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:27:22 AM [express] GET /api/admin/reviews 304 in 54ms :: []
+2:27:22 AM [express] GET /api/admin/dashboard/stats 304 in 69ms :: {"activeProfessionals":0,"monthly…
+2:27:22 AM [express] GET /api/admin/categories 304 in 61ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+2:27:22 AM [express] GET /api/admin/payments 304 in 72ms :: []
+2:27:22 AM [express] GET /api/admin/professionals 304 in 61ms :: []
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:27:28 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 200 in 20ms :: {"id":…
+2:27:28 AM [express] GET /api/admin/plans 200 in 4ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10…
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:27:35 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 200 in 10ms :: {"id":…
+2:27:35 AM [express] GET /api/admin/plans 200 in 5ms :: [{"id":"5a18ecb0-6eaf-4cc2-82a9-923fbfe74ebe…
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:27:42 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 200 in 9ms :: {"id":"…
+2:27:42 AM [express] GET /api/admin/plans 200 in 4ms :: [{"id":"5a18ecb0-6eaf-4cc2-82a9-923fbfe74ebe…
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:27:52 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 200 in 10ms :: {"id":…
+2:27:52 AM [express] GET /api/admin/plans 200 in 3ms :: [{"id":"5a18ecb0-6eaf-4cc2-82a9-923fbfe74ebe…
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:28:07 AM [express] PUT /api/admin/plans/5a18ecb0-6eaf-4cc2-82a9-923fbfe74ebe 200 in 21ms :: {"id":…
+2:28:08 AM [express] GET /api/admin/plans 200 in 3ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df73…
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+[auto-sync] ⚠️ Erro na ressincronização automática: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:1613:33)
+2:28:15 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 200 in 9ms :: {"id":"…
+2:28:15 AM [express] GET /api/admin/plans 200 in 3ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10…
+2:28:35 AM [express] GET /api/install/status 200 in 13ms :: {"installed":true,"needsInstallation":fa…
+2:28:35 AM [express] GET /api/categories/popular 200 in 47ms :: [{"id":"676b8100-d29b-4890-b1ea-e6f7…
+2:28:35 AM [express] GET /api/professionals/search 200 in 46ms :: []
+2:28:35 AM [express] GET /api/categories 200 in 51ms :: [{"id":"ae882751-68f1-41de-987b-05bb9262cb97…
+[static-server] Serving index.html for: /favicon.ico
+2:28:37 AM [express] GET /api/subscription-plans 200 in 3ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+2:30:15 AM [express] POST /api/admin/configs 200 in 18ms :: {"id":"3554ad96-72b0-4cfc-b292-bba92a8a2…
+2:30:15 AM [express] GET /api/admin/configs/PAGARME_API_KEY 200 in 6ms :: {"id":"3554ad96-72b0-4cfc-…
+2:30:15 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 14ms :: {"error":"Configur…
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection successful!
+Connection successful! Proceeding with plan sync...
+Dados que serão enviados para Pagar.me: {
+  "name": "Plano Básico",
+  "description": "Plano básico para profissionais",
+  "currency": "BRL",
+  "interval": "month",
+  "intervalCount": 1,
+  "billingDays": [],
+  "billingType": "prepaid",
+  "paymentMethods": [
+    "credit_card",
+    "boleto"
+  ],
+  "installments": [
+    1,
+    2,
+    3,
+    6,
+    12
+  ],
+  "pricingScheme": {
+    "schemeType": "unit",
+    "price": 2990
+  },
+  "metadata": {
+    "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+    "created_by": "monte_everest_system"
+  },
+  "items": [
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "pricingScheme": {
+        "schemeType": "unit",
+        "price": 2990
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:39:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:39:48 AM [express] GET /api/install/status 304 in 32ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:39:48 AM [express] GET /api/subscription-plans 304 in 16ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:14 AM [express] POST /api/payments/create-subscription 500 in 307ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:17 AM [express] POST /api/payments/create-subscription 500 in 262ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:18 AM [express] POST /api/payments/create-subscription 500 in 239ms :: {"success":false,"error"…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /seja-profissional
+2:42:47 AM [express] GET /api/install/status 304 in 40ms :: {"installed":true,"needsInstallation":fa…
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:48:10 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:48:11 AM [express] GET /api/install/status 304 in 33ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:48:11 AM [express] GET /api/subscription-plans 304 in 20ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_W8kyzj6hKhAz7wB0",
+  "code": "SUB_75157284187_1757386114085",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_LbEQprBIXINpW7N5",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:48:34Z",
+  "updated_at": "2025-09-09T02:48:34Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:51:58 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:52:55 AM [express] GET /api/install/status 304 in 30ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:52:55 AM [express] GET /api/subscription-plans 304 in 16ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_JV2EvRzCAtmvyMpW",
+  "code": "SUB_75157284187_1757386393307",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_OkYb9kVsZtKenXPQ",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:53:13Z",
+  "updated_at": "2025-09-09T02:53:13Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_qedbPdgSXaSl4bPo",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T02:53:13Z",
+      "updated_at": "2025-09-09T02:53:13Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T02:53:13Z",
+      "updated_at": "2025-09-09T02:53:13Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: duplicate key value violates unique constraint "professionals_email_key"
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createProfessional (/app/server/storage.ts:426:23)
+    at async <anonymous> (/app/server/routes.ts:2302:28) {
+  length: 240,
+  severity: 'ERROR',
+  code: '23505',
+  detail: 'Key (email)=(rafaeladapta02@gmail.com) already exists.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'professionals',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'professionals_email_key',
+  file: 'nbtinsert.c',
+  line: '666',
+  routine: '_bt_check_unique'
+}
+2:53:15 AM [express] POST /api/payments/create-subscription 500 in 2009ms :: {"success":false,"error…
