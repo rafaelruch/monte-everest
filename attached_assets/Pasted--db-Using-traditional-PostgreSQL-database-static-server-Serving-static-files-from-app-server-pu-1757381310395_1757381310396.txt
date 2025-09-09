@@ -1,0 +1,500 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+4:14:55 PM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+[static-server] Serving index.html for: /favicon.ico
+4:15:00 PM [express] GET /api/install/status 200 in 43ms :: {"installed":false,"needsInstallation":t…
+[install] Criando tabelas automaticamente com DATABASE_URL fornecida...
+[auto-installer] ✅ Conexão com banco testada com sucesso
+[auto-installer] Iniciando criação automática das tabelas...
+[auto-installer] Conectado ao banco PostgreSQL
+[auto-installer] Executando SQL de criação das tabelas...
+[auto-installer] ✅ Todas as tabelas criadas com sucesso!
+[install] ✅ Tabelas criadas com sucesso!
+4:15:24 PM [express] POST /api/install 200 in 104ms :: {"success":true,"message":"Sistema instalado …
+4:15:30 PM [express] GET /api/install/status 200 in 2ms :: {"installed":true,"needsInstallation":fal…
+4:15:30 PM [express] GET /api/categories 200 in 3ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc1ddaa7"…
+4:15:30 PM [express] GET /api/categories/popular 200 in 2ms :: [{"id":"a2d7c3cd-b48c-4758-bc8b-7ffc8…
+4:15:30 PM [express] GET /api/professionals/search 200 in 4ms :: []
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /entrar
+4:15:42 PM [express] GET /api/install/status 200 in 11ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+4:15:52 PM [express] POST /api/auth/admin/login 200 in 68ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+4:15:53 PM [express] GET /api/admin/dashboard/stats 200 in 20ms :: {"activeProfessionals":0,"monthly…
+4:15:53 PM [express] GET /api/admin/reviews 200 in 7ms :: []
+4:15:53 PM [express] GET /api/admin/users 404 in 5ms :: {"error":"API endpoint not found"}
+4:15:53 PM [express] GET /api/admin/plans 200 in 11ms :: [{"id":"76553f99-f60a-4109-bdf5-a9c162bf615…
+[static-server] Serving index.html for: /favicon.ico
+Error fetching pages: error: column "meta_description" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:1216:21) {
+  length: 116,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '42',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+4:15:53 PM [express] GET /api/admin/pages 500 in 63ms :: {"message":"Erro interno do servidor"}
+4:15:53 PM [express] GET /api/admin/professionals 200 in 65ms :: []
+Error fetching payments: error: column payments.plan_id does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getPayments (/app/server/storage.ts:539:12)
+    at async <anonymous> (/app/server/routes.ts:895:24) {
+  length: 115,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '555',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+4:15:53 PM [express] GET /api/admin/payments 500 in 68ms :: {"message":"Erro interno do servidor"}
+4:15:53 PM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 64ms :: {"error":"Configuration n…
+4:15:53 PM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 64ms :: {"error":"Configur…
+4:15:53 PM [express] GET /api/admin/categories 200 in 67ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc…
+4:17:20 PM [express] POST /api/admin/users 404 in 1ms :: {"error":"API endpoint not found"}
+4:17:21 PM [express] POST /api/admin/users 404 in 0ms :: {"error":"API endpoint not found"}
+4:17:22 PM [express] POST /api/admin/users 404 in 1ms :: {"error":"API endpoint not found"}
+4:19:20 PM [express] DELETE /api/admin/plans/ed15b5e0-315f-45fe-907d-258a6b508328 200 in 17ms :: {"m…
+4:19:20 PM [express] GET /api/admin/plans 200 in 4ms :: [{"id":"76553f99-f60a-4109-bdf5-a9c162bf6151…
+4:19:24 PM [express] PUT /api/admin/plans/76553f99-f60a-4109-bdf5-a9c162bf6151 500 in 6ms :: {"messa…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:638:23)
+    at async <anonymous> (/app/server/routes.ts:1152:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+[static-server] Serving index.html for: /easypanel-installer
+4:22:03 PM [express] GET /api/install/status 200 in 14ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+[setup-database] Testando conexão com banco...
+[auto-installer] ✅ Conexão com banco testada com sucesso
+[setup-database] Criando tabelas...
+[auto-installer] Iniciando criação automática das tabelas...
+[auto-installer] Conectado ao banco PostgreSQL
+[auto-installer] Executando SQL de criação das tabelas...
+[auto-installer] ✅ Todas as tabelas criadas com sucesso!
+[setup-database] ✅ Instalação completa!
+4:22:22 PM [express] POST /api/install/setup-database 200 in 23ms :: {"success":true,"message":"Banc…
+[static-server] Serving index.html for: /favicon.ico
+4:22:33 PM [express] GET /api/professionals/search 200 in 29ms :: []
+4:22:33 PM [express] GET /api/categories 200 in 38ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc1ddaa7…
+4:22:33 PM [express] GET /api/categories/popular 200 in 39ms :: [{"id":"a2d7c3cd-b48c-4758-bc8b-7ffc…
+[static-server] Serving index.html for: /entrar
+4:22:39 PM [express] GET /api/install/status 200 in 3ms :: {"installed":true,"needsInstallation":fal…
+[static-server] Serving index.html for: /favicon.ico
+4:22:47 PM [express] POST /api/auth/admin/login 401 in 56ms :: {"message":"Credenciais inválidas"}
+4:22:48 PM [express] POST /api/auth/admin/login 401 in 54ms :: {"message":"Credenciais inválidas"}
+4:22:48 PM [express] POST /api/auth/admin/login 401 in 61ms :: {"message":"Credenciais inválidas"}
+4:22:48 PM [express] POST /api/auth/admin/login 401 in 60ms :: {"message":"Credenciais inválidas"}
+4:22:48 PM [express] POST /api/auth/admin/login 401 in 55ms :: {"message":"Credenciais inválidas"}
+4:22:48 PM [express] POST /api/auth/admin/login 401 in 55ms :: {"message":"Credenciais inválidas"}
+4:22:53 PM [express] POST /api/auth/admin/login 200 in 59ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+4:22:53 PM [express] GET /api/admin/dashboard/stats 200 in 7ms :: {"activeProfessionals":0,"monthlyR…
+4:22:53 PM [express] GET /api/admin/users 404 in 2ms :: {"error":"API endpoint not found"}
+Error fetching pages: error: column "meta_description" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:1216:21) {
+  length: 116,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '42',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+4:22:53 PM [express] GET /api/admin/pages 500 in 15ms :: {"message":"Erro interno do servidor"}
+[static-server] Serving index.html for: /favicon.ico
+4:22:53 PM [express] GET /api/admin/categories 200 in 58ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc…
+4:22:53 PM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 57ms :: {"error":"Configur…
+Error fetching payments: error: column payments.plan_id does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getPayments (/app/server/storage.ts:539:12)
+    at async <anonymous> (/app/server/routes.ts:895:24) {
+  length: 115,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '555',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+4:22:53 PM [express] GET /api/admin/payments 500 in 65ms :: {"message":"Erro interno do servidor"}
+4:22:53 PM [express] GET /api/admin/reviews 200 in 74ms :: []
+4:22:53 PM [express] GET /api/admin/professionals 200 in 84ms :: []
+4:22:53 PM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 64ms :: {"error":"Configuration n…
+4:22:53 PM [express] GET /api/admin/plans 200 in 63ms :: [{"id":"76553f99-f60a-4109-bdf5-a9c162bf615…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:638:23)
+    at async <anonymous> (/app/server/routes.ts:1152:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+4:23:08 PM [express] PUT /api/admin/plans/a0d97bf1-a61a-4f28-8a99-701afa2b0b59 500 in 13ms :: {"mess…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:638:23)
+    at async <anonymous> (/app/server/routes.ts:1152:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+4:23:09 PM [express] PUT /api/admin/plans/a0d97bf1-a61a-4f28-8a99-701afa2b0b59 500 in 19ms :: {"mess…
+4:23:15 PM [express] DELETE /api/admin/plans/76553f99-f60a-4109-bdf5-a9c162bf6151 200 in 17ms :: {"m…
+4:23:15 PM [express] GET /api/admin/plans 200 in 6ms :: [{"id":"9fee992f-ce5d-4ade-b07f-cd199de9ff01…
+4:23:18 PM [express] DELETE /api/admin/plans/e40e99e2-47c8-4190-adf3-5afdc8dc1ce1 200 in 6ms :: {"me…
+4:23:18 PM [express] GET /api/admin/plans 200 in 4ms :: [{"id":"9fee992f-ce5d-4ade-b07f-cd199de9ff01…
+[static-server] Serving index.html for: /admin/dashboard
+4:23:23 PM [express] GET /api/install/status 200 in 1ms :: {"installed":true,"needsInstallation":fal…
+4:23:23 PM [express] GET /api/admin/dashboard/stats 200 in 15ms :: {"activeProfessionals":0,"monthly…
+4:23:23 PM [express] GET /api/admin/users 404 in 1ms :: {"error":"API endpoint not found"}
+4:23:23 PM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 10ms :: {"error":"Configur…
+[static-server] Serving index.html for: /favicon.ico
+4:23:23 PM [express] GET /api/admin/categories 200 in 14ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc…
+4:23:23 PM [express] GET /api/admin/plans 200 in 46ms :: [{"id":"9fee992f-ce5d-4ade-b07f-cd199de9ff0…
+Error fetching payments: error: column payments.plan_id does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getPayments (/app/server/storage.ts:539:12)
+    at async <anonymous> (/app/server/routes.ts:895:24) {
+  length: 115,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '555',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+4:23:23 PM [express] GET /api/admin/payments 500 in 51ms :: {"message":"Erro interno do servidor"}
+4:23:23 PM [express] GET /api/admin/professionals 200 in 59ms :: []
+Error fetching pages: error: column "meta_description" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async <anonymous> (/app/server/routes.ts:1216:21) {
+  length: 116,
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:18:29 AM [express] serving on port 5000
+[setup-database] Testando conexão com banco...
+[auto-installer] ❌ Erro ao conectar com banco: TypeError: Cannot read properties of undefined (reading 'searchParams')
+    at parse (/app/node_modules/pg-connection-string/index.js:39:30)
+    at new ConnectionParameters (/app/node_modules/pg/lib/connection-parameters.js:56:42)
+    at new Client (/app/node_modules/pg/lib/client.js:18:33)
+    at BoundPool.newClient (/app/node_modules/pg-pool/index.js:233:20)
+    at BoundPool.connect (/app/node_modules/pg-pool/index.js:227:10)
+    at checkDatabaseConnection (/app/server/auto-installer.ts:382:31)
+    at <anonymous> (/app/server/routes.ts:365:34)
+    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)
+    at next (/app/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/app/node_modules/express/lib/router/route.js:119:3)
+1:18:44 AM [express] POST /api/install/setup-database 400 in 19ms :: {"message":"Não foi possível co…
+[setup-database] Testando conexão com banco...
+[auto-installer] ✅ Conexão com banco testada com sucesso
+[setup-database] Criando tabelas...
+[auto-installer] Iniciando criação automática das tabelas...
+[auto-installer] Conectado ao banco PostgreSQL
+[auto-installer] Executando SQL de criação das tabelas...
+[auto-installer] ❌ Erro ao criar tabelas: error: column "meta_description" of relation "pages" does not exist
+    at /app/node_modules/pg/lib/client.js:545:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createDatabaseTables (/app/server/auto-installer.ts:340:5)
+    at async <anonymous> (/app/server/routes.ts:375:29) {
+  length: 136,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '7883',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+[static-server] Serving index.html for: /easypanel-installer
+Error checking installation status: error: column "full_name" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '35',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:43 AM [express] GET /api/install/status 200 in 24ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /install
+Error checking installation status: error: column "full_name" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26) {
+  length: 109,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '35',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:46 AM [express] GET /api/install/status 304 in 13ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+1:20:46 AM [express] GET /api/categories 304 in 23ms :: [{"id":"3be3dcf6-31ff-49a7-a5f8-dfc6fc1ddaa7…
+Error searching professionals: error: column "first_login" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+1:20:46 AM [express] GET /api/professionals/search 500 in 16ms :: {"message":"Erro interno do servid…
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getProfessionals (/app/server/storage.ts:405:12)
+    at async <anonymous> (/app/server/routes.ts:116:29) {
+  length: 112,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '318',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+1:20:47 AM [express] GET /api/categories/popular 304 in 25ms :: [{"id":"a2d7c3cd-b48c-4758-bc8b-7ffc…
+[static-server] Serving index.html for: /favicon.ico
+node:events:502
+      throw er; // Unhandled 'error' event
+      ^
+
+error: terminating connection due to administrator command
+    at Parser.parseErrorMessage (/app/node_modules/pg-protocol/src/parser.ts:369:69)
+    at Parser.handlePacket (/app/node_modules/pg-protocol/src/parser.ts:187:21)
+    at Parser.parse (/app/node_modules/pg-protocol/src/parser.ts:102:30)
+    at Socket.<anonymous> (/app/node_modules/pg-protocol/src/index.ts:7:48)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at TCP.onStreamRead (node:internal/stream_base_commons:191:23)
+Emitted 'error' event on Client instance at:
+    at Client._handleErrorEvent (/app/node_modules/pg/lib/client.js:350:10)
+    at Client._handleErrorMessage (/app/node_modules/pg/lib/client.js:361:12)
+    at Connection.emit (node:events:524:28)
+    at /app/node_modules/pg/lib/connection.js:116:12
+    at Parser.parse (/app/node_modules/pg-protocol/src/parser.ts:103:9)
+    at Socket.<anonymous> (/app/node_modules/pg-protocol/src/index.ts:7:48)
+    [... lines matching original stack trace ...]
+    at Readable.push (node:internal/streams/readable:392:5) {
+  length: 116,
+  severity: 'FATAL',
+  code: '57P01',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'postgres.c',
+  line: '3315',
+  routine: 'ProcessInterrupts'
+}
+
+Node.js v20.19.5
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:25:21 AM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:26:32 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:13 AM [express] GET /api/install/status 304 in 64ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+1:27:27 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+Error checking installation status: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:241:26)
+1:27:29 AM [express] GET /api/install/status 304 in 28ms :: {"installed":false,"needsInstallation":t…
+[static-server] Serving index.html for: /favicon.ico
+Error during installation: Error: The server does not support SSL connections
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.getAdminUsers (/app/server/storage.ts:136:12)
+    at async <anonymous> (/app/server/routes.ts:260:26)
+1:27:51 AM [express] POST /api/install 500 in 6ms :: {"message":"The server does not support SSL con…
