@@ -422,7 +422,7 @@ export default function ProfessionalDashboard() {
       }
 
       // Refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
       toast({ title: "Sucesso", description: "Foto de perfil atualizada com sucesso!" });
     } catch (error) {
       console.error("Erro no upload:", error);
@@ -1286,7 +1286,7 @@ export default function ProfessionalDashboard() {
                               });
                               
                               if (addResponse.ok) {
-                                queryClient.invalidateQueries({ queryKey: ['/api/professionals/me'] });
+                                queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
                                 toast({ title: "Sucesso", description: "Foto adicionada ao portfólio com sucesso!" });
                               } else {
                                 throw new Error("Erro ao adicionar foto ao portfólio");
