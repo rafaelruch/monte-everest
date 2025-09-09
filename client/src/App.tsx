@@ -19,6 +19,7 @@ import ProfessionalCheckout from "@/pages/professional-checkout";
 import SearchResults from "@/pages/search-results";
 import ProfessionalProfile from "@/pages/professional-profile";
 import ProfessionalLogin from "@/pages/professional-login";
+import ProfessionalChangePassword from "@/pages/professional-change-password";
 import ProfessionalDashboard from "@/pages/professional-dashboard";
 import Installation from "@/pages/installation";
 import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
@@ -36,6 +37,8 @@ function Router() {
       <Route path="/admin/configurations" component={AdminConfigurations} />
       
       {/* Professional dashboard - sem header/footer */}
+      <Route path="/professional-login" component={ProfessionalLogin} />
+      <Route path="/professional-change-password" component={ProfessionalChangePassword} />
       <Route path="/professional-dashboard" component={ProfessionalDashboard} />
       
       {/* Public routes - com header/footer */}

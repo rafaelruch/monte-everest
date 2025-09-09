@@ -188,10 +188,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstLogin: isFirstLogin
         },
         token,
-        firstLogin: isFirstLogin
+        firstLogin: isFirstLogin,
+        redirectTo: isFirstLogin ? '/professional-change-password' : '/professional-dashboard'
       });
     } catch (error) {
       console.error("Error during professional login:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Professional change password endpoint
+  app.post("/api/professionals/change-password", async (req, res) => {
+    try {
+      const { email, currentPassword, newPassword } = req.body;
+      
+      if (!email || !currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Todos os campos são obrigatórios" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      // Verify current password
+      const professional = await storage.authenticateProfessional(email, currentPassword);
+      if (!professional) {
+        return res.status(401).json({ message: "Senha atual incorreta" });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password in database
+      await storage.updateProfessional(professional.id, {
+        password: hashedPassword
+      });
+
+      res.json({ 
+        message: "Senha alterada com sucesso!",
+        redirectTo: '/professional-dashboard'
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

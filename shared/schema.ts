@@ -91,6 +91,7 @@ export const professionals = pgTable("professionals", {
   lastPaymentDate: timestamp("last_payment_date"),
   nextPaymentDate: timestamp("next_payment_date"),
   subscriptionExpiresAt: timestamp("subscription_expires_at"), // When subscription becomes inactive
+  firstLogin: boolean("first_login").default(true), // Force password change on first login
   photo: varchar("photo"), // URL to professional's photo
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   totalReviews: integer("total_reviews").default(0),
