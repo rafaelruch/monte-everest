@@ -1,0 +1,500 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:39:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:39:48 AM [express] GET /api/install/status 304 in 32ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:39:48 AM [express] GET /api/subscription-plans 304 in 16ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:14 AM [express] POST /api/payments/create-subscription 500 in 307ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:17 AM [express] POST /api/payments/create-subscription 500 in 262ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:18 AM [express] POST /api/payments/create-subscription 500 in 239ms :: {"success":false,"error"…
+[static-server] Serving index.html for: /favicon.ico
+[db] Using traditional PostgreSQL database
+[static-server] Serving index.html for: /seja-profissional
+2:42:47 AM [express] GET /api/install/status 304 in 40ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:42:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+[static-server] Serving index.html for: /favicon.ico
+2:42:49 AM [express] GET /api/install/status 304 in 34ms :: {"installed":true,"needsInstallation":fa…
+2:42:49 AM [express] GET /api/subscription-plans 200 in 14ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+[static-server] Serving index.html for: /seja-profissional
+2:42:51 AM [express] GET /api/install/status 304 in 11ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:42:51 AM [express] GET /api/subscription-plans 304 in 3ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:43:18 AM [express] POST /api/payments/create-subscription 500 in 551ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:43:36 AM [express] POST /api/payments/create-subscription 500 in 237ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:47:50 AM [express] POST /api/payments/create-subscription 500 in 392ms :: {"success":false,"error"…
+[static-server] Serving index.html for: /seja-profissional
+2:47:51 AM [express] GET /api/install/status 304 in 15ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:47:51 AM [express] GET /api/subscription-plans 304 in 6ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+[static-server] Serving index.html for: /seja-profissional
+2:47:52 AM [express] GET /api/install/status 304 in 12ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:47:52 AM [express] GET /api/subscription-plans 304 in 3ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5…
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:48:10 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:48:11 AM [express] GET /api/install/status 304 in 33ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:48:11 AM [express] GET /api/subscription-plans 304 in 20ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_W8kyzj6hKhAz7wB0",
+  "code": "SUB_75157284187_1757386114085",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_LbEQprBIXINpW7N5",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:48:34Z",
+  "updated_at": "2025-09-09T02:48:34Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_jgLxGO1S9SY7AQ2B",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    }
+  ],
+  "boleto": {},
+  "metadata": {
+    "professional_name": "Rafael Miguel de Oliveira",
+    "professional_email": "rafaeladapta02@gmail.com",
+    "plan_name": "Plano Básico"
+  }
+}
+Error creating subscription: error: column "card_token" of relation "payments" does not exist
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createPayment (/app/server/storage.ts:555:23)
+    at async <anonymous> (/app/server/routes.ts:2318:23) {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '156',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+2:48:36 AM [express] POST /api/payments/create-subscription 500 in 2160ms :: {"success":false,"error…
+[static-server] Serving index.html for: /entrar
+2:50:29 AM [express] GET /api/install/status 304 in 12ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:50:34 AM [express] POST /api/auth/admin/login 200 in 70ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+2:50:34 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 10ms :: {"error":"Configur…
+2:50:34 AM [express] GET /api/admin/dashboard/stats 304 in 22ms :: {"activeProfessionals":0,"monthly…
+[static-server] Serving index.html for: /favicon.ico
+2:50:34 AM [express] GET /api/admin/users 304 in 9ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd09…
+2:50:34 AM [express] GET /api/admin/professionals 200 in 63ms :: [{"id":"d2617323-23ea-481a-81b9-13f…
+2:50:34 AM [express] GET /api/admin/plans 304 in 63ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb5a3f9e1…
+2:50:34 AM [express] GET /api/admin/configs/PAGARME_API_KEY 304 in 57ms :: {"id":"3554ad96-72b0-4cfc…
+2:50:34 AM [express] GET /api/admin/categories 304 in 58ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+2:50:34 AM [express] GET /api/admin/payments 304 in 63ms :: []
+2:50:34 AM [express] GET /api/admin/pages 304 in 61ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:50:34 AM [express] GET /api/admin/reviews 304 in 47ms :: []
+2:50:43 AM [express] POST /api/admin/configs 200 in 7ms :: {"id":"3554ad96-72b0-4cfc-b292-bba92a8a20…
+2:50:43 AM [express] POST /api/admin/configs 200 in 6ms :: {"id":"b8c33f3f-e0a2-4eaa-803f-8d93193fdb…
+2:50:43 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 200 in 3ms :: {"id":"b8c33f3f-e0a…
+2:50:43 AM [express] GET /api/admin/configs/PAGARME_API_KEY 200 in 3ms :: {"id":"3554ad96-72b0-4cfc-…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+2:50:53 AM [express] GET /api/subscription-plans 304 in 11ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_pojJnVafRLck4Jea",
+  "code": "SUB_75157284187_1757386270871",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_y1n0zqmcyTjz29VE",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:51:11Z",
+  "updated_at": "2025-09-09T02:51:11Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
+      "id": "addr_VAG040WUQU3zxQ5d",
+      "line_1": "Rua Principal, 123",
+      "line_2": "Centro",
+      "street": "Rua Principal",
+      "number": "123",
+      "complement": "",
+      "zip_code": "74000000",
+      "neighborhood": "Centro",
+      "city": "Goiânia",
+      "state": "GO",
+      "country": "BR",
+      "status": "active",
+      "created_at": "2025-09-09T02:48:34Z",
+      "updated_at": "2025-09-09T02:48:34Z"
+    },
+    "created_at": "2025-09-09T02:48:34Z",
+    "updated_at": "2025-09-09T02:48:34Z",
+    "phones": {},
+    "metadata": {
+      "created_by": "monte_everest_system"
+    }
+  },
+  "plan": {
+    "id": "plan_94qYE4wtxt4jeZ25",
+    "name": "Plano Básico",
+    "description": "Plano básico para profissionais",
+    "url": "plans/plan_94qYE4wtxt4jeZ25/everest-servicos-ltda-conta-ativa-test/plano-basico",
+    "statement_descriptor": "MONTE EVEREST",
+    "interval": "month",
+    "interval_count": 1,
+    "billing_type": "prepaid",
+    "payment_methods": [
+      "credit_card",
+      "boleto"
+    ],
+    "installments": [
+      1,
+      2,
+      3,
+      6,
+      12
+    ],
+    "status": "active",
+    "currency": "BRL",
+    "created_at": "2025-09-09T02:30:29Z",
+    "updated_at": "2025-09-09T02:30:29Z",
+    "metadata": {
+      "plan_id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "created_by": "monte_everest_system"
+    }
+  },
+  "items": [
+    {
+      "id": "si_1N8Jkb7SeiBKZ27a",
+      "name": "Plano Básico",
+      "description": "Plano básico para profissionais",
+      "quantity": 1,
+      "status": "active",
+      "created_at": "2025-09-09T02:51:11Z",
+      "updated_at": "2025-09-09T02:51:11Z",
+      "pricing_scheme": {
+        "price": 2990,
+        "scheme_type": "unit"
+      }
+    },
+    {
+      "id": "6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10",
+      "name": "Plano Básico",
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:51:58 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:52:55 AM [express] GET /api/install/status 304 in 30ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:52:55 AM [express] GET /api/subscription-plans 304 in 16ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Pagar.me subscription response: {
+  "id": "sub_JV2EvRzCAtmvyMpW",
+  "code": "SUB_75157284187_1757386393307",
+  "start_at": "2025-09-08T00:00:00Z",
+  "interval": "month",
+  "interval_count": 1,
+  "billing_type": "prepaid",
+  "current_cycle": {
+    "id": "cycle_OkYb9kVsZtKenXPQ",
+    "start_at": "2025-09-08T00:00:00Z",
+    "end_at": "2025-10-07T23:59:59Z",
+    "billing_at": "2025-09-08T00:00:00Z",
+    "status": "billed",
+    "cycle": 1
+  },
+  "next_billing_at": "2025-10-08T00:00:00Z",
+  "payment_method": "boleto",
+  "currency": "BRL",
+  "statement_descriptor": "MONTE EVEREST",
+  "installments": 1,
+  "status": "active",
+  "created_at": "2025-09-09T02:53:13Z",
+  "updated_at": "2025-09-09T02:53:13Z",
+  "customer": {
+    "id": "cus_3W91ybXi1iRYkaQK",
+    "name": "Rafael Miguel de Oliveira",
+    "email": "rafaeladapta02@gmail.com",
+    "code": "75157284187",
+    "document": "75157284187",
+    "type": "individual",
+    "delinquent": false,
+    "address": {
