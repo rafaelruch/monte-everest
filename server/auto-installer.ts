@@ -128,7 +128,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     CREATE TABLE IF NOT EXISTS payments (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
         professional_id VARCHAR NOT NULL,
-        subscription_plan_id VARCHAR,
+        plan_id VARCHAR,
         amount DECIMAL(10,2) NOT NULL,
         currency VARCHAR DEFAULT 'BRL',
         status VARCHAR NOT NULL DEFAULT 'pending',
