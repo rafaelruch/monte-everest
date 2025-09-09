@@ -883,7 +883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentPhotos = await db
         .select()
         .from(images)
-        .where(sql`${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`);
+        .where(sql`${images.professional_id} = ${professionalId} AND ${images.type} = 'portfolio'`);
       
       console.log("[photo-upload] Fotos atuais:", currentPhotos.length, "/ Máximo:", maxPhotos);
       
@@ -1007,7 +1007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove photo from database
       const deletedImage = await db
         .delete(images)
-        .where(sql`${images.id} = ${imageId} AND ${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`)
+        .where(sql`${images.id} = ${imageId} AND ${images.professional_id} = ${professionalId} AND ${images.type} = 'portfolio'`)
         .returning();
       
       if (deletedImage.length === 0) {
@@ -1062,7 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove old profile image if exists
       await db
         .delete(images)
-        .where(sql`${images.professionalId} = ${professionalId} AND ${images.type} = 'profile'`);
+        .where(sql`${images.professional_id} = ${professionalId} AND ${images.type} = 'profile'`);
       
       // Save new profile image to database
       const [savedImage] = await db
