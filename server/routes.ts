@@ -4,6 +4,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import pg from 'pg';
+import crypto from 'crypto';
 import { insertProfessionalSchema, insertReviewSchema, insertContactSchema } from "@shared/schema";
 import { z } from "zod";
 import {
@@ -240,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/install/status", async (req, res) => {
     try {
       // Direct database check without SSL for installation status
-      const { Pool: PgPool } = require('pg');
+      const { Pool: PgPool } = pg;
       const dbUrl = process.env.DATABASE_URL;
       
       if (!dbUrl) {
@@ -278,6 +280,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         installed: false,
         needsInstallation: true
+      });
+    }
+  });
+
+  // ENDPOINT SIMPLES PARA CRIAR TABELAS
+  app.post("/api/setup-tables", async (req, res) => {
+    try {
+      const { databaseUrl } = req.body;
+      
+      if (!databaseUrl) {
+        return res.status(400).json({ message: "URL do banco de dados é obrigatória" });
+      }
+
+      console.log("[setup-tables] Iniciando criação das tabelas...");
+      
+      // Testar conexão primeiro
+      const connectionOk = await checkDatabaseConnection(databaseUrl);
+      if (!connectionOk) {
+        return res.status(400).json({ 
+          message: "Não foi possível conectar ao banco de dados. Verifique a URL." 
+        });
+      }
+
+      // Criar tabelas
+      const tablesCreated = await createDatabaseTables(databaseUrl);
+      if (!tablesCreated) {
+        return res.status(500).json({ 
+          message: "Erro ao criar tabelas no banco de dados" 
+        });
+      }
+
+      console.log("[setup-tables] ✅ Tabelas criadas com sucesso!");
+      
+      res.json({ 
+        success: true,
+        message: "✅ Todas as tabelas foram criadas com sucesso! Agora você pode configurar a aplicação normalmente." 
+      });
+      
+    } catch (error) {
+      console.error("[setup-tables] Erro:", error);
+      res.status(500).json({ 
+        message: `Erro ao criar tabelas: ${error instanceof Error ? error.message : "Erro desconhecido"}` 
       });
     }
   });
@@ -338,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // NOW check if already installed (after tables exist) using direct query
       try {
-        const { Pool: PgPool } = require('pg');
+        const { Pool: PgPool } = pg;
         const pool = new PgPool({ 
           connectionString: targetDatabaseUrl, 
           ssl: false 
@@ -364,14 +408,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create admin user with direct SQL query
       try {
-        const { Pool: PgPool } = require('pg');
+        const { Pool: PgPool } = pg;
         const pool = new PgPool({ 
           connectionString: targetDatabaseUrl, 
           ssl: false 
         });
         
         const client = await pool.connect();
-        const adminId = require('crypto').randomUUID();
+        const adminId = crypto.randomUUID();
         await client.query(`
           INSERT INTO users (id, email, password, role, is_system_admin, created_at, updated_at)
           VALUES ($1, $2, $3, 'admin', true, NOW(), NOW())

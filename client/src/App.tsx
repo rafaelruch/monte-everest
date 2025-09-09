@@ -23,6 +23,7 @@ import ProfessionalChangePassword from "@/pages/professional-change-password";
 import ProfessionalDashboard from "@/pages/professional-dashboard";
 import Installation from "@/pages/installation";
 import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
+import SetupTables from "@/pages/setup-tables";
 import PageContent from "@/pages/page-content";
 import NotFound from "@/pages/not-found";
 
@@ -76,6 +77,7 @@ function Router() {
               <Route path="/easypanel-installer">
                 {() => <InstallationRoute component={EasyPanelInstaller} />}
               </Route>
+              <Route path="/setup-tables" component={SetupTables} />
               <Route path="/pagina/:slug" component={PageContent} />
               <Route component={NotFound} />
             </Switch>
