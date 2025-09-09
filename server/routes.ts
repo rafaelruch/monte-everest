@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         token,
         firstLogin: isFirstLogin,
-        redirectTo: isFirstLogin ? '/professional-change-password' : '/professional-dashboard'
+        redirectTo: '/professional-dashboard'
       });
     } catch (error) {
       console.error("Error during professional login:", error);
