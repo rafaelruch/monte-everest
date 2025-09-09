@@ -538,13 +538,31 @@ export default function ProfessionalDashboard() {
                 {/* QR Code */}
                 {professional.pendingPixUrl && (
                   <div className="flex flex-col items-center gap-2">
-                    <img 
-                      src={professional.pendingPixUrl} 
-                      alt="QR Code PIX" 
-                      className="w-32 h-32 bg-white p-2 rounded border"
-                      data-testid="pending-pix-qr-code"
-                    />
-                    <p className="text-xs text-center">Escaneie com seu app bancário</p>
+                    <div className="bg-white p-3 rounded-lg border shadow-sm">
+                      <img 
+                        src={professional.pendingPixUrl} 
+                        alt="QR Code PIX" 
+                        className="w-40 h-40"
+                        data-testid="pending-pix-qr-code"
+                        onError={(e) => {
+                          console.error('QR Code failed to load:', professional.pendingPixUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('QR Code loaded successfully:', professional.pendingPixUrl);
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-center font-medium">📱 Escaneie com seu app bancário</p>
+                  </div>
+                )}
+                
+                {/* Show debug info if QR Code is not available */}
+                {!professional.pendingPixUrl && professional.pendingPixCode && (
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <p className="text-sm text-orange-700">
+                      ⚠️ QR Code não disponível, use o código PIX abaixo
+                    </p>
                   </div>
                 )}
                 
@@ -563,13 +581,10 @@ export default function ProfessionalDashboard() {
                       size="sm"
                       onClick={() => {
                         navigator.clipboard.writeText(professional.pendingPixCode);
-                        // Assuming toast is available
-                        if (typeof toast !== 'undefined') {
-                          toast({ 
-                            title: "Código PIX copiado!", 
-                            description: "Cole no seu app bancário para pagar" 
-                          });
-                        }
+                        toast({ 
+                          title: "Código PIX copiado!", 
+                          description: "Cole no seu app bancário para pagar" 
+                        });
                       }}
                       className="shrink-0"
                       data-testid="button-copy-pending-pix"

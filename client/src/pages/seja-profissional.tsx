@@ -670,29 +670,28 @@ export default function SejaProfissional() {
                   </div>
                 )}
                 
-                {/* Debug info */}
-                {paymentMethod === 'pix' && !paymentInfo.qrCodeUrl && (
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-yellow-700">
-                      QR Code não disponível. Dados recebidos:
+                {/* Debug info - show what we have */}
+                {paymentMethod === 'pix' && paymentInfo && (
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-700 mb-2">
+                      Informações de Pagamento PIX:
                     </p>
-                    <pre className="text-xs text-yellow-600 mt-1">
-                      {JSON.stringify({
-                        hasQrCodeUrl: !!paymentInfo.qrCodeUrl,
-                        hasQrCode: !!paymentInfo.qrCode,
-                        hasPixCode: !!paymentInfo.pixCode
-                      }, null, 2)}
-                    </pre>
+                    <div className="text-xs text-blue-600 space-y-1">
+                      <div>QR Code URL: {paymentInfo.qrCodeUrl ? '✅ Disponível' : '❌ Não disponível'}</div>
+                      <div>Código PIX: {paymentInfo.pixCode || paymentInfo.qrCode ? '✅ Disponível' : '❌ Não disponível'}</div>
+                      <div>Valor: R$ {paymentInfo.amount ? (paymentInfo.amount / 100).toFixed(2) : 'N/A'}</div>
+                      <div>Expira em: {paymentInfo.expiresAt ? new Date(paymentInfo.expiresAt).toLocaleString('pt-BR') : 'N/A'}</div>
+                    </div>
                   </div>
                 )}
 
-                {/* PIX Code */}
-                {(paymentInfo.qrCode || paymentInfo.pixCode) && (
+                {/* PIX Code - Always show if we have payment info */}
+                {paymentInfo && (
                   <div>
                     <Label className="text-sm font-medium">Código PIX (Copia e Cola)</Label>
                     <div className="flex gap-2 mt-1">
                       <Input
-                        value={paymentInfo.pixCode || paymentInfo.qrCode}
+                        value={paymentInfo.pixCode || paymentInfo.qrCode || "Código PIX não disponível"}
                         readOnly
                         className="font-mono text-xs"
                         data-testid="pix-code"
@@ -701,10 +700,14 @@ export default function SejaProfissional() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          navigator.clipboard.writeText(paymentInfo.pixCode || paymentInfo.qrCode);
-                          toast({ title: "Código PIX copiado!", description: "Cole no seu app bancário para pagar" });
+                          const code = paymentInfo.pixCode || paymentInfo.qrCode;
+                          if (code) {
+                            navigator.clipboard.writeText(code);
+                            toast({ title: "Código PIX copiado!", description: "Cole no seu app bancário para pagar" });
+                          }
                         }}
                         data-testid="button-copy-pix"
+                        disabled={!paymentInfo.pixCode && !paymentInfo.qrCode}
                       >
                         Copiar PIX
                       </Button>
