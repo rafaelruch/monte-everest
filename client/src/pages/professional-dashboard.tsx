@@ -871,25 +871,6 @@ export default function ProfessionalDashboard() {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Descrição dos Serviços</FormLabel>
-                            <FormControl>
-                              <Textarea 
-                                {...field} 
-                                rows={4}
-                                placeholder="Descreva seus serviços e experiência..."
-                                data-testid="input-description"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
                       {updateProfileMutation.error && (
                         <Alert variant="destructive">
                           <AlertDescription>
