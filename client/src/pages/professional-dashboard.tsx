@@ -79,6 +79,7 @@ const changePasswordSchema = z.object({
 type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 
 export default function ProfessionalDashboard() {
+  // ALL HOOKS MUST BE AT THE TOP - NO CONDITIONAL HOOKS
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [professionalAuth, setProfessionalAuth] = useState<any>(null);
@@ -90,6 +91,7 @@ export default function ProfessionalDashboard() {
   const queryClient = useQueryClient();
   const { fetchAddressByCep, loading: cepLoading } = useViaCep();
 
+  // Get auth from localStorage on mount
   useEffect(() => {
     const auth = localStorage.getItem("professionalAuth");
     if (!auth) {
@@ -110,6 +112,13 @@ export default function ProfessionalDashboard() {
       setProfessionalAuth(updatedAuth);
     }
   }, [setLocation]);
+
+  // Force password change for first login - MOVED TO TOP
+  useEffect(() => {
+    if (professionalAuth && professionalAuth.firstLogin && !forcePasswordChangeOpen) {
+      setForcePasswordChangeOpen(true);
+    }
+  }, [professionalAuth, forcePasswordChangeOpen]);
 
   const { data: professional, isLoading: professionalLoading } = useQuery<any>({
     queryKey: ["/api/professionals", professionalAuth?.id],
@@ -412,16 +421,10 @@ export default function ProfessionalDashboard() {
     changePasswordMutation.mutate(data);
   };
 
+  // Early return after all hooks are defined
   if (!professionalAuth) {
     return null;
   }
-
-  // Force password change for first login
-  useEffect(() => {
-    if (professional && professional.firstLogin && !forcePasswordChangeOpen) {
-      setForcePasswordChangeOpen(true);
-    }
-  }, [professional, forcePasswordChangeOpen]);
 
   if (professionalLoading) {
     return (

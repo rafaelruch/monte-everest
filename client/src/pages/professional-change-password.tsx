@@ -36,7 +36,7 @@ export default function ProfessionalChangePassword() {
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      currentPassword: "",
+      currentPassword: "senha123",
       newPassword: "",
       confirmPassword: "",
     },
