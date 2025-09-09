@@ -1,0 +1,29 @@
+[profile-image] Detalhes do erro: {
+  message: "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var.",
+  stack: "Error: PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var.\n" +
+    '    at ObjectStorageService.getPrivateObjectDir (/app/server/objectStorage.ts:69:13)\n' +
+    '    at ObjectStorageService.getObjectEntityUploadURL (/app/server/objectStorage.ts:135:35)\n' +
+    '    at <anonymous> (/app/server/routes.ts:894:52)\n' +
+    '    at Layer.handle [as handle_request] (/app/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at next (/app/node_modules/express/lib/router/route.js:149:13)\n' +
+    '    at verifyProfessionalToken (/app/server/routes.ts:64:5)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  env: {
+    NODE_ENV: 'production',
+    hasObjectStorageVars: { PUBLIC_OBJECT_SEARCH_PATHS: false, PRIVATE_OBJECT_DIR: false }
+  }
+}
+6:00:04 PM [express] POST /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/profile-image/uplo…
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+6:00:11 PM [express] serving on port 5000
+[db] Using traditional PostgreSQL database
+[startup] Configurando PUBLIC_OBJECT_SEARCH_PATHS: /replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/public
+[startup] Configurando PRIVATE_OBJECT_DIR: /replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/.private
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+6:01:03 PM [express] serving on port 5000
+[static-server] Serving index.html for: /professional-dashboard
+6:01:06 PM [express] GET /api/install/status 304 in 34ms :: {"installed":true,"needsInstallation":fa…
+6:01:06 PM [express] GET /api/categories 304 in 48ms :: [{"id":"ae882751-68f1-41de-987b-05bb9262cb97…
