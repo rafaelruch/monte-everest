@@ -213,6 +213,9 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                       WHERE table_name='payments' AND column_name='card_token') THEN
             ALTER TABLE payments ADD COLUMN card_token TEXT;
+            RAISE NOTICE 'Coluna card_token adicionada à tabela payments';
+        ELSE
+            RAISE NOTICE 'Coluna card_token já existe na tabela payments';
         END IF;
     END $$;
 

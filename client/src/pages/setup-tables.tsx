@@ -33,12 +33,9 @@ export default function SetupTables() {
       if (response.ok) {
         setResult({ 
           success: true, 
-          message: data.message + " 🎉 Redirecionando para instalação em 3 segundos..." 
+          message: data.message + " 🎉 Schema atualizado com sucesso!" 
         });
-        // Redirecionar para a instalação após 3 segundos
-        setTimeout(() => {
-          window.location.href = "/install";
-        }, 3000);
+        // Não redirecionar - apenas atualização de schema
       } else {
         setResult({ success: false, message: data.message || "Erro desconhecido" });
       }
@@ -56,9 +53,9 @@ export default function SetupTables() {
           <div className="mx-auto mb-4 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
             <Database className="w-6 h-6 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl font-bold">Passo 1: Criar Tabelas</CardTitle>
+          <CardTitle className="text-2xl font-bold">Atualizar Schema do Banco</CardTitle>
           <p className="text-gray-600">
-            Primeiro, vamos criar as tabelas no banco de dados
+            Criar/atualizar tabelas e colunas no banco de dados
           </p>
         </CardHeader>
         
@@ -102,10 +99,10 @@ export default function SetupTables() {
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Criando tabelas...
+                Atualizando Schema...
               </div>
             ) : (
-              "Criar Tabelas"
+              "Atualizar Schema"
             )}
           </Button>
 
