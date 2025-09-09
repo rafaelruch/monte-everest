@@ -849,14 +849,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/professionals/:id/photos", verifyProfessionalToken, async (req, res) => {
     try {
       const professionalId = req.params.id;
-      const { photoURL } = req.body;
+      const { imageId } = req.body;
       
       if (professionalId !== req.professional.id) {
         return res.status(403).json({ message: "Acesso negado" });
       }
 
-      if (!photoURL) {
-        return res.status(400).json({ message: "URL da foto é obrigatória" });
+      if (!imageId) {
+        return res.status(400).json({ message: "ID da imagem é obrigatório" });
+      }
+
+      // Verify image exists and belongs to this professional
+      const [imageRecord] = await db
+        .select()
+        .from(images)
+        .where(sql`${images.id} = ${imageId} AND ${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`)
+        .limit(1);
+
+      if (!imageRecord) {
+        return res.status(404).json({ message: "Imagem não encontrada" });
       }
 
       // Get professional to update portfolio
@@ -865,16 +876,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Profissional não encontrado" });
       }
 
-      // Set object ACL policy for the uploaded photo
-      const objectStorageService = new ObjectStorageService();
-      const normalizedPath = await objectStorageService.trySetObjectEntityAclPolicy(photoURL, {
-        owner: professionalId,
-        visibility: "public", // Portfolio photos are public
-      });
-
-      // Update professional portfolio
+      // Update professional portfolio with image URL
+      const imageUrl = `/api/images/${imageId}`;
       const currentPortfolio = professional.portfolio || [];
-      const updatedPortfolio = [...currentPortfolio, normalizedPath];
+      const updatedPortfolio = [...currentPortfolio, imageUrl];
       
       await storage.updateProfessional(professionalId, {
         portfolio: updatedPortfolio
@@ -882,7 +887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         message: "Foto adicionada com sucesso",
-        photoPath: normalizedPath 
+        photoPath: imageUrl 
       });
     } catch (error) {
       console.error("Error adding photo to portfolio:", error);

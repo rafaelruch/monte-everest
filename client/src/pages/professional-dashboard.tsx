@@ -405,16 +405,16 @@ export default function ProfessionalDashboard() {
         throw new Error(errorData.message || 'Erro no upload da imagem');
       }
 
-      const { objectPath } = await uploadResponse.json();
+      const { imageId } = await uploadResponse.json();
       
-      // Update profile with image path
+      // Update profile with image ID
       const updateResponse = await fetch(`/api/professionals/${professionalAuth.id}/profile-image`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${professionalAuth.token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ objectPath })
+        body: JSON.stringify({ imageId })
       });
 
       if (!updateResponse.ok) {
@@ -1273,8 +1273,8 @@ export default function ProfessionalDashboard() {
                             console.log("[frontend] Resposta do upload:", uploadResponse.status, uploadResponse.statusText);
                             
                             if (uploadResponse.ok) {
-                              const { objectPath } = await uploadResponse.json();
-                              console.log("[frontend] Upload concluído, adicionando ao portfólio:", objectPath);
+                              const { imageId } = await uploadResponse.json();
+                              console.log("[frontend] Upload concluído, adicionando ao portfólio:", imageId);
                               
                               // Add to portfolio
                               const addResponse = await fetch(`/api/professionals/${professionalData.id}/photos`, {
@@ -1283,7 +1283,7 @@ export default function ProfessionalDashboard() {
                                   'Authorization': `Bearer ${token}`,
                                   'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({ objectPath })
+                                body: JSON.stringify({ imageId })
                               });
                               
                               if (addResponse.ok) {
