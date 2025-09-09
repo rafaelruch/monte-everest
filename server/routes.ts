@@ -2305,7 +2305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: professionalData.phone,
         document: professionalData.cpf,
         categoryId: '', // Will be set later when they complete profile
-        serviceArea: 'Goiânia', // Default area
+        serviceArea: professionalData.cep || '74000000', // Use provided CEP or default
+        city: professionalData.city || 'Goiânia', // Use provided city or default
         description: '',
         status: subscription.status === 'active' ? 'pending' : 'inactive',
         averageRating: 0,
