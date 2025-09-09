@@ -948,14 +948,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
-      const payment = await storage.createPayment(req.body);
+      // Convert date strings to Date objects if necessary
+      const paymentData = { ...req.body };
+      if (paymentData.dueDate && typeof paymentData.dueDate === 'string') {
+        paymentData.dueDate = new Date(paymentData.dueDate);
+      }
+      if (paymentData.paidAt && typeof paymentData.paidAt === 'string') {
+        paymentData.paidAt = new Date(paymentData.paidAt);
+      }
+
+      const payment = await storage.createPayment(paymentData);
       
       await storage.createLog({
         userId: req.user.id,
         action: 'create_payment',
         entityType: 'payment',
         entityId: payment.id,
-        details: req.body,
+        details: paymentData,
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
@@ -969,14 +978,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/payments/:id", verifyAdminToken, async (req, res) => {
     try {
-      const payment = await storage.updatePayment(req.params.id, req.body);
+      // Convert date strings to Date objects if necessary
+      const paymentData = { ...req.body };
+      if (paymentData.dueDate && typeof paymentData.dueDate === 'string') {
+        paymentData.dueDate = new Date(paymentData.dueDate);
+      }
+      if (paymentData.paidAt && typeof paymentData.paidAt === 'string') {
+        paymentData.paidAt = new Date(paymentData.paidAt);
+      }
+
+      const payment = await storage.updatePayment(req.params.id, paymentData);
       
       await storage.createLog({
         userId: req.user.id,
         action: 'update_payment',
         entityType: 'payment',
         entityId: req.params.id,
-        details: req.body,
+        details: paymentData,
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
