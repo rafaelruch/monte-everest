@@ -22,7 +22,7 @@ import { emailService } from "./email";
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
 // Middleware to verify admin JWT token
-const verifyAdminToken = async (req: any, res: any, next: any) => {
+const verifyAdminToken = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   
   if (!token) {
@@ -45,7 +45,7 @@ const verifyAdminToken = async (req: any, res: any, next: any) => {
 };
 
 // Middleware to verify professional JWT token
-const verifyProfessionalToken = async (req: any, res: any, next: any) => {
+const verifyProfessionalToken = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   
   if (!token) {
@@ -272,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (dbError) {
         await pool.end();
         // If table doesn't exist or other DB error, system needs installation
-        console.log("[install-status] DB error (likely tables don't exist):", dbError.message);
+        console.log("[install-status] DB error (likely tables don't exist):", dbError instanceof Error ? dbError.message : dbError);
         res.json({ 
           installed: false,
           needsInstallation: true
@@ -488,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         siteName: siteName || "Monte Everest",
         siteUrl: siteUrl || "",
         installedAt: new Date().toISOString(),
-        installedBy: adminUser.id,
+        installedBy: adminId,
         version: "1.0.0"
       };
 
@@ -500,7 +500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create system logs entry
       await storage.createLog({
-        userId: adminUser.id,
+        userId: adminId,
         action: 'system_installation',
         entityType: 'system',
         entityId: 'installation',
@@ -524,8 +524,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error during installation:", error);
       res.status(500).json({ 
-        message: error.message || "Erro durante a instalação",
-        error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        message: error instanceof Error ? error.message : "Erro durante a instalação",
+        error: process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined
       });
     }
   });
@@ -575,7 +575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[setup-database] Erro:", error);
       res.status(500).json({ 
         message: "Erro interno durante configuração do banco",
-        error: error.message || "Erro desconhecido"
+        error: error instanceof Error ? error.message : "Erro desconhecido"
       });
     }
   });
@@ -620,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("[install-module] Erro:", error);
       res.status(500).json({ 
         message: "Erro interno durante instalação do módulo",
-        error: error.message || "Erro desconhecido"
+        error: error instanceof Error ? error.message : "Erro desconhecido"
       });
     }
   });

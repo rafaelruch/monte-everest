@@ -27,9 +27,15 @@ import SetupTables from "@/pages/setup-tables";
 import PageContent from "@/pages/page-content";
 import NotFound from "@/pages/not-found";
 
+// Type for install status response
+interface InstallStatus {
+  installed: boolean;
+  needsInstallation: boolean;
+}
+
 // Component to protect installation routes
 function InstallationRoute({ component: Component }: { component: React.ComponentType }) {
-  const { data: installStatus } = useQuery({
+  const { data: installStatus } = useQuery<InstallStatus>({
     queryKey: ["/api/install/status"],
     retry: false,
   });
