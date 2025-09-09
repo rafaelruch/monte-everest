@@ -1,0 +1,97 @@
+6:04:31 PM [express] POST /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/photos/upload-url …
+[profile-image] Solicitação de URL de upload para foto de perfil: 4797cf59-db2f-4530-8740-9e8062401d84
+[profile-image] Gerando URL de upload para foto de perfil...
+[profile-image] Erro ao obter URL de upload: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async signObjectURL (/app/server/objectStorage.ts:295:20)
+    at async <anonymous> (/app/server/routes.ts:894:25) {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:1106
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 1106
+  }
+}
+[profile-image] Detalhes do erro: {
+  message: 'fetch failed',
+  stack: 'TypeError: fetch failed\n' +
+    '    at node:internal/deps/undici/undici:13510:13\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async signObjectURL (/app/server/objectStorage.ts:295:20)\n' +
+    '    at async <anonymous> (/app/server/routes.ts:894:25)',
+  env: {
+    NODE_ENV: 'production',
+    hasObjectStorageVars: { PUBLIC_OBJECT_SEARCH_PATHS: true, PRIVATE_OBJECT_DIR: true }
+  }
+}
+6:04:35 PM [express] POST /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/profile-image/uplo…
+[static-server] Serving index.html for: /professional-dashboard
+6:04:45 PM [express] GET /api/install/status 200 in 11ms :: {"installed":true,"needsInstallation":fa…
+6:04:46 PM [express] GET /api/categories 304 in 25ms :: [{"id":"ae882751-68f1-41de-987b-05bb9262cb97…
+6:04:46 PM [express] GET /api/reviews/4797cf59-db2f-4530-8740-9e8062401d84 304 in 34ms :: [{"id":"f2…
+6:04:46 PM [express] GET /api/contacts/4797cf59-db2f-4530-8740-9e8062401d84 304 in 32ms :: [{"id":"c…
+6:04:46 PM [express] GET /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84 304 in 33ms :: {"id…
+6:04:46 PM [express] GET /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/contacts/monthly 30…
+[static-server] Serving index.html for: /favicon.ico
+[profile-image] Solicitação de URL de upload para foto de perfil: 4797cf59-db2f-4530-8740-9e8062401d84
+[profile-image] Gerando URL de upload para foto de perfil...
+[profile-image] Erro ao obter URL de upload: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async signObjectURL (/app/server/objectStorage.ts:295:20)
+    at async <anonymous> (/app/server/routes.ts:894:25) {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:1106
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 1106
+  }
+}
+[profile-image] Detalhes do erro: {
+  message: 'fetch failed',
+  stack: 'TypeError: fetch failed\n' +
+    '    at node:internal/deps/undici/undici:13510:13\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async signObjectURL (/app/server/objectStorage.ts:295:20)\n' +
+    '    at async <anonymous> (/app/server/routes.ts:894:25)',
+  env: {
+    NODE_ENV: 'production',
+    hasObjectStorageVars: { PUBLIC_OBJECT_SEARCH_PATHS: true, PRIVATE_OBJECT_DIR: true }
+  }
+}
+6:04:50 PM [express] POST /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/profile-image/uplo…
+[photo-upload] Solicitação de URL de upload para profissional: 4797cf59-db2f-4530-8740-9e8062401d84
+[photo-upload] Fotos atuais: 0 / Máximo: 3
+[photo-upload] Gerando URL de upload...
+[photo-upload] Erro ao obter URL de upload: TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async signObjectURL (/app/server/objectStorage.ts:295:20)
+    at async <anonymous> (/app/server/routes.ts:781:25) {
+  [cause]: Error: connect ECONNREFUSED 127.0.0.1:1106
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16) {
+    errno: -111,
+    code: 'ECONNREFUSED',
+    syscall: 'connect',
+    address: '127.0.0.1',
+    port: 1106
+  }
+}
+[photo-upload] Detalhes do erro: {
+  message: 'fetch failed',
+  stack: 'TypeError: fetch failed\n' +
+    '    at node:internal/deps/undici/undici:13510:13\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async signObjectURL (/app/server/objectStorage.ts:295:20)\n' +
+    '    at async <anonymous> (/app/server/routes.ts:781:25)',
+  env: {
+    NODE_ENV: 'production',
+    hasObjectStorageVars: { PUBLIC_OBJECT_SEARCH_PATHS: true, PRIVATE_OBJECT_DIR: true }
+  }
+}
+6:04:59 PM [express] POST /api/professionals/4797cf59-db2f-4530-8740-9e8062401d84/photos/upload-url …
