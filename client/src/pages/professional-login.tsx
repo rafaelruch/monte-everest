@@ -77,7 +77,9 @@ export default function ProfessionalLogin() {
         firstLogin: data.firstLogin || data.professional.firstLogin
       }));
       
-      setLocation("/professional-dashboard");
+      // Use redirectTo from backend, default to dashboard if not provided
+      const redirectPath = data.redirectTo || "/professional-dashboard";
+      setLocation(redirectPath);
     },
   });
 
