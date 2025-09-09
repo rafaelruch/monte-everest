@@ -417,6 +417,10 @@ export class DatabaseStorage implements IStorage {
     return professional;
   }
 
+  async getProfessionalById(id: string): Promise<Professional | undefined> {
+    return this.getProfessional(id);
+  }
+
   async getProfessionalByEmail(email: string): Promise<Professional | undefined> {
     const [professional] = await db.select().from(professionals).where(eq(professionals.email, email));
     return professional;
@@ -436,9 +440,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProfessional(id: string): Promise<void> {
-    await db.update(professionals)
-      .set({ status: 'suspended', updatedAt: new Date() })
-      .where(eq(professionals.id, id));
+    // Delete in order due to foreign key constraints
+    // First delete contacts
+    await db.delete(contacts).where(eq(contacts.professionalId, id));
+    
+    // Delete reviews
+    await db.delete(reviews).where(eq(reviews.professionalId, id));
+    
+    // Delete payments
+    await db.delete(payments).where(eq(payments.professionalId, id));
+    
+    // Finally delete the professional
+    await db.delete(professionals).where(eq(professionals.id, id));
   }
 
   async updateProfessionalRating(professionalId: string): Promise<void> {
