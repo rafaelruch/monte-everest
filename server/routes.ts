@@ -1257,6 +1257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'delete_category',
         entityType: 'category',
         entityId: req.params.id,
+        details: {},
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
@@ -1519,6 +1520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'delete_subscription_plan',
         entityType: 'subscription_plan',
         entityId: req.params.id,
+        details: {},
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
@@ -1614,6 +1616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'delete_page',
         entityType: 'page',
         entityId: req.params.id,
+        details: {},
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
