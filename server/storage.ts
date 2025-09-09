@@ -96,6 +96,7 @@ export interface IStorage {
   getPayment(id: string): Promise<Payment | undefined>;
   createPayment(payment: InsertPayment): Promise<Payment>;
   updatePayment(id: string, payment: Partial<InsertPayment>): Promise<Payment>;
+  deletePayment(id: string): Promise<void>;
   getOverduePayments(): Promise<Payment[]>;
 
   // Contact operations
@@ -560,6 +561,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(payments.id, id))
       .returning();
     return updated;
+  }
+
+  async deletePayment(id: string): Promise<void> {
+    await db.delete(payments).where(eq(payments.id, id));
   }
 
   async getOverduePayments(): Promise<Payment[]> {

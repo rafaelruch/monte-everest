@@ -935,13 +935,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get payment reports
+  // Payment management routes
   app.get("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
       const payments = await storage.getPayments();
       res.json(payments);
     } catch (error) {
       console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.post("/api/admin/payments", verifyAdminToken, async (req, res) => {
+    try {
+      const payment = await storage.createPayment(req.body);
+      
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'create_payment',
+        entityType: 'payment',
+        entityId: payment.id,
+        details: req.body,
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.status(201).json(payment);
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.put("/api/admin/payments/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const payment = await storage.updatePayment(req.params.id, req.body);
+      
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'update_payment',
+        entityType: 'payment',
+        entityId: req.params.id,
+        details: req.body,
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json(payment);
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  app.delete("/api/admin/payments/:id", verifyAdminToken, async (req, res) => {
+    try {
+      await storage.deletePayment(req.params.id);
+      
+      await storage.createLog({
+        userId: req.user.id,
+        action: 'delete_payment',
+        entityType: 'payment',
+        entityId: req.params.id,
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ message: "Pagamento removido com sucesso" });
+    } catch (error) {
+      console.error("Error deleting payment:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
