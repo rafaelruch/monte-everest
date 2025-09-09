@@ -301,10 +301,30 @@ export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans
   updatedAt: true,
 });
 
+// Images table - para armazenar imagens diretamente no banco
+export const images = pgTable("images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  filename: varchar("filename").notNull(),
+  mimetype: varchar("mimetype").notNull(),
+  size: integer("size").notNull(), // tamanho em bytes
+  data: bytea("data").notNull(), // dados binários da imagem
+  professionalId: varchar("professional_id").notNull(), // quem fez upload
+  type: varchar("type").notNull(), // 'profile' ou 'portfolio'
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  professionalIdx: index("images_professional_idx").on(table.professionalId),
+  typeIdx: index("images_type_idx").on(table.type),
+}));
+
 export const insertPageSchema = createInsertSchema(pages).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertImageSchema = createInsertSchema(images).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -337,3 +357,6 @@ export type InsertSystemConfig = typeof systemConfigs.$inferInsert;
 
 export type Page = typeof pages.$inferSelect;
 export type InsertPage = z.infer<typeof insertPageSchema>;
+
+export type Image = typeof images.$inferSelect;
+export type InsertImage = z.infer<typeof insertImageSchema>;
