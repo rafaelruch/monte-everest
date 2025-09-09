@@ -2298,21 +2298,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscription = await pagarmeResponse.json();
       console.log('Pagar.me subscription response:', JSON.stringify(subscription, null, 2));
       
-      // Create professional account after successful subscription
-      const professional = await storage.createProfessional({
-        fullName: professionalData.name,
-        email: professionalData.email,
-        phone: professionalData.phone,
-        document: professionalData.cpf,
-        categoryId: '', // Will be set later when they complete profile
-        serviceArea: professionalData.cep || '74000000', // Use provided CEP or default
-        city: professionalData.city || 'Goiânia', // Use provided city or default
-        description: '',
-        status: subscription.status === 'active' ? 'pending' : 'inactive',
-        averageRating: 0,
-        totalReviews: 0,
-        password: await bcrypt.hash('senha123', 10) // Default password: senha123
-      });
+      // Check if professional already exists, if so, update instead of creating
+      let professional = await storage.getProfessionalByEmail(professionalData.email);
+      
+      if (professional) {
+        // Professional exists, update their data
+        console.log(`Professional with email ${professionalData.email} already exists, updating...`);
+        professional = await storage.updateProfessional(professional.id, {
+          fullName: professionalData.name,
+          phone: professionalData.phone,
+          document: professionalData.cpf,
+          serviceArea: professionalData.cep || professional.serviceArea || '74000000',
+          city: professionalData.city || professional.city || 'Goiânia',
+          status: subscription.status === 'active' ? 'active' : 'inactive',
+          subscriptionPlanId: planId,
+          updatedAt: new Date()
+        });
+      } else {
+        // Create new professional account
+        console.log(`Creating new professional with email ${professionalData.email}...`);
+        professional = await storage.createProfessional({
+          fullName: professionalData.name,
+          email: professionalData.email,
+          phone: professionalData.phone,
+          document: professionalData.cpf,
+          categoryId: '', // Will be set later when they complete profile
+          serviceArea: professionalData.cep || '74000000', // Use provided CEP or default
+          city: professionalData.city || 'Goiânia', // Use provided city or default
+          description: '',
+          status: subscription.status === 'active' ? 'pending' : 'inactive',
+          averageRating: 0,
+          totalReviews: 0,
+          password: await bcrypt.hash('senha123', 10) // Default password: senha123
+        });
+      }
       
       // Save payment record
       const payment = await storage.createPayment({
