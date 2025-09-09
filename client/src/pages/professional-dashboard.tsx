@@ -86,6 +86,7 @@ export default function ProfessionalDashboard() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const [forcePasswordChangeOpen, setForcePasswordChangeOpen] = useState(false);
   const queryClient = useQueryClient();
   const { fetchAddressByCep, loading: cepLoading } = useViaCep();
 
@@ -415,6 +416,13 @@ export default function ProfessionalDashboard() {
     return null;
   }
 
+  // Force password change for first login
+  useEffect(() => {
+    if (professional && professional.firstLogin && !forcePasswordChangeOpen) {
+      setForcePasswordChangeOpen(true);
+    }
+  }, [professional, forcePasswordChangeOpen]);
+
   if (professionalLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -576,6 +584,93 @@ export default function ProfessionalDashboard() {
           </Alert>
         </div>
       )}
+
+      {/* Force Password Change Modal */}
+      <Dialog open={forcePasswordChangeOpen} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" data-testid="force-password-change-dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-orange-600" />
+              Alterar Senha Obrigatória
+            </DialogTitle>
+            <DialogDescription>
+              Por segurança, você deve alterar sua senha temporária antes de continuar.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+              <FormField
+                control={passwordForm.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha Atual (senha123)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Digite sua senha atual"
+                        {...field}
+                        data-testid="input-current-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={passwordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Digite sua nova senha"
+                        {...field}
+                        data-testid="input-new-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Nova Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirme sua nova senha"
+                        {...field}
+                        data-testid="input-confirm-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={changePasswordMutation.isPending}
+                  data-testid="button-change-password-confirm"
+                >
+                  {changePasswordMutation.isPending ? "Alterando..." : "Alterar Senha"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Bloqueio para status inativo */}
       {professional?.status === 'inactive' && (
