@@ -2445,7 +2445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               const paymentInfo = {
                 qrCode: transaction.qr_code, // PIX copy-paste code
-                qrCodeUrl: transaction.qr_code_url, // QR Code image URL
+                qrCodeUrl: transaction.qr_code_url || transaction.qr_code, // QR Code image URL (fallback to qr_code if no qr_code_url)
                 pixCode: transaction.qr_code, // PIX copy-paste code
                 line: transaction.line, // Boleto line
                 pdf: transaction.pdf, // Boleto PDF
@@ -2453,6 +2453,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 amount: charge.amount || priceInCentavos,
                 chargeId: charge.id
               };
+              
+              console.log('PaymentInfo created:', {
+                hasQrCode: !!paymentInfo.qrCode,
+                hasQrCodeUrl: !!paymentInfo.qrCodeUrl,
+                hasPixCode: !!paymentInfo.pixCode,
+                qrCodeUrl: paymentInfo.qrCodeUrl
+              });
               
               responseData.paymentInfo = paymentInfo;
               responseData.redirectTo = null; // Don't redirect yet, show payment info first
@@ -2467,6 +2474,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             const errorText = await chargeResponse.text();
             console.error('Failed to create boleto charge:', chargeResponse.status, errorText);
+            
+            // Check if it's CPF validation error
+            try {
+              const errorData = JSON.parse(errorText);
+              if (errorData.errors && errorData.errors.some(err => err.message && err.message.includes('Invalid CPF'))) {
+                return res.status(400).json({
+                  success: false,
+                  error: 'invalid_cpf',
+                  message: 'CPF inválido. Verifique o número do CPF e tente novamente.'
+                });
+              }
+            } catch (e) {
+              // Continue with generic error
+            }
+            
             responseData.paymentInfo = {
               amount: priceInCentavos,
               expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
@@ -2475,6 +2497,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (error) {
           console.error('Error creating boleto charge:', error);
+          
+          // Check if it's CPF validation error
+          if (error.message && error.message.includes('Invalid CPF')) {
+            return res.status(400).json({
+              success: false,
+              error: 'invalid_cpf',
+              message: 'CPF inválido. Verifique o número do CPF e tente novamente.'
+            });
+          }
+          
           responseData.paymentInfo = {
             amount: priceInCentavos,
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()

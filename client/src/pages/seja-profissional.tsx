@@ -116,11 +116,20 @@ export default function SejaProfissional() {
       }
     },
     onError: (error) => {
-      toast({
-        title: "Erro ao processar pagamento",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Check for specific error types
+      if (error.message.includes('CPF inválido') || error.message.includes('Invalid CPF')) {
+        toast({
+          title: "CPF Inválido",
+          description: "Verifique o número do CPF e tente novamente.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro ao processar pagamento",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -646,11 +655,34 @@ export default function SejaProfissional() {
                         alt="QR Code PIX" 
                         className="w-48 h-48 mx-auto"
                         data-testid="pix-qr-code"
+                        onError={(e) => {
+                          console.error('QR Code image failed to load:', paymentInfo.qrCodeUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('QR Code image loaded successfully:', paymentInfo.qrCodeUrl);
+                        }}
                       />
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">
                       Escaneie o QR Code com seu app de banco para pagar
                     </p>
+                  </div>
+                )}
+                
+                {/* Debug info */}
+                {paymentMethod === 'pix' && !paymentInfo.qrCodeUrl && (
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-sm text-yellow-700">
+                      QR Code não disponível. Dados recebidos:
+                    </p>
+                    <pre className="text-xs text-yellow-600 mt-1">
+                      {JSON.stringify({
+                        hasQrCodeUrl: !!paymentInfo.qrCodeUrl,
+                        hasQrCode: !!paymentInfo.qrCode,
+                        hasPixCode: !!paymentInfo.pixCode
+                      }, null, 2)}
+                    </pre>
                   </div>
                 )}
 
