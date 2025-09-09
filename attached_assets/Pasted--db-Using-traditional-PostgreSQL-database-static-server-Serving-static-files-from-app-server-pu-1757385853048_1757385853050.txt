@@ -1,0 +1,519 @@
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:16:04 AM [express] serving on port 5000
+[static-server] Serving index.html for: /install
+[static-server] Serving index.html for: /favicon.ico
+2:16:05 AM [express] GET /api/install/status 200 in 30ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:16:07 AM [express] GET /api/categories 200 in 30ms :: [{"id":"ae882751-68f1-41de-987b-05bb9262cb97…
+2:16:07 AM [express] GET /api/categories/popular 200 in 29ms :: [{"id":"676b8100-d29b-4890-b1ea-e6f7…
+2:16:07 AM [express] GET /api/professionals/search 200 in 34ms :: []
+[static-server] Serving index.html for: /favicon.ico
+2:16:10 AM [express] GET /api/subscription-plans 200 in 4ms :: [{"id":"7bee79a2-da05-4793-9cf4-25746…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /entrar
+2:16:25 AM [express] GET /api/install/status 304 in 12ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:16:33 AM [express] POST /api/auth/admin/login 200 in 72ms :: {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI…
+2:16:33 AM [express] GET /api/admin/dashboard/stats 200 in 24ms :: {"activeProfessionals":0,"monthly…
+2:16:33 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 11ms :: {"error":"Configur…
+2:16:33 AM [express] GET /api/admin/categories 200 in 13ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+[static-server] Serving index.html for: /favicon.ico
+2:16:33 AM [express] GET /api/admin/professionals 200 in 60ms :: []
+2:16:33 AM [express] GET /api/admin/plans 200 in 65ms :: [{"id":"7bee79a2-da05-4793-9cf4-2574671dbf2…
+2:16:33 AM [express] GET /api/admin/pages 200 in 65ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:16:33 AM [express] GET /api/admin/reviews 200 in 38ms :: []
+2:16:33 AM [express] GET /api/admin/users 200 in 58ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+2:16:33 AM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 57ms :: {"error":"Configuration n…
+2:16:33 AM [express] GET /api/admin/payments 200 in 76ms :: []
+2:17:06 AM [express] DELETE /api/admin/plans/7bee79a2-da05-4793-9cf4-2574671dbf2a 200 in 16ms :: {"m…
+2:17:06 AM [express] GET /api/admin/plans 200 in 5ms :: [{"id":"7e0a3b56-32db-4356-9adf-ebe1b2d13790…
+2:17:10 AM [express] DELETE /api/admin/plans/7e0a3b56-32db-4356-9adf-ebe1b2d13790 200 in 5ms :: {"me…
+2:17:10 AM [express] GET /api/admin/plans 200 in 3ms :: [{"id":"816f7bfb-5b88-4683-b3f3-6bb52cd24b68…
+2:17:13 AM [express] DELETE /api/admin/plans/816f7bfb-5b88-4683-b3f3-6bb52cd24b68 200 in 6ms :: {"me…
+2:17:13 AM [express] GET /api/admin/plans 200 in 5ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df73…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:17:29 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 500 in 44ms :: {"mess…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:17:31 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 500 in 15ms :: {"mess…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:17:34 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 500 in 13ms :: {"mess…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:17:36 AM [express] PUT /api/admin/plans/6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10 500 in 15ms :: {"mess…
+2:18:16 AM [express] POST /api/admin/plans 500 in 15ms :: {"message":"Erro interno do servidor"}
+Error creating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.createSubscriptionPlan (/app/server/storage.ts:644:23)
+    at async <anonymous> (/app/server/routes.ts:1546:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+[static-server] Serving index.html for: /admin/dashboard
+2:18:20 AM [express] GET /api/install/status 304 in 10ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:18:21 AM [express] GET /api/admin/users 304 in 55ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+2:18:21 AM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 74ms :: {"error":"Configuration n…
+2:18:21 AM [express] GET /api/admin/plans 304 in 72ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df7…
+2:18:21 AM [express] GET /api/admin/categories 304 in 63ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+2:18:21 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 80ms :: {"error":"Configur…
+2:18:21 AM [express] GET /api/admin/dashboard/stats 304 in 71ms :: {"activeProfessionals":0,"monthly…
+2:18:21 AM [express] GET /api/admin/payments 304 in 76ms :: []
+2:18:21 AM [express] GET /api/admin/pages 304 in 68ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:18:21 AM [express] GET /api/admin/reviews 304 in 78ms :: []
+2:18:21 AM [express] GET /api/admin/professionals 304 in 91ms :: []
+2:18:45 AM [express] POST /api/admin/users 201 in 73ms :: {"id":"51cfb5d5-6b49-4f6e-b55b-5bd8c9e6d01…
+2:18:45 AM [express] GET /api/admin/users 200 in 5ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd09…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:19:03 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 16ms :: {"mess…
+Testing Pagar.me connection before sync...
+Testing Pagar.me connection...
+Connection failed: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:2046:29)
+Error in syncPlanWithPagarMe: Error: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at getPagarmeApiKey (/app/server/pagarme.ts:8:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createPagarmeClient (/app/server/pagarme.ts:15:18)
+    at async PagarMeService.testConnection (/app/server/pagarme.ts:31:22)
+    at async PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:129:7)
+    at async <anonymous> (/app/server/routes.ts:2046:29)
+Error syncing plan with Pagar.me: Error: Falha na sincronização com Pagar.me: PAGARME_API_KEY não configurado. Configure nas configurações do sistema.
+    at PagarMeService.syncPlanWithPagarMe (/app/server/pagarme.ts:170:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/server/routes.ts:2046:29)
+2:19:22 AM [express] POST /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73/sync-pagarme 500 in …
+2:19:27 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 5ms :: {"messa…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:25:46 AM [express] serving on port 5000
+[static-server] Serving index.html for: /admin/dashboard
+2:25:48 AM [express] GET /api/install/status 304 in 32ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:25:48 AM [express] GET /api/admin/professionals 304 in 67ms :: []
+2:25:48 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 93ms :: {"error":"Configur…
+2:25:48 AM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 90ms :: {"error":"Configuration n…
+2:25:48 AM [express] GET /api/admin/users 304 in 87ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+2:25:48 AM [express] GET /api/admin/plans 304 in 86ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df7…
+2:25:48 AM [express] GET /api/admin/reviews 304 in 92ms :: []
+2:25:48 AM [express] GET /api/admin/categories 304 in 90ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+2:25:48 AM [express] GET /api/admin/pages 304 in 74ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:25:48 AM [express] GET /api/admin/payments 304 in 81ms :: []
+2:25:48 AM [express] GET /api/admin/dashboard/stats 304 in 93ms :: {"activeProfessionals":0,"monthly…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:25:54 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 20ms :: {"mess…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:25:55 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 5ms :: {"messa…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:25:55 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 5ms :: {"messa…
+2:25:56 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 5ms :: {"messa…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:25:56 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 4ms :: {"messa…
+Error updating plan: error: invalid input syntax for type numeric: ""
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/app/node_modules/src/node-postgres/session.ts:104:19)
+    at async DatabaseStorage.updateSubscriptionPlan (/app/server/storage.ts:649:23)
+    at async <anonymous> (/app/server/routes.ts:1594:20) {
+  length: 131,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: undefined,
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = ''",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'numeric.c',
+  line: '801',
+  routine: 'numeric_in'
+}
+2:25:56 AM [express] PUT /api/admin/plans/0970052b-198b-4ba0-a996-28afb007df73 500 in 4ms :: {"messa…
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:27:15 AM [express] serving on port 5000
+[static-server] Serving index.html for: /admin/dashboard
+[static-server] Serving index.html for: /favicon.ico
+2:27:22 AM [express] GET /api/install/status 304 in 25ms :: {"installed":true,"needsInstallation":fa…
+2:27:22 AM [express] GET /api/admin/configs/PAGARME_ENCRYPTION_KEY 404 in 55ms :: {"error":"Configur…
+2:27:22 AM [express] GET /api/admin/configs/PAGARME_API_KEY 404 in 50ms :: {"error":"Configuration n…
+2:27:22 AM [express] GET /api/admin/plans 304 in 56ms :: [{"id":"0970052b-198b-4ba0-a996-28afb007df7…
+2:27:22 AM [express] GET /api/admin/users 304 in 54ms :: [{"id":"85890426-9dd2-4b67-b8a0-50de8fb4fd0…
+2:27:22 AM [express] GET /api/admin/pages 304 in 50ms :: [{"id":"7c3e611b-acf5-4db8-b2d5-e8226510005…
+2:27:22 AM [express] GET /api/admin/reviews 304 in 54ms :: []
+2:27:22 AM [express] GET /api/admin/dashboard/stats 304 in 69ms :: {"activeProfessionals":0,"monthly…
+2:27:22 AM [express] GET /api/admin/categories 304 in 61ms :: [{"id":"ae882751-68f1-41de-987b-05bb92…
+2:27:22 AM [express] GET /api/admin/payments 304 in 72ms :: []
+2:27:22 AM [express] GET /api/admin/professionals 304 in 61ms :: []
+[auto-sync] Plano atualizado, tentando ressincronizar com Pagar.me...
+[db] Using traditional PostgreSQL database
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+2:39:47 AM [express] serving on port 5000
+[static-server] Serving index.html for: /seja-profissional
+2:39:48 AM [express] GET /api/install/status 304 in 32ms :: {"installed":true,"needsInstallation":fa…
+[static-server] Serving index.html for: /favicon.ico
+2:39:48 AM [express] GET /api/subscription-plans 304 in 16ms :: [{"id":"6e31f402-53a5-4b6d-a1a1-88eb…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:14 AM [express] POST /api/payments/create-subscription 500 in 307ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:17 AM [express] POST /api/payments/create-subscription 500 in 262ms :: {"success":false,"error"…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:40:18 AM [express] POST /api/payments/create-subscription 500 in 239ms :: {"success":false,"error"…
+[static-server] Serving index.html for: /favicon.ico
+[static-server] Serving index.html for: /seja-profissional
+2:42:47 AM [express] GET /api/install/status 304 in 40ms :: {"installed":true,"needsInstallation":fa…
+Plan found: {
+  id: '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10',
+  name: 'Plano Básico',
+  monthlyPrice: '29.90',
+  monthlyPriceType: 'string',
+  pagarmeProductId: 'plan_94qYE4wtxt4jeZ25'
+}
+Price validation: {
+  planName: 'Plano Básico',
+  originalPrice: '29.90',
+  priceInReais: 29.9,
+  priceInCentavos: 2990,
+  expectedForProfissional: 'R$ 59,90 = 5990 centavos'
+}
+Erro na API Pagar.me: { message: 'Authorization has been denied for this request.' }
+Error creating subscription: Error: API Error: 401 - {"message":"Authorization has been denied for this request."}
+    at <anonymous> (/app/server/routes.ts:2295:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2:43:36 AM [express] POST /api/payments/create-subscription 500 in 237ms :: {"success":false,"error"…
