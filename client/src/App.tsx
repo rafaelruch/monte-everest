@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import InstallationGuard from "@/components/installation-guard";
@@ -25,6 +25,21 @@ import Installation from "@/pages/installation";
 import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
 import PageContent from "@/pages/page-content";
 import NotFound from "@/pages/not-found";
+
+// Component to protect installation routes
+function InstallationRoute({ component: Component }: { component: React.ComponentType }) {
+  const { data: installStatus } = useQuery({
+    queryKey: ["/api/install/status"],
+    retry: false,
+  });
+
+  // If system is already installed, show 404
+  if (installStatus?.installed) {
+    return <NotFound />;
+  }
+
+  return <Component />;
+}
 
 function Router() {
   return (
@@ -55,8 +70,12 @@ function Router() {
               <Route path="/profissional/:id" component={ProfessionalProfile} />
               <Route path="/professional-login" component={ProfessionalLogin} />
               <Route path="/professional-checkout" component={ProfessionalCheckout} />
-              <Route path="/install" component={Installation} />
-              <Route path="/easypanel-installer" component={EasyPanelInstaller} />
+              <Route path="/install">
+                {() => <InstallationRoute component={Installation} />}
+              </Route>
+              <Route path="/easypanel-installer">
+                {() => <InstallationRoute component={EasyPanelInstaller} />}
+              </Route>
               <Route path="/pagina/:slug" component={PageContent} />
               <Route component={NotFound} />
             </Switch>

@@ -256,6 +256,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/install", async (req, res) => {
     try {
+      // Check if already installed first
+      const adminUsers = await storage.getAdminUsers();
+      if (adminUsers.length > 0) {
+        return res.status(404).json({ message: "Página não encontrada" });
+      }
+
       const { adminEmail, adminPassword, siteName, databaseUrl, siteUrl } = req.body;
       
       if (!adminEmail || !adminPassword) {
@@ -290,12 +296,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log("[install] ✅ Todas as tabelas criadas com sucesso!");
-
-      // Check if already installed
-      const adminUsers = await storage.getAdminUsers();
-      if (adminUsers.length > 0) {
-        return res.status(400).json({ message: "Sistema já foi instalado" });
-      }
       
       // Hash password and create admin
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -356,6 +356,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint especial para instalação automática de tabelas (EasyPanel)
   app.post("/api/install/setup-database", async (req, res) => {
     try {
+      // Check if already installed first
+      const adminUsers = await storage.getAdminUsers();
+      if (adminUsers.length > 0) {
+        return res.status(404).json({ message: "Página não encontrada" });
+      }
+
       const { databaseUrl } = req.body;
       
       if (!databaseUrl) {
