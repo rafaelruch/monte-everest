@@ -1,6 +1,17 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 
+// Configurar variáveis de ambiente do Object Storage se não estiverem definidas
+if (!process.env.PUBLIC_OBJECT_SEARCH_PATHS) {
+  process.env.PUBLIC_OBJECT_SEARCH_PATHS = "/replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/public";
+  console.log("[startup] Configurando PUBLIC_OBJECT_SEARCH_PATHS:", process.env.PUBLIC_OBJECT_SEARCH_PATHS);
+}
+
+if (!process.env.PRIVATE_OBJECT_DIR) {
+  process.env.PRIVATE_OBJECT_DIR = "/replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/.private";
+  console.log("[startup] Configurando PRIVATE_OBJECT_DIR:", process.env.PRIVATE_OBJECT_DIR);
+}
+
 // Function to dynamically import log function without importing Vite
 function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
