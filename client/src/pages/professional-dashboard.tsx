@@ -1008,11 +1008,45 @@ export default function ProfessionalDashboard() {
 
                   {/* Add photo button */}
                   <div className="col-span-full">
-                    <ImageUploader
-                      onGetUploadParameters={handleGetUploadParameters}
-                      onComplete={handleUploadComplete}
-                      maxFileSize={5 * 1024 * 1024} // 5MB
-                    />
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="portfolio-upload-input"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          try {
+                            const params = await handleGetUploadParameters();
+                            const uploadResponse = await fetch(params.url, {
+                              method: params.method,
+                              body: file,
+                              headers: { 'Content-Type': file.type },
+                            });
+                            
+                            if (uploadResponse.ok) {
+                              handleUploadComplete({ uploadURL: params.url });
+                            }
+                          } catch (error) {
+                            console.error("Portfolio upload error:", error);
+                          }
+                        }}
+                      />
+                      <Button 
+                        type="button"
+                        variant="outline"
+                        className="w-full h-32 border-dashed"
+                        onClick={() => document.getElementById('portfolio-upload-input')?.click()}
+                      >
+                        <div className="flex flex-col items-center">
+                          <ImagePlus className="h-8 w-8 mb-2" />
+                          <span>Adicionar Foto ao Portfólio</span>
+                          <span className="text-xs text-muted-foreground">JPG, PNG até 5MB</span>
+                        </div>
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
