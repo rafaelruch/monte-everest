@@ -981,15 +981,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Record contact interaction
   app.post("/api/contacts", async (req, res) => {
     try {
+      console.log("[contact] Environment:", process.env.NODE_ENV);
+      console.log("[contact] Database URL exists:", !!process.env.DATABASE_URL);
+      console.log("[contact] Received data:", JSON.stringify(req.body, null, 2));
+      
+      // Validate required fields manually first
+      if (!req.body.professionalId) {
+        console.error("[contact] Missing professionalId");
+        return res.status(400).json({ message: "ID do profissional é obrigatório" });
+      }
+      
+      if (!req.body.contactMethod) {
+        console.error("[contact] Missing contactMethod");
+        return res.status(400).json({ message: "Método de contato é obrigatório" });
+      }
+      
+      console.log("[contact] Starting validation...");
       const validatedData = insertContactSchema.parse(req.body);
+      console.log("[contact] Validated data:", JSON.stringify(validatedData, null, 2));
+      
+      console.log("[contact] Attempting to create contact in database...");
       const contact = await storage.createContact(validatedData);
+      console.log("[contact] Contact created successfully:", contact.id);
+      
       res.status(201).json({ message: "Contato registrado com sucesso", contact });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+        console.error("[contact] Validation error:", JSON.stringify(error.errors, null, 2));
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: error.errors,
+          details: "Erro de validação de schema"
+        });
       }
-      console.error("Error creating contact:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      
+      // Enhanced error logging for production debugging
+      console.error("[contact] === ERROR DETAILS ===");
+      console.error("[contact] Error type:", error?.constructor?.name);
+      console.error("[contact] Error message:", error instanceof Error ? error.message : 'Unknown error');
+      console.error("[contact] Error stack:", error instanceof Error ? error.stack : 'No stack available');
+      console.error("[contact] Request body:", JSON.stringify(req.body, null, 2));
+      console.error("[contact] Environment:", {
+        NODE_ENV: process.env.NODE_ENV,
+        hasDbUrl: !!process.env.DATABASE_URL,
+        timestamp: new Date().toISOString()
+      });
+      console.error("[contact] ===================");
+      
+      // Return more detailed error for debugging
+      res.status(500).json({ 
+        message: "Erro interno do servidor",
+        debug: process.env.NODE_ENV === 'development' ? {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          type: error?.constructor?.name,
+          stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined
+        } : undefined
+      });
     }
   });
 
