@@ -2009,7 +2009,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ uploadURL });
   });
 
-  // Serve private objects with public access for professional photos
+  // Serve public images for professional photos/portfolio
+  app.get("/images/:imagePath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      // Convert /images/... path to /objects/... path for internal processing
+      const objectPath = `/objects/${req.params.imagePath}`;
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving image:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Serve private objects with public access for professional photos (legacy)
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = new ObjectStorageService();
     try {

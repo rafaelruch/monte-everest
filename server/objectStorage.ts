@@ -203,7 +203,8 @@ export class ObjectStorageService {
   
     // Extract the entity ID from the path
     const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
+    // Use /images/ path for public serving instead of /objects/
+    return `/images/${entityId}`;
   }
 
   // Tries to set the ACL policy for the object entity and return the normalized path.
