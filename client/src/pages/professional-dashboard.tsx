@@ -923,19 +923,30 @@ export default function ProfessionalDashboard() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
+                          console.log("[frontend] Iniciando upload da foto de perfil:", file.name, file.size);
+                          
                           try {
+                            console.log("[frontend] Obtendo parâmetros de upload...");
                             const params = await handleGetProfileImageUploadParameters();
+                            console.log("[frontend] Parâmetros obtidos:", params.method, params.url ? "URL_OK" : "NO_URL");
+                            
+                            console.log("[frontend] Fazendo upload do arquivo...");
                             const uploadResponse = await fetch(params.url, {
                               method: params.method,
                               body: file,
                               headers: { 'Content-Type': file.type },
                             });
                             
+                            console.log("[frontend] Resposta do upload:", uploadResponse.status, uploadResponse.statusText);
+                            
                             if (uploadResponse.ok) {
+                              console.log("[frontend] Upload concluído, atualizando perfil...");
                               handleProfileImageUploadComplete({ uploadURL: params.url });
+                            } else {
+                              console.error("[frontend] Erro no upload:", await uploadResponse.text());
                             }
                           } catch (error) {
-                            console.error("Upload error:", error);
+                            console.error("[frontend] Erro durante upload da foto de perfil:", error);
                           }
                         }}
                       />
@@ -1244,19 +1255,30 @@ export default function ProfessionalDashboard() {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           
+                          console.log("[frontend] Iniciando upload da foto do portfólio:", file.name, file.size);
+                          
                           try {
+                            console.log("[frontend] Obtendo parâmetros de upload do portfólio...");
                             const params = await handleGetUploadParameters();
+                            console.log("[frontend] Parâmetros obtidos:", params.method, params.url ? "URL_OK" : "NO_URL");
+                            
+                            console.log("[frontend] Fazendo upload do arquivo do portfólio...");
                             const uploadResponse = await fetch(params.url, {
                               method: params.method,
                               body: file,
                               headers: { 'Content-Type': file.type },
                             });
                             
+                            console.log("[frontend] Resposta do upload:", uploadResponse.status, uploadResponse.statusText);
+                            
                             if (uploadResponse.ok) {
+                              console.log("[frontend] Upload concluído, adicionando ao portfólio...");
                               handleUploadComplete({ uploadURL: params.url });
+                            } else {
+                              console.error("[frontend] Erro no upload do portfólio:", await uploadResponse.text());
                             }
                           } catch (error) {
-                            console.error("Portfolio upload error:", error);
+                            console.error("[frontend] Erro durante upload do portfólio:", error);
                           }
                         }}
                       />

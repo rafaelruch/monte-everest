@@ -746,15 +746,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Professional portfolio photo upload routes
   app.post("/api/professionals/:id/photos/upload-url", verifyProfessionalToken, async (req, res) => {
     try {
+      console.log("[photo-upload] Solicitação de URL de upload para profissional:", req.params.id);
+      
       const professionalId = req.params.id;
       
       if (professionalId !== req.professional.id) {
+        console.log("[photo-upload] Acesso negado - IDs não coincidem");
         return res.status(403).json({ message: "Acesso negado" });
       }
 
       // Get professional and their plan to check photo limits
       const professional = await storage.getProfessional(professionalId);
       if (!professional) {
+        console.log("[photo-upload] Profissional não encontrado:", professionalId);
         return res.status(404).json({ message: "Profissional não encontrado" });
       }
 
@@ -763,18 +767,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check current photo count
       const currentPhotoCount = professional.portfolio?.length || 0;
+      console.log("[photo-upload] Fotos atuais:", currentPhotoCount, "/ Máximo:", maxPhotos);
+      
       if (currentPhotoCount >= maxPhotos) {
+        console.log("[photo-upload] Limite de fotos atingido");
         return res.status(400).json({ 
           message: `Limite de ${maxPhotos} fotos atingido para seu plano` 
         });
       }
 
+      console.log("[photo-upload] Gerando URL de upload...");
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       
+      console.log("[photo-upload] URL gerada com sucesso:", uploadURL ? "SIM" : "NÃO");
       res.json({ uploadURL });
     } catch (error) {
-      console.error("Error getting upload URL:", error);
+      console.error("[photo-upload] Erro ao obter URL de upload:", error);
+      console.error("[photo-upload] Detalhes do erro:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        env: {
+          NODE_ENV: process.env.NODE_ENV,
+          hasObjectStorageVars: {
+            PUBLIC_OBJECT_SEARCH_PATHS: !!process.env.PUBLIC_OBJECT_SEARCH_PATHS,
+            PRIVATE_OBJECT_DIR: !!process.env.PRIVATE_OBJECT_DIR
+          }
+        }
+      });
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
@@ -860,18 +880,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile image upload routes
   app.post("/api/professionals/:id/profile-image/upload-url", verifyProfessionalToken, async (req, res) => {
     try {
+      console.log("[profile-image] Solicitação de URL de upload para foto de perfil:", req.params.id);
+      
       const professionalId = req.params.id;
       
       if (professionalId !== req.professional.id) {
+        console.log("[profile-image] Acesso negado - IDs não coincidem");
         return res.status(403).json({ message: "Acesso negado" });
       }
 
+      console.log("[profile-image] Gerando URL de upload para foto de perfil...");
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       
+      console.log("[profile-image] URL de upload gerada:", uploadURL ? "SIM" : "NÃO");
       res.json({ uploadURL });
     } catch (error) {
-      console.error("Error getting profile image upload URL:", error);
+      console.error("[profile-image] Erro ao obter URL de upload:", error);
+      console.error("[profile-image] Detalhes do erro:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        env: {
+          NODE_ENV: process.env.NODE_ENV,
+          hasObjectStorageVars: {
+            PUBLIC_OBJECT_SEARCH_PATHS: !!process.env.PUBLIC_OBJECT_SEARCH_PATHS,
+            PRIVATE_OBJECT_DIR: !!process.env.PRIVATE_OBJECT_DIR
+          }
+        }
+      });
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
