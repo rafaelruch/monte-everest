@@ -1584,11 +1584,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Clean numeric fields - convert empty strings to null/undefined
       const cleanedData = { ...req.body };
+      
+      // Decimal fields
       if (cleanedData.monthlyPrice === "" || cleanedData.monthlyPrice === null) {
         cleanedData.monthlyPrice = undefined;
       }
+      if (cleanedData.yearlyPrice === "" || cleanedData.yearlyPrice === null) {
+        cleanedData.yearlyPrice = undefined;
+      }
+      
+      // Integer fields
       if (cleanedData.maxContacts === "" || cleanedData.maxContacts === null) {
         cleanedData.maxContacts = undefined;
+      }
+      if (cleanedData.maxPhotos === "" || cleanedData.maxPhotos === null) {
+        cleanedData.maxPhotos = undefined;
+      }
+      if (cleanedData.priority === "" || cleanedData.priority === null) {
+        cleanedData.priority = undefined;
       }
       
       const plan = await storage.updateSubscriptionPlan(req.params.id, cleanedData);
