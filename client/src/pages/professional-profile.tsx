@@ -171,7 +171,11 @@ export default function ProfessionalProfile() {
 
   const submitContactMutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
-      const response = await apiRequest("POST", "/api/contacts", data);
+      const response = await apiRequest("POST", "/api/contacts", {
+        ...data,
+        professionalId,
+        contactMethod: "form"
+      });
       return response.json();
     },
     onSuccess: () => {
