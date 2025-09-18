@@ -37,7 +37,7 @@ export default function ComoFunciona() {
     },
     {
       icon: <MapPin className="h-8 w-8 text-primary" />,
-      title: "Busca por Localização",
+      title: "Busca por Cidade",
       description: "Encontre profissionais próximos à sua região para maior comodidade e menor custo.",
     },
   ];
