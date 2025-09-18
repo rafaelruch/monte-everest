@@ -96,15 +96,6 @@ export default function ComoFunciona() {
               ))}
             </div>
           </div>
-
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-lg">
-              <CheckCircle className="h-5 w-5" />
-              <span className="font-medium" data-testid="guarantee-text">
-                Garantia de qualidade e satisfação
-              </span>
-            </div>
-          </div>
         </div>
       </section>
     </div>
