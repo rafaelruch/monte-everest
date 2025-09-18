@@ -413,7 +413,17 @@ export class DatabaseStorage implements IStorage {
     limit?: number;
     offset?: number;
   }): Promise<Professional[]> {
-    let query = db.select().from(professionals);
+    let query = db
+      .select({
+        ...professionals,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug,
+        },
+      })
+      .from(professionals)
+      .leftJoin(categories, eq(professionals.categoryId, categories.id));
     
     const conditions = [];
     
