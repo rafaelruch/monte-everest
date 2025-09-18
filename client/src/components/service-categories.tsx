@@ -1,38 +1,33 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Wrench, Zap, Droplets, Paintbrush, Leaf, Hammer, 
-  Scissors, Laptop, Car, Book, Music, Camera,
-  Scale, Calculator, Palette, Home, Utensils, Shirt,
-  Baby, Briefcase, Dumbbell, Heart, GraduationCap, Stethoscope
-} from "lucide-react";
+import CategoryIcon from "./category-icon";
 
-// Mapeamento de ícones por nome da categoria para fallback
-const iconMap: Record<string, any> = {
-  "Assistência Técnica": Wrench,
-  "Eletricista": Zap,
-  "Encanador": Droplets,
-  "Pintura": Paintbrush,
-  "Jardinagem": Leaf,
-  "Construção": Hammer,
-  "Beleza e Estética": Scissors,
-  "Informática": Laptop,
-  "Automotivo": Car,
-  "Educação": Book,
-  "Música": Music,
-  "Fotografia": Camera,
-  "Advocacia": Scale,
-  "Contabilidade": Calculator,
-  "Design": Palette,
-  "Limpeza": Home,
-  "Culinária": Utensils,
-  "Costura": Shirt,
-  "Cuidados Infantis": Baby,
-  "Marketing": Briefcase,
-  "Esportes": Dumbbell,
-  "Saúde": Stethoscope,
-  "Reforço Escolar": GraduationCap,
-  "Cuidados Especiais": Heart,
+// Mapeamento de ícones Font Awesome por nome da categoria para fallback
+const iconMap: Record<string, string> = {
+  "Assistência Técnica": "wrench",
+  "Eletricista": "plug",
+  "Encanador": "faucet",
+  "Pintura": "paint-brush",
+  "Jardinagem": "leaf",
+  "Construção": "hammer",
+  "Beleza e Estética": "cut",
+  "Informática": "desktop",
+  "Automotivo": "car",
+  "Educação": "book",
+  "Música": "music",
+  "Fotografia": "camera",
+  "Advocacia": "shield",
+  "Contabilidade": "calculator",
+  "Design": "pen",
+  "Limpeza": "broom",
+  "Culinária": "utensils",
+  "Costura": "tshirt",
+  "Cuidados Infantis": "heart",
+  "Marketing": "chart-bar",
+  "Esportes": "dumbbell",
+  "Saúde": "stethoscope",
+  "Reforço Escolar": "graduation-cap",
+  "Cuidados Especiais": "heartbeat",
 };
 
 // Cores para as categorias
@@ -61,13 +56,13 @@ export default function ServiceCategories() {
     setLocation(`/buscar?category=${categorySlug}`);
   };
 
-  const getCategoryIcon = (category: any) => {
+  const getCategoryIcon = (category: any): string => {
     // Primeiro tenta usar o ícone do banco se disponível
-    if (category.icon && iconMap[category.name]) {
-      return iconMap[category.name];
+    if (category.icon) {
+      return category.icon;
     }
-    // Fallback para ícone baseado no nome
-    return iconMap[category.name] || Wrench;
+    // Fallback para ícone baseado no nome da categoria
+    return iconMap[category.name] || "wrench";
   };
 
   const getCategoryColor = (index: number) => {
@@ -122,7 +117,7 @@ export default function ServiceCategories() {
         
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {popularCategories.map((category: any, index: number) => {
-            const Icon = getCategoryIcon(category);
+            const iconName = getCategoryIcon(category);
             const color = getCategoryColor(index);
             
             return (
@@ -133,7 +128,7 @@ export default function ServiceCategories() {
                 data-testid={`category-${category.slug}`}
               >
                 <div className={`${color} mb-4 group-hover:scale-110 transition-transform duration-200 flex justify-center`}>
-                  <Icon size={40} />
+                  <CategoryIcon iconName={iconName} size="lg" />
                 </div>
                 <h3 className="font-medium text-foreground text-sm leading-tight" data-testid={`category-name-${category.slug}`}>
                   {category.name}
