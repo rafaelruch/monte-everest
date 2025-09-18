@@ -17,7 +17,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin-layout";
 import IconSelector from "@/components/icon-selector";
-import CategoryIcon from "@/components/category-icon";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -444,24 +443,16 @@ export default function AdminCategories() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Ícone</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Profissionais</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCategories.map((category: any) => (
                   <TableRow key={category.id}>
-                    <TableCell>
-                      <CategoryIcon 
-                        iconName={category.icon} 
-                        className="h-6 w-6"
-                      />
-                    </TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                     <TableCell className="max-w-xs truncate">
@@ -471,12 +462,6 @@ export default function AdminCategories() {
                       <Badge variant={category.isActive ? "default" : "secondary"}>
                         {category.isActive ? "Ativa" : "Inativa"}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-1 text-muted-foreground" />
-                        {category.professionalsCount || 0}
-                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">

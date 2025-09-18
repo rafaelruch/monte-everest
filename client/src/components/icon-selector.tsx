@@ -80,7 +80,7 @@ import {
   // Diversos
   faGamepad, faDice, faPuzzlePiece, faBomb, faMagic,
   faQuestion, faExclamation, faInfo,
-  faCompass, faMap, faLocationArrow, faMapPin, faBinoculars, faZap
+  faCompass, faMap, faLocationArrow, faMapPin, faBinoculars
 } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -340,7 +340,7 @@ const availableIcons = [
   { icon: faSearch, name: "search", label: "Busca" },
   { icon: faFilter, name: "filter", label: "Filtro" },
   { icon: faSort, name: "sort", label: "Ordenar" },
-  { icon: faZap, name: "zap", label: "Raio" },
+  { icon: faBolt, name: "zap", label: "Raio" },
   { icon: faRandom, name: "random", label: "Aleatório" },
   { icon: faSync, name: "sync", label: "Sincronizar" },
   { icon: faDownload, name: "download", label: "Download" },
