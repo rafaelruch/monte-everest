@@ -34,6 +34,9 @@ import { Pool as PgPool } from 'pg';
 import { eq, desc, asc, and, like, sql, count, avg, or, isNull, gt, lt, lte } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
+// Global flag to track UNACCENT availability
+let unaccentAvailable: boolean | null = null;
+
 export interface IStorage {
   // Installation operations
   getAdminUsers(): Promise<User[]>;
@@ -132,6 +135,54 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Initialize database extensions and check UNACCENT availability
+  async initializeDatabase(): Promise<void> {
+    try {
+      console.log('[db] Initializing database extensions...');
+      
+      // Try to create UNACCENT extension
+      await db.execute(sql`CREATE EXTENSION IF NOT EXISTS unaccent`);
+      
+      // Test UNACCENT functionality
+      await db.execute(sql`SELECT unaccent('test')`);
+      
+      unaccentAvailable = true;
+      console.log('[db] UNACCENT extension is available and working');
+    } catch (error) {
+      console.warn('[db] UNACCENT extension not available, falling back to regular ILIKE:', error);
+      unaccentAvailable = false;
+      
+      // Log the error for debugging
+      await this.createLog({
+        userId: 'system',
+        action: 'unaccent_initialization_failed',
+        entityType: 'database',
+        entityId: 'unaccent_extension',
+        details: { error: error instanceof Error ? error.message : String(error) },
+        ipAddress: null,
+        userAgent: null
+      }).catch(() => {
+        // Ignore logging errors during initialization
+        console.warn('[db] Could not log UNACCENT initialization error');
+      });
+    }
+  }
+
+  // Helper method to create accent-insensitive search conditions with fallback
+  private createAccentInsensitiveCondition(column: any, searchTerm: string) {
+    if (unaccentAvailable === true) {
+      try {
+        return sql`unaccent(${column}) ILIKE unaccent(${`%${searchTerm}%`})`;
+      } catch (error) {
+        console.warn('[db] UNACCENT query failed, falling back to case-insensitive ILIKE:', error);
+        unaccentAvailable = false;
+        return sql`${column} ILIKE ${`%${searchTerm}%`}`;
+      }
+    } else {
+      // Use regular case-insensitive search as fallback
+      return sql`${column} ILIKE ${`%${searchTerm}%`}`;
+    }
+  }
   // Installation operations
   async getAdminUsers(): Promise<User[]> {
     return await db.select().from(users).where(eq(users.role, 'admin'));
@@ -371,11 +422,13 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (filters?.serviceArea) {
-      conditions.push(like(professionals.serviceArea, `%${filters.serviceArea}%`));
+      // Use accent-insensitive search with fallback
+      conditions.push(this.createAccentInsensitiveCondition(professionals.serviceArea, filters.serviceArea));
     }
     
     if (filters?.city) {
-      conditions.push(like(professionals.city, `%${filters.city}%`));
+      // Use accent-insensitive search with fallback
+      conditions.push(this.createAccentInsensitiveCondition(professionals.city, filters.city));
     }
     
     if (filters?.status) {

@@ -131,6 +131,13 @@ const processPagarMePayment = async (paymentData: any) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Initialize database extensions and check UNACCENT availability
+  try {
+    await storage.initializeDatabase();
+  } catch (error) {
+    console.error('[startup] Failed to initialize database:', error);
+  }
+  
   // Public API Routes
 
   // Get all categories

@@ -15,3 +15,14 @@ export function formatCurrency(value: number, currency: string = 'BRL'): string 
     maximumFractionDigits: 2,
   }).format(value);
 }
+
+/**
+ * Check if a string is a valid UUID (version 4 format)
+ * UUIDs have the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ */
+export function isUuid(value: string): boolean {
+  if (!value || typeof value !== 'string') return false;
+  
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+}

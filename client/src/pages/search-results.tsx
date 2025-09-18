@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useSearch } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, isUuid } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,20 +29,46 @@ export default function SearchResults() {
   const [currentPage, setCurrentPage] = useState(1);
   const professionalsPerPage = 12;
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
   });
 
+  // Use useMemo to compute derived category ID outside the query to prevent race conditions
+  const derivedCategoryId = useMemo(() => {
+    if (selectedCategory === "all" || !selectedCategory) {
+      return "";
+    }
+    
+    // If selectedCategory is a UUID, use it directly
+    if (isUuid(selectedCategory)) {
+      return selectedCategory;
+    }
+    
+    // If categories are still loading and we have a slug (not an ID), wait for them to load
+    if (categoriesLoading) {
+      return null; // Signal to wait for categories
+    }
+    
+    // Find category by slug (for URLs from popular categories)
+    const categoryData = (categories as Category[]).find((cat: Category) => cat.slug === selectedCategory);
+    
+    return categoryData?.id || "";
+  }, [selectedCategory, categories, categoriesLoading]);
+
   const { data: professionals = [], isLoading, error } = useQuery({
     queryKey: ["/api/professionals/search", { 
-      category: selectedCategory === "all" ? "" : selectedCategory, 
+      category: derivedCategoryId, 
       location, 
       page: currentPage, 
       limit: professionalsPerPage 
     }],
+    // Only enable the query when we have a resolved category ID (or no category filter)
+    enabled: derivedCategoryId !== null,
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (selectedCategory && selectedCategory !== "all") params.set("category", selectedCategory);
+      if (derivedCategoryId) {
+        params.set("category", derivedCategoryId);
+      }
       if (location) params.set("location", location);
       params.set("page", currentPage.toString());
       params.set("limit", professionalsPerPage.toString());
@@ -55,14 +81,19 @@ export default function SearchResults() {
     },
   });
 
-  const selectedCategoryData = selectedCategory === "all" ? null : (categories as Category[]).find((cat: Category) => cat.id === selectedCategory);
+  // Find category by slug first (for URLs from popular categories), then by ID (for backward compatibility)
+  const selectedCategoryData = selectedCategory === "all" ? null : 
+    (categories as Category[]).find((cat: Category) => cat.slug === selectedCategory) ||
+    (categories as Category[]).find((cat: Category) => cat.id === selectedCategory);
 
   // Update selected category name when category changes
   useEffect(() => {
     if (selectedCategory === "all") {
       setSelectedCategoryName("");
     } else {
-      const category = (categories as Category[]).find((cat: Category) => cat.id === selectedCategory);
+      // Find category by slug first, then by ID
+      const category = (categories as Category[]).find((cat: Category) => cat.slug === selectedCategory) ||
+                      (categories as Category[]).find((cat: Category) => cat.id === selectedCategory);
       setSelectedCategoryName(category?.name || "");
     }
   }, [selectedCategory, categories]);
@@ -171,7 +202,7 @@ export default function SearchResults() {
                               <Check
                                 className={cn(
                                   "mr-2 h-4 w-4",
-                                  selectedCategory === category.id ? "opacity-100" : "opacity-0"
+                                  (selectedCategory === category.id || selectedCategory === category.slug) ? "opacity-100" : "opacity-0"
                                 )}
                               />
                               {category.name}
