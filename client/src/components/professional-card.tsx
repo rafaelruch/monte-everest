@@ -157,6 +157,15 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
                   showTotal={false}
                 />
               </div>
+              
+              {/* Category after rating */}
+              {professional.category && (
+                <div className="mt-1">
+                  <p className="text-primary font-medium text-sm" data-testid={`professional-category-${professional.id}`}>
+                    {professional.category.name}
+                  </p>
+                </div>
+              )}
             </div>
             
             {/* Description */}
@@ -166,15 +175,10 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
               </p>
             </div>
             
-            {/* Category and Ranking */}
+            {/* Ranking */}
             <div className="mb-2">
-              {professional.category && (
-                <p className="text-primary font-medium text-sm" data-testid={`professional-category-${professional.id}`}>
-                  {professional.category.name}
-                </p>
-              )}
               {professional.rankingPosition && professional.category && (
-                <Badge variant="secondary" className="mt-1 text-xs" data-testid={`professional-ranking-${professional.id}`}>
+                <Badge variant="secondary" className="text-xs" data-testid={`professional-ranking-${professional.id}`}>
                   #{professional.rankingPosition} em {professional.category.name}
                 </Badge>
               )}
