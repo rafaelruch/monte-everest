@@ -16,6 +16,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin-layout";
+import IconSelector from "@/components/icon-selector";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -293,7 +294,11 @@ export default function AdminCategories() {
                       <FormItem>
                         <FormLabel>Ícone</FormLabel>
                         <FormControl>
-                          <Input placeholder="cleaning" {...field} />
+                          <IconSelector 
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Selecione um ícone para a categoria"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
