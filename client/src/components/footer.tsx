@@ -15,7 +15,7 @@ export default function Footer() {
             />
             <p className="text-muted-foreground mb-4" data-testid="footer-description">
               A plataforma que conecta você com os melhores profissionais da sua região.
-              Qualidade garantida através de avaliações reais.
+              Qualidade baseada em avaliações reais.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors" data-testid="social-facebook">
