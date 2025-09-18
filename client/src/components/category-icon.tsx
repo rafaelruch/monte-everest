@@ -11,7 +11,8 @@ import {
   faBook, faPen, faCalculator, faGlobe, faEnvelope, faPhone,
   faHeart, faStar, faThumbsUp, faSmile, faHandshake, faAward,
   faShield, faKey, faLock, faCog, faChartBar, faMoneyBill,
-  faQuestionCircle
+  faQuestionCircle, faSnowflake, faLanguage, faBaby, faPalette,
+  faBullhorn, faDroplet, faBalanceScale
 } from "@fortawesome/free-solid-svg-icons";
 
 const iconMap = {
@@ -19,6 +20,7 @@ const iconMap = {
   "wrench": faWrench,
   "hammer": faHammer,
   "paint-brush": faPaintBrush,
+  "paintbrush": faPaintBrush, // alias
   "shower": faShower,
   "leaf": faLeaf,
   "car": faCar,
@@ -30,13 +32,16 @@ const iconMap = {
   "plug": faPlug,
   "wifi": faWifi,
   "desktop": faDesktop,
+  "laptop": faDesktop, // usando desktop como alternativa para laptop
   "camera": faCamera,
   "music": faMusic,
+  "Music": faMusic, // case-insensitive
   "gamepad": faGamepad,
   "graduation-cap": faGraduationCap,
   "heartbeat": faHeartbeat,
   "stethoscope": faStethoscope,
   "cut": faCut,
+  "scissors": faCut, // alias para cut
   "user-md": faUserMd,
   "dumbbell": faDumbbell,
   "running": faRunning,
@@ -60,6 +65,7 @@ const iconMap = {
   "shopping-bag": faShoppingBag,
   "gift": faGift,
   "tshirt": faTshirt,
+  "shirt": faTshirt, // alias
   "gem": faGem,
   "ring": faRing,
   "umbrella": faUmbrella,
@@ -81,6 +87,19 @@ const iconMap = {
   "cog": faCog,
   "chart-bar": faChartBar,
   "money-bill": faMoneyBill,
+  // Novos ícones para mapear os existentes no banco
+  "snowflake": faSnowflake,
+  "refrigerator": faHome, // usando home como fallback para refrigerator
+  "languages": faLanguage,
+  "language": faLanguage,
+  "zap": faPlug, // usando plug como alternativa para zap
+  "baby": faBaby,
+  "palette": faPalette,
+  "megaphone": faBullhorn,
+  "droplet": faDroplet,
+  "scale": faBalanceScale,
+  "activity": faHeartbeat, // usando heartbeat como alternativa para activity
+  "flower": faLeaf, // usando leaf como alternativa para flower
 };
 
 interface CategoryIconProps {
