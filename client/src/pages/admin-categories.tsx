@@ -63,10 +63,22 @@ export default function AdminCategories() {
         description: "Categoria criada com sucesso!",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Erro ao criar categoria:", error);
+      
+      let errorMessage = "Erro ao criar categoria. Tente novamente.";
+      
+      if (error?.response?.status === 401) {
+        errorMessage = "Sua sessão expirou. Por favor, faça login novamente.";
+      } else if (error?.response?.status === 409) {
+        errorMessage = "Esta categoria já existe. Tente um nome diferente.";
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       toast({
-        title: "Erro",
-        description: "Erro ao criar categoria. Tente novamente.",
+        title: "Erro ao criar",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -87,10 +99,22 @@ export default function AdminCategories() {
         description: "Categoria atualizada com sucesso!",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Erro ao atualizar categoria:", error);
+      
+      let errorMessage = "Erro ao atualizar categoria. Tente novamente.";
+      
+      if (error?.response?.status === 401) {
+        errorMessage = "Sua sessão expirou. Por favor, faça login novamente.";
+      } else if (error?.response?.status === 409) {
+        errorMessage = "Esta categoria já existe. Tente um nome diferente.";
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       toast({
-        title: "Erro",
-        description: "Erro ao atualizar categoria. Tente novamente.",
+        title: "Erro ao atualizar",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -154,6 +178,11 @@ export default function AdminCategories() {
   };
 
   const handleSubmit = (data: CategoryFormData) => {
+    // Prevent multiple submissions
+    if (createMutation.isPending || updateMutation.isPending) {
+      return;
+    }
+    
     if (editingCategory) {
       updateMutation.mutate({ ...data, id: editingCategory.id });
     } else {
