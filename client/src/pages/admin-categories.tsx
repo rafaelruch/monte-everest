@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin-layout";
 import IconSelector from "@/components/icon-selector";
+import CategoryIcon from "@/components/category-icon";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -35,7 +36,7 @@ export default function AdminCategories() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: categories = [], isLoading } = useQuery({
+  const { data: categories = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/categories"],
   });
 
@@ -443,6 +444,7 @@ export default function AdminCategories() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Ícone</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Descrição</TableHead>
@@ -454,6 +456,12 @@ export default function AdminCategories() {
               <TableBody>
                 {filteredCategories.map((category: any) => (
                   <TableRow key={category.id}>
+                    <TableCell>
+                      <CategoryIcon 
+                        iconName={category.icon} 
+                        className="h-6 w-6"
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{category.name}</TableCell>
                     <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                     <TableCell className="max-w-xs truncate">
