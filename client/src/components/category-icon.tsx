@@ -12,7 +12,7 @@ import {
   faHeart, faStar, faThumbsUp, faSmile, faHandshake, faAward,
   faShield, faKey, faLock, faCog, faChartBar, faMoneyBill,
   faQuestionCircle, faSnowflake, faLanguage, faBaby, faPalette,
-  faBullhorn, faDroplet, faBalanceScale
+  faBullhorn, faDroplet, faBalanceScale, faBuilding, faBolt
 } from "@fortawesome/free-solid-svg-icons";
 
 const iconMap = {
@@ -92,7 +92,7 @@ const iconMap = {
   "refrigerator": faHome, // usando home como fallback para refrigerator
   "languages": faLanguage,
   "language": faLanguage,
-  "zap": faPlug, // usando plug como alternativa para zap
+  "zap": faBolt, // mapeamento correto para zap
   "baby": faBaby,
   "palette": faPalette,
   "megaphone": faBullhorn,
@@ -100,6 +100,7 @@ const iconMap = {
   "scale": faBalanceScale,
   "activity": faHeartbeat, // usando heartbeat como alternativa para activity
   "flower": faLeaf, // usando leaf como alternativa para flower
+  "building": faBuilding, // mapeamento para prédio
 };
 
 interface CategoryIconProps {

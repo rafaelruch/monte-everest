@@ -317,7 +317,6 @@ const availableIcons = [
   { icon: faPlug, name: "plug", label: "Tomada" },
   { icon: faLightbulb, name: "lightbulb", label: "Lâmpada" },
   { icon: faBroom, name: "broom", label: "Vassoura" },
-  { icon: faShower, name: "shower", label: "Chuveiro" },
   { icon: faFaucet, name: "faucet", label: "Torneira" },
   { icon: faTrash, name: "trash", label: "Lixo" },
   { icon: faBoxes, name: "boxes", label: "Caixas" },
