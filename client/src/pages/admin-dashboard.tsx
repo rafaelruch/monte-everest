@@ -141,6 +141,10 @@ type PageFormData = z.infer<typeof pageSchema>;
 // Ícones disponíveis para as categorias (substituído pelo IconSelector com Font Awesome)
 // const availableIcons = []; // Removido - usando IconSelector agora
 
+// Centralized Brazilian currency formatter
+const formatBRL = (centavos: number) => 
+  new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(centavos / 100);
+
 const sidebarItems: SidebarItem[] = [
   { id: "overview", label: "Visão Geral", icon: LayoutDashboard },
   { id: "professionals", label: "Profissionais", icon: Users },
@@ -953,7 +957,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              R$ {currentMonthRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatBRL(currentMonthRevenue * 100)}
             </div>
             <p className="text-xs opacity-90">
               {payments.filter((p: Payment) => p.status === 'active' || p.status === 'paid').length} pagamentos ativos
@@ -983,7 +987,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              R$ {averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatBRL(averageTicket * 100)}
             </div>
             <p className="text-xs opacity-90">
               Valor médio por assinante ativo
@@ -1057,7 +1061,7 @@ export default function AdminDashboard() {
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium">R$ {parseFloat(payment.amount).toFixed(2)}</p>
+                      <p className="font-medium">{formatBRL(parseFloat(payment.amount))}</p>
                       <p className="text-sm text-gray-500">ID: {payment.professionalId?.slice(0, 8)}</p>
                       <p className="text-xs text-gray-400">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('pt-BR') : 'Data não informada'}
@@ -1242,17 +1246,17 @@ export default function AdminDashboard() {
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
   });
 
-  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
-  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
+  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
   const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
   const activePayments = payments.filter((p: Payment) => p.status === 'active');
-  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
+  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
   const projectedAnnualRevenue = monthlyRecurringRevenue * 12;
 
   const validPayments = payments.filter((p: Payment) => p.status === 'paid' || p.status === 'active');
   const averageTicket = validPayments.length > 0 ? 
-    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / validPayments.length : 0;
+    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100 / validPayments.length : 0;
 
   const conversionRate = professionals.length > 0 ? 
     (activePayments.length / professionals.length * 100) : 0;
@@ -1368,7 +1372,7 @@ export default function AdminDashboard() {
                           <Badge variant="outline">Plano</Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          R$ {(parseFloat(payment.amount || '0') / 100).toFixed(2)}
+                          {formatBRL(parseFloat(payment.amount || '0'))}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
@@ -1474,7 +1478,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
                 <p className="text-2xl font-bold text-green-600">
-                  R$ {currentMonthRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(currentMonthRevenue * 100)}
                 </p>
                 <p className={`text-sm ${revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {revenueGrowth >= 0 ? '↗' : '↘'} {Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior
@@ -1491,7 +1495,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">MRR (Receita Recorrente)</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  R$ {monthlyRecurringRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(monthlyRecurringRevenue * 100)}
                 </p>
                 <p className="text-sm text-gray-500">
                   {activePayments.length} assinantes ativos
@@ -1508,7 +1512,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  R$ {averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(averageTicket * 100)}
                 </p>
                 <p className="text-sm text-gray-500">
                   Por profissional/mês
@@ -1559,11 +1563,11 @@ export default function AdminDashboard() {
                 <YAxis 
                   tick={{ fontSize: 12 }}
                   stroke="#666"
-                  tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`}
+                  tickFormatter={(value) => formatBRL(value * 100)}
                 />
                 <Tooltip 
                   formatter={(value: any, name: string) => [
-                    name === 'receita' ? `R$ ${parseFloat(value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : value,
+                    name === 'receita' ? formatBRL(parseFloat(value) * 100) : value,
                     name === 'receita' ? 'Receita' : 'Assinantes'
                   ]}
                   labelStyle={{ color: '#333' }}
@@ -1659,11 +1663,11 @@ export default function AdminDashboard() {
                 orientation="right"
                 tick={{ fontSize: 12 }}
                 stroke="#666"
-                tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`}
+                tickFormatter={(value) => formatBRL(value * 100)}
               />
               <Tooltip 
                 formatter={(value: any, name: string) => [
-                  name === 'receita' ? `R$ ${parseFloat(value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : value,
+                  name === 'receita' ? formatBRL(parseFloat(value) * 100) : value,
                   name === 'receita' ? 'Receita Total' : 'Assinantes'
                 ]}
                 contentStyle={{ 
@@ -1719,11 +1723,11 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50">
                 <span className="text-gray-600">Receita Total</span>
                 <span className="font-bold text-orange-600">
-                  R$ {(
+                  {formatBRL(
                     payments
                       .filter((p: Payment) => p.status === 'active' || p.status === 'paid')
-                      .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100
-                  ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0)
+                  )}
                 </span>
               </div>
             </div>
@@ -1742,19 +1746,19 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
                 <span className="text-gray-600">Receita Anual Projetada</span>
                 <span className="font-bold text-green-600">
-                  R$ {projectedAnnualRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(projectedAnnualRevenue * 100)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                 <span className="text-gray-600">Próximo Mês (estimativa)</span>
                 <span className="font-bold text-blue-600">
-                  R$ {monthlyRecurringRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(monthlyRecurringRevenue * 100)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50">
                 <span className="text-gray-600">Trimestre Atual</span>
                 <span className="font-bold text-purple-600">
-                  R$ {(monthlyRecurringRevenue * 3).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL((monthlyRecurringRevenue * 3) * 100)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
@@ -1823,7 +1827,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500">{planPayments.length} assinantes</p>
                     </div>
                     <span className="font-bold text-sm">
-                      R$ {planRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      {formatBRL(planRevenue * 100)}
                     </span>
                   </div>
                 );
@@ -2134,7 +2138,7 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="text-2xl font-bold text-[#3C8BAB]">
-                        R$ {parseFloat(plan.monthlyPrice).toFixed(2)}
+                        {formatBRL(parseFloat(plan.monthlyPrice) * 100)}
                         <span className="text-sm font-normal text-gray-500">/mês</span>
                       </div>
                       <div className="space-y-2">
