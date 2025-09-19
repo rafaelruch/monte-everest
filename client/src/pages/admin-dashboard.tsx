@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { 
   Users, 
   DollarSign, 
@@ -1061,7 +1061,7 @@ export default function AdminDashboard() {
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium">{formatBRL(parseFloat(payment.amount))}</p>
+                      <p className="font-medium">{formatCurrency(parseFloat(payment.amount))}</p>
                       <p className="text-sm text-gray-500">ID: {payment.professionalId?.slice(0, 8)}</p>
                       <p className="text-xs text-gray-400">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('pt-BR') : 'Data não informada'}
@@ -1372,7 +1372,7 @@ export default function AdminDashboard() {
                           <Badge variant="outline">Plano</Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          {formatBRL(parseFloat(payment.amount || '0'))}
+                          {formatCurrency(parseFloat(payment.amount || '0'))}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
