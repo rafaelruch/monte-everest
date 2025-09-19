@@ -83,6 +83,7 @@ export interface IStorage {
   deleteProfessional(id: string): Promise<void>;
   updateProfessionalRating(professionalId: string): Promise<void>;
   updateCategoryRankings(categoryId: string): Promise<void>;
+  getActiveCities(): Promise<string[]>;
   
   // Professional authentication
   authenticateProfessional(email: string, password: string): Promise<Professional | null>;
@@ -551,6 +552,16 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(professionals.id, categoryProfessionals[i].id));
     }
+  }
+
+  async getActiveCities(): Promise<string[]> {
+    const result = await db.select({ city: professionals.city })
+      .from(professionals)
+      .where(eq(professionals.status, 'active'))
+      .groupBy(professionals.city)
+      .orderBy(asc(professionals.city));
+    
+    return result.map(row => row.city).filter(city => city !== null && city !== undefined);
   }
 
   async getReviews(professionalId: string): Promise<Review[]> {

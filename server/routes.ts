@@ -161,6 +161,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get cities with active professionals
+  app.get("/api/cities", async (req, res) => {
+    try {
+      const cities = await storage.getActiveCities();
+      res.json(cities);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Search professionals
   app.get("/api/professionals/search", async (req, res) => {
     try {
