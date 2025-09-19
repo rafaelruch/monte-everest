@@ -25,12 +25,18 @@ export default function SearchResults() {
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [open, setOpen] = useState(false);
   const [location, setLocationInput] = useState(searchParams.get("location") || "");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [cityOpen, setCityOpen] = useState(false);
   const [sortBy, setSortBy] = useState("rating");
   const [currentPage, setCurrentPage] = useState(1);
   const professionalsPerPage = 12;
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: cities = [] } = useQuery({
+    queryKey: ["/api/cities"],
   });
 
   // Use useMemo to compute derived category ID outside the query to prevent race conditions
@@ -110,6 +116,7 @@ export default function SearchResults() {
   const clearFilters = () => {
     setSelectedCategory("all");
     setLocationInput("");
+    setSelectedCity("");
     setLocation("/buscar");
     setCurrentPage(1);
   };
@@ -216,12 +223,60 @@ export default function SearchResults() {
               </div>
               
               <div className="flex-1">
-                <Input
-                  placeholder="CEP ou cidade"
-                  value={location}
-                  onChange={(e) => setLocationInput(e.target.value)}
-                  data-testid="filter-location"
-                />
+                <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={cityOpen}
+                      className="w-full justify-between"
+                      data-testid="filter-location"
+                    >
+                      {selectedCity || location || "Digite uma cidade..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[400px] p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Digite o nome da cidade..." 
+                        value={location}
+                        onValueChange={setLocationInput}
+                      />
+                      <CommandList>
+                        <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
+                        <CommandGroup>
+                          {(cities as string[])
+                            .filter((city: string) => 
+                              city.toLowerCase().includes(location.toLowerCase())
+                            )
+                            .slice(0, 10)
+                            .map((city: string) => (
+                            <CommandItem
+                              key={city}
+                              value={city}
+                              onSelect={() => {
+                                setSelectedCity(city);
+                                setLocationInput(city);
+                                setCityOpen(false);
+                              }}
+                              data-testid={`option-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  (selectedCity === city || location === city) ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                              {city}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               
               <div className="flex gap-2">
