@@ -9,9 +9,9 @@ import crypto from 'crypto';
 import { Client as ObjectStorageClient } from '@replit/object-storage';
 
 const { Pool: PgPool } = pg;
-import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema } from "@shared/schema";
+import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens } from "@shared/schema";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
+import { sql, and, isNull, gt } from "drizzle-orm";
 import multer from "multer";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
@@ -295,6 +295,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error changing password:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Forgot password endpoint
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+
+      const professional = await storage.getProfessionalByEmail(email);
+      
+      if (!professional) {
+        return res.json({ 
+          success: true, 
+          message: "Se o email existir, você receberá instruções de recuperação" 
+        });
+      }
+
+      const plainToken = crypto.randomBytes(32).toString('hex');
+      const hashedToken = await bcrypt.hash(plainToken, 10);
+      
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1);
+      
+      await storage.createPasswordResetToken({
+        professionalId: professional.id,
+        token: hashedToken,
+        expiresAt
+      });
+      
+      const resetUrl = `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/reset-password?token=${plainToken}`;
+      
+      await emailService.sendPasswordResetEmail({
+        to: professional.email,
+        professionalName: professional.fullName,
+        resetUrl
+      });
+      
+      await storage.createLog({
+        userId: professional.id,
+        action: 'forgot_password_request',
+        entityType: 'professional',
+        entityId: professional.id,
+        details: { email: professional.email },
+        ipAddress: req.ip || null,
+        userAgent: req.headers['user-agent'] || null
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Se o email existir, você receberá instruções de recuperação" 
+      });
+    } catch (error) {
+      console.error("Error in forgot password:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Reset password endpoint
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token é obrigatório" });
+      }
+      
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: "Nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      const allTokens = await db.select()
+        .from(passwordResetTokens)
+        .where(
+          and(
+            isNull(passwordResetTokens.usedAt),
+            gt(passwordResetTokens.expiresAt, new Date())
+          )
+        );
+      
+      let matchedToken = null;
+      for (const dbToken of allTokens) {
+        const isMatch = await bcrypt.compare(token, dbToken.token);
+        if (isMatch) {
+          matchedToken = dbToken;
+          break;
+        }
+      }
+      
+      if (!matchedToken) {
+        return res.status(400).json({ message: "Token inválido ou expirado" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await storage.updateProfessionalPassword(matchedToken.professionalId, hashedPassword);
+      
+      await storage.markTokenAsUsed(matchedToken.token);
+      
+      await storage.createLog({
+        userId: matchedToken.professionalId,
+        action: 'password_reset_success',
+        entityType: 'professional',
+        entityId: matchedToken.professionalId,
+        details: { method: 'reset_token' },
+        ipAddress: req.ip || null,
+        userAgent: req.headers['user-agent'] || null
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Senha alterada com sucesso" 
+      });
+    } catch (error) {
+      console.error("Error in reset password:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

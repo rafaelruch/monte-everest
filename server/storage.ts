@@ -9,6 +9,7 @@ import {
   systemLogs,
   systemConfigs,
   pages,
+  passwordResetTokens,
   type User,
   type InsertUser,
   type Category,
@@ -28,6 +29,8 @@ import {
   type InsertSystemConfig,
   type Page,
   type InsertPage,
+  type PasswordResetToken,
+  type InsertPasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
 import { Pool as PgPool } from 'pg';
@@ -134,6 +137,13 @@ export interface IStorage {
   createPage(page: InsertPage): Promise<Page>;
   updatePage(id: string, page: Partial<InsertPage>): Promise<Page>;
   deletePage(id: string): Promise<void>;
+
+  // Password reset token operations
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  getPasswordResetTokensByProfessional(professionalId: string): Promise<PasswordResetToken[]>;
+  markTokenAsUsed(token: string): Promise<void>;
+  cleanupExpiredTokens(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -934,6 +944,52 @@ export class DatabaseStorage implements IStorage {
 
   async deletePage(id: string): Promise<void> {
     await db.delete(pages).where(eq(pages.id, id));
+  }
+
+  // Password reset token operations
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [created] = await db.insert(passwordResetTokens).values(token).returning();
+    return created;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [resetToken] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(
+        and(
+          eq(passwordResetTokens.token, token),
+          isNull(passwordResetTokens.usedAt),
+          gt(passwordResetTokens.expiresAt, new Date())
+        )
+      );
+    return resetToken;
+  }
+
+  async getPasswordResetTokensByProfessional(professionalId: string): Promise<PasswordResetToken[]> {
+    return await db
+      .select()
+      .from(passwordResetTokens)
+      .where(
+        and(
+          eq(passwordResetTokens.professionalId, professionalId),
+          isNull(passwordResetTokens.usedAt),
+          gt(passwordResetTokens.expiresAt, new Date())
+        )
+      );
+  }
+
+  async markTokenAsUsed(token: string): Promise<void> {
+    await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.token, token));
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    await db
+      .delete(passwordResetTokens)
+      .where(lt(passwordResetTokens.expiresAt, new Date()));
   }
 }
 
