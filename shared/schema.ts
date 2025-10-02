@@ -315,6 +315,20 @@ export const images = pgTable("images", {
   typeIdx: index("images_type_idx").on(table.type),
 }));
 
+// Password reset tokens for professionals
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  professionalId: varchar("professional_id").notNull(),
+  token: text("token").notNull().unique(), // Hashed token
+  expiresAt: timestamp("expires_at").notNull(), // Token expiration (15-60 minutes)
+  usedAt: timestamp("used_at"), // Null if not used yet
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  professionalIdx: index("password_reset_tokens_professional_idx").on(table.professionalId),
+  tokenIdx: index("password_reset_tokens_token_idx").on(table.token),
+  expiresAtIdx: index("password_reset_tokens_expires_at_idx").on(table.expiresAt),
+}));
+
 export const insertPageSchema = createInsertSchema(pages).omit({
   id: true,
   createdAt: true,
@@ -324,6 +338,12 @@ export const insertPageSchema = createInsertSchema(pages).omit({
 export const insertImageSchema = createInsertSchema(images).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+  usedAt: true,
 });
 
 // Types
@@ -359,3 +379,6 @@ export type InsertPage = z.infer<typeof insertPageSchema>;
 
 export type Image = typeof images.$inferSelect;
 export type InsertImage = z.infer<typeof insertImageSchema>;
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
