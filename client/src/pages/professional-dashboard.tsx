@@ -209,11 +209,40 @@ export default function ProfessionalDashboard() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      return apiRequest("PATCH", `/api/professionals/${professionalAuth.id}`, data);
+      if (!professionalAuth?.token || !professionalAuth?.id) {
+        throw new Error("Sessão expirada. Faça login novamente.");
+      }
+      
+      const response = await fetch(`/api/professionals/${professionalAuth.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${professionalAuth.token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao atualizar perfil");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth.id] });
       setIsEditing(false);
+      toast({
+        title: "Perfil atualizado!",
+        description: "Suas informações foram salvas com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
   
