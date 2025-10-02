@@ -2376,6 +2376,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset admin password
+  app.post("/api/admin/users/:id/reset-password", verifyAdminToken, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { newPassword } = req.body;
+      
+      // Validate new password
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: "Senha deve ter pelo menos 6 caracteres" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Prevent changing password of system admin
+      if (user.isSystemAdmin) {
+        return res.status(400).json({ message: "Não é possível alterar senha do administrador do sistema" });
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await storage.updateAdminPassword(userId, hashedPassword);
+
+      // Log the action
+      await storage.createLog({
+        userId: req.user!.id,
+        action: 'reset_admin_password',
+        entityType: 'user',
+        entityId: userId,
+        details: { adminEmail: user.email },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ message: "Senha alterada com sucesso" });
+    } catch (error) {
+      console.error("Error resetting admin password:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Object storage routes for professional photo upload
   app.post("/api/objects/upload", async (req, res) => {
     const objectStorageService = new ObjectStorageService();

@@ -49,6 +49,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   deleteUser(id: string): Promise<void>;
+  updateAdminPassword(adminId: string, hashedPassword: string): Promise<void>;
 
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -343,6 +344,12 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  async updateAdminPassword(adminId: string, hashedPassword: string): Promise<void> {
+    await db.update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, adminId));
   }
 
   async getCategories(): Promise<Category[]> {
