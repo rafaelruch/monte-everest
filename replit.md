@@ -43,11 +43,13 @@ The application uses PostgreSQL with Drizzle ORM:
 - **Reviews**: Customer feedback system with ratings and comments
 - **Payments**: Subscription management for professional accounts
 - **Contacts**: Interaction tracking between clients and professionals
+- **Password Reset Tokens**: Secure token management for professional password recovery with expiration and single-use validation
 
 ## Authentication & Authorization
 
 - **Admin Authentication**: JWT-based authentication for administrative users
 - **Professional Registration**: Multi-step registration process with payment verification
+- **Professional Password Recovery**: Email-based password reset system with secure token validation
 - **Role-based Access**: Different access levels for admin users and public visitors
 - **Session Management**: Token-based sessions with secure storage
 
@@ -64,6 +66,7 @@ The application uses PostgreSQL with Drizzle ORM:
 ## Communication Channels
 - **WhatsApp Integration**: Direct messaging capability through WhatsApp Business API
 - **Phone Integration**: Click-to-call functionality for immediate contact
+- **Email Service**: Nodemailer integration for transactional emails (password recovery, credentials delivery)
 
 ## Database Infrastructure
 - **Neon Database**: Serverless PostgreSQL hosting with automatic scaling
