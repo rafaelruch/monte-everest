@@ -138,6 +138,16 @@ const pageSchema = z.object({
 
 type PageFormData = z.infer<typeof pageSchema>;
 
+const changeAdminPasswordSchema = z.object({
+  newPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string().min(1, "Confirmação é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Senhas não coincidem",
+  path: ["confirmPassword"],
+});
+
+type ChangeAdminPasswordData = z.infer<typeof changeAdminPasswordSchema>;
+
 // Ícones disponíveis para as categorias (substituído pelo IconSelector com Font Awesome)
 // const availableIcons = []; // Removido - usando IconSelector agora
 
@@ -216,8 +226,6 @@ export default function AdminDashboard() {
     adminId: string | null;
     adminName: string;
   }>({ open: false, adminId: null, adminName: '' });
-  const [newAdminPassword, setNewAdminPassword] = useState('');
-  const [confirmAdminPassword, setConfirmAdminPassword] = useState('');
   
   const itemsPerPage = 20;
 
@@ -415,6 +423,14 @@ export default function AdminDashboard() {
       content: "",
       metaDescription: "",
       isActive: true,
+    },
+  });
+
+  const adminPasswordForm = useForm<ChangeAdminPasswordData>({
+    resolver: zodResolver(changeAdminPasswordSchema),
+    defaultValues: {
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -876,8 +892,7 @@ export default function AdminDashboard() {
         description: "A senha do administrador foi redefinida com sucesso.",
       });
       setChangeAdminPasswordModal({ open: false, adminId: null, adminName: '' });
-      setNewAdminPassword('');
-      setConfirmAdminPassword('');
+      adminPasswordForm.reset();
     },
     onError: (error: Error) => {
       toast({
@@ -2528,80 +2543,89 @@ export default function AdminDashboard() {
       </Card>
 
       {/* Modal de Alteração de Senha de Admin */}
-      <Dialog open={changeAdminPasswordModal.open} onOpenChange={(open) => {
-        if (!open) {
-          setChangeAdminPasswordModal({ open: false, adminId: null, adminName: '' });
-          setNewAdminPassword('');
-          setConfirmAdminPassword('');
-        }
-      }}>
-        <DialogContent>
+      <Dialog 
+        open={changeAdminPasswordModal.open} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setChangeAdminPasswordModal({ open: false, adminId: null, adminName: '' });
+            adminPasswordForm.reset();
+          }
+        }}
+      >
+        <DialogContent data-testid="admin-password-change-dialog">
           <DialogHeader>
             <DialogTitle>Alterar Senha do Administrador</DialogTitle>
             <DialogDescription>
               Defina uma nova senha para {changeAdminPasswordModal.adminName}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Nova Senha</label>
-              <Input
-                type="password"
-                value={newAdminPassword}
-                onChange={(e) => setNewAdminPassword(e.target.value)}
-                placeholder="Digite a nova senha (mínimo 6 caracteres)"
-                data-testid="input-new-admin-password"
+          <Form {...adminPasswordForm}>
+            <form onSubmit={adminPasswordForm.handleSubmit((data) => {
+              if (changeAdminPasswordModal.adminId) {
+                changeAdminPasswordMutation.mutate({
+                  adminId: changeAdminPasswordModal.adminId,
+                  newPassword: data.newPassword
+                });
+              }
+            })} className="space-y-4">
+              <FormField
+                control={adminPasswordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova Senha</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Digite a nova senha (mínimo 6 caracteres)"
+                        {...field}
+                        data-testid="input-new-admin-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {newAdminPassword && newAdminPassword.length < 6 && (
-                <p className="text-sm text-red-500 mt-1">Senha deve ter pelo menos 6 caracteres</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Confirmar Nova Senha</label>
-              <Input
-                type="password"
-                value={confirmAdminPassword}
-                onChange={(e) => setConfirmAdminPassword(e.target.value)}
-                placeholder="Digite novamente a nova senha"
-                data-testid="input-confirm-admin-password"
+              <FormField
+                control={adminPasswordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Nova Senha</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Digite novamente a nova senha"
+                        {...field}
+                        data-testid="input-confirm-admin-password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {confirmAdminPassword && newAdminPassword !== confirmAdminPassword && (
-                <p className="text-sm text-red-500 mt-1">As senhas não coincidem</p>
-              )}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setChangeAdminPasswordModal({ open: false, adminId: null, adminName: '' });
-                  setNewAdminPassword('');
-                  setConfirmAdminPassword('');
-                }}
-                data-testid="button-cancel-admin-password"
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  if (changeAdminPasswordModal.adminId) {
-                    changeAdminPasswordMutation.mutate({
-                      adminId: changeAdminPasswordModal.adminId,
-                      newPassword: newAdminPassword
-                    });
-                  }
-                }}
-                disabled={
-                  !newAdminPassword ||
-                  newAdminPassword.length < 6 ||
-                  newAdminPassword !== confirmAdminPassword ||
-                  changeAdminPasswordMutation.isPending
-                }
-                data-testid="button-save-admin-password"
-              >
-                {changeAdminPasswordMutation.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-            </div>
-          </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setChangeAdminPasswordModal({ open: false, adminId: null, adminName: '' });
+                    adminPasswordForm.reset();
+                  }}
+                  data-testid="button-cancel-admin-password"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={changeAdminPasswordMutation.isPending}
+                  data-testid="button-save-admin-password"
+                >
+                  {changeAdminPasswordMutation.isPending ? "Salvando..." : "Salvar"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
