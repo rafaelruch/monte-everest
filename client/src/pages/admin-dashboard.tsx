@@ -197,6 +197,19 @@ export default function AdminDashboard() {
   const [pagarmeEncryptionKey, setPagarmeEncryptionKey] = useState("");
   const [isEditingPagarmeConfig, setIsEditingPagarmeConfig] = useState(false);
   
+  // Estado para modal de alteração de senha
+  const [changePasswordModal, setChangePasswordModal] = useState<{
+    open: boolean;
+    professionalId: string | null;
+    professionalName: string;
+  }>({
+    open: false,
+    professionalId: null,
+    professionalName: '',
+  });
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
   const itemsPerPage = 20;
 
   // Check if user is authenticated
@@ -535,6 +548,40 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
       toast({ title: "Status atualizado com sucesso!" });
+    },
+  });
+
+  const changeProfessionalPasswordMutation = useMutation({
+    mutationFn: async ({ professionalId, newPassword }: { professionalId: string; newPassword: string }) => {
+      const response = await fetch(`/api/admin/professionals/${professionalId}/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({ newPassword }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao alterar senha");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ 
+        title: "Senha alterada!", 
+        description: "A senha do profissional foi redefinida com sucesso." 
+      });
+      setChangePasswordModal({ open: false, professionalId: null, professionalName: '' });
+      setNewPassword("");
+      setConfirmPassword("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao alterar senha",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -1176,6 +1223,20 @@ export default function AdminDashboard() {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() => setChangePasswordModal({
+                                  open: true,
+                                  professionalId: professional.id,
+                                  professionalName: professional.fullName
+                                })}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+                                data-testid={`button-change-password-${professional.id}`}
+                              >
+                                <Key className="h-4 w-4" />
+                              </Button>
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => {
                                   if (confirm(`Tem certeza que deseja excluir o profissional "${professional.fullName}"? Esta ação não pode ser desfeita.`)) {
                                     deleteProfessionalMutation.mutate(professional.id);
@@ -1226,6 +1287,108 @@ export default function AdminDashboard() {
               )}
             </CardContent>
           </Card>
+
+          {/* Modal de Alteração de Senha */}
+          <Dialog open={changePasswordModal.open} onOpenChange={(open) => {
+            if (!open) {
+              setChangePasswordModal({ open: false, professionalId: null, professionalName: '' });
+              setNewPassword("");
+              setConfirmPassword("");
+            }
+          }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Alterar Senha do Profissional</DialogTitle>
+                <DialogDescription>
+                  Definir nova senha para <strong>{changePasswordModal.professionalName}</strong>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">Nova Senha</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    data-testid="input-new-password"
+                  />
+                  {newPassword.length > 0 && newPassword.length < 6 && (
+                    <p className="text-sm text-red-600">A senha deve ter no mínimo 6 caracteres</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirmar Senha</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Digite a senha novamente"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    data-testid="input-confirm-password"
+                  />
+                  {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                    <p className="text-sm text-red-600">As senhas não coincidem</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setChangePasswordModal({ open: false, professionalId: null, professionalName: '' });
+                    setNewPassword("");
+                    setConfirmPassword("");
+                  }}
+                  data-testid="button-cancel-password-change"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (newPassword.length < 6) {
+                      toast({
+                        title: "Erro de validação",
+                        description: "A senha deve ter no mínimo 6 caracteres",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (newPassword !== confirmPassword) {
+                      toast({
+                        title: "Erro de validação",
+                        description: "As senhas não coincidem",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (changePasswordModal.professionalId) {
+                      changeProfessionalPasswordMutation.mutate({
+                        professionalId: changePasswordModal.professionalId,
+                        newPassword,
+                      });
+                    }
+                  }}
+                  disabled={
+                    changeProfessionalPasswordMutation.isPending ||
+                    newPassword.length < 6 ||
+                    newPassword !== confirmPassword
+                  }
+                  data-testid="button-save-password-change"
+                >
+                  {changeProfessionalPasswordMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Salvar Nova Senha'
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     };

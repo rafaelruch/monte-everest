@@ -1523,6 +1523,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset professional password (admin only)
+  app.post("/api/admin/professionals/:id/reset-password", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+      
+      if (!id) {
+        return res.status(400).json({ message: "ID do profissional é obrigatório" });
+      }
+
+      if (!newPassword || typeof newPassword !== 'string') {
+        return res.status(400).json({ message: "Nova senha é obrigatória" });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "A senha deve ter no mínimo 6 caracteres" });
+      }
+
+      // Check if professional exists
+      const professional = await storage.getProfessional(id);
+      if (!professional) {
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password in database
+      await storage.updateProfessionalPassword(id, hashedPassword);
+
+      // Log the action
+      await storage.createLog({
+        userId: req.user!.id,
+        action: 'reset_professional_password',
+        entityType: 'professional',
+        entityId: id,
+        details: { professionalName: professional.fullName },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ message: "Senha alterada com sucesso" });
+    } catch (error) {
+      console.error("Error resetting professional password:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Payment management routes
   app.get("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
