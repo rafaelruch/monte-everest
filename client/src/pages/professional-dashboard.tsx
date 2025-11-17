@@ -91,8 +91,9 @@ export default function ProfessionalDashboard() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card'>('pix');
   const [pixPaymentData, setPixPaymentData] = useState<any>(null);
+  const [cpfForPayment, setCpfForPayment] = useState('');
   const queryClient = useQueryClient();
-  const { fetchAddressByCep, loading: cepLoading } = useViaCep();
+  const { fetchAddressByCep, loading: cepLoading} = useViaCep();
 
   // Get auth from localStorage on mount
   useEffect(() => {
@@ -791,12 +792,48 @@ export default function ProfessionalDashboard() {
             {/* Payment Forms */}
             {paymentMethod === 'pix' && !pixPaymentData && (
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground text-center">
-                  Clique no botão abaixo para gerar o código PIX para pagamento
-                </p>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">CPF do titular</label>
+                  <Input
+                    placeholder="000.000.000-00"
+                    value={cpfForPayment}
+                    onChange={(e) => {
+                      // Remove non-numeric characters
+                      const value = e.target.value.replace(/\D/g, '');
+                      // Format as CPF
+                      let formatted = value;
+                      if (value.length > 3) {
+                        formatted = value.slice(0, 3) + '.' + value.slice(3);
+                      }
+                      if (value.length > 6) {
+                        formatted = formatted.slice(0, 7) + '.' + formatted.slice(7);
+                      }
+                      if (value.length > 9) {
+                        formatted = formatted.slice(0, 11) + '-' + formatted.slice(11, 13);
+                      }
+                      setCpfForPayment(formatted);
+                    }}
+                    maxLength={14}
+                    data-testid="input-cpf-payment"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Informe um CPF válido para gerar o código PIX
+                  </p>
+                </div>
                 <Button
                   onClick={async () => {
                     try {
+                      // Validate CPF
+                      const cpfDigits = cpfForPayment.replace(/\D/g, '');
+                      if (cpfDigits.length !== 11) {
+                        toast({
+                          title: "CPF inválido",
+                          description: "Por favor, informe um CPF com 11 dígitos",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      
                       // Use professional's plan or first available plan
                       const planId = professional?.subscriptionPlanId || plans[0]?.id;
                       
@@ -817,7 +854,8 @@ export default function ProfessionalDashboard() {
                         },
                         body: JSON.stringify({
                           professionalId: professional.id,
-                          planId
+                          planId,
+                          cpf: cpfDigits
                         })
                       });
 

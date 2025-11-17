@@ -3219,10 +3219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create PIX payment for existing professional
   app.post("/api/payments/create-pix", verifyProfessionalToken, async (req, res) => {
     try {
-      const { professionalId, planId } = req.body;
+      const { professionalId, planId, cpf } = req.body;
 
-      if (!professionalId || !planId) {
-        return res.status(400).json({ error: 'Missing required fields' });
+      if (!professionalId || !planId || !cpf) {
+        return res.status(400).json({ error: 'Missing required fields: professionalId, planId, and cpf are required' });
       }
 
       // Get professional and plan
@@ -3253,7 +3253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customer: {
           name: professional.fullName,
           email: professional.email,
-          document: '02549332046', // Valid test CPF (passes validation algorithm)
+          document: cpf, // Use CPF provided by user
           type: 'individual',
           address: {
             country: 'BR',
