@@ -25,22 +25,12 @@ export default function SejaProfissional() {
   const [location, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [showPaymentInfo, setShowPaymentInfo] = useState(false);
-  const [paymentInfo, setPaymentInfo] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'credit_card' | 'pix'>('credit_card');
-  const [timeLeft, setTimeLeft] = useState<string>('');
   
   const [formData, setFormData] = useState({
-    // Dados pessoais
     name: "",
     email: "",
     cpf: "",
     phone: "",
-    // Dados do cartão (apenas se credit_card)
-    cardNumber: "",
-    cardName: "",
-    cardExpiry: "",
-    cardCvv: "",
   });
 
   // Fetch available plans
@@ -55,67 +45,46 @@ export default function SejaProfissional() {
     },
   });
 
-  // Create subscription mutation
-  const createSubscriptionMutation = useMutation({
-    mutationFn: async (subscriptionData: any) => {
-      const response = await fetch("/api/payments/create-subscription", {
+  // Create registration with checkout mutation
+  const createRegistrationMutation = useMutation({
+    mutationFn: async (registrationData: any) => {
+      const response = await fetch("/api/payments/register-with-checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(subscriptionData),
+        body: JSON.stringify(registrationData),
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create subscription");
+        throw new Error(errorData.error || errorData.message || "Erro ao processar cadastro");
       }
       return response.json();
     },
     onSuccess: (data) => {
-      // Check if it's PIX/Boleto payment
-      if (data.paymentMethod === 'pix' || data.paymentMethod === 'boleto') {
-        toast({
-          title: "Assinatura criada!",
-          description: data.message || "Complete o pagamento para ativar sua conta.",
-        });
+      toast({
+        title: "Cadastro criado!",
+        description: "Você será redirecionado para completar o pagamento.",
+      });
+      
+      setShowCheckout(false);
+      
+      // Open checkout in new tab
+      if (data.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
         
-        // Show payment info and don't redirect yet
-        setPaymentInfo(data.paymentInfo);
-        setShowPaymentInfo(true);
-        setShowCheckout(false);
-      } else {
-        // Credit card payment - proceed with auto-login
-        toast({
-          title: "Assinatura criada com sucesso!",
-          description: data.message || "Sua conta profissional está ativa. Você já pode receber clientes!",
-        });
-        
-        // Save credentials for auto-login if autoLogin is enabled
-        if (data.autoLogin && data.professional) {
-          const autoLoginCredentials = {
-            email: data.professional.email,
-            password: 'senha123', // Default password
-            firstLogin: data.firstLogin || true,
-            token: data.token
-          };
-          
-          localStorage.setItem('autoLoginCredentials', JSON.stringify(autoLoginCredentials));
-          
-          // Show credentials toast
-          setTimeout(() => {
-            toast({
-              title: "Credenciais de Acesso",
-              description: `Login: ${data.professional.email} | Senha: senha123`,
-            });
-          }, 2000);
-        }
-        
-        setShowCheckout(false);
-        // Use redirectTo from backend response, or fallback to professional login with auto-login
+        // Show success message and redirect after opening checkout
         setTimeout(() => {
-          const redirectPath = data.redirectTo || "/professional-login?autoLogin=true";
-          setLocation(redirectPath);
-        }, 4000);
+          toast({
+            title: "Complete o Pagamento",
+            description: "Após confirmar o pagamento, você receberá suas credenciais por email.",
+          });
+        }, 1000);
+        
+        // Redirect to home or login page
+        setTimeout(() => {
+          setLocation("/");
+        }, 3000);
       }
     },
     onError: (error) => {
@@ -126,9 +95,15 @@ export default function SejaProfissional() {
           description: "Verifique o número do CPF e tente novamente.",
           variant: "destructive",
         });
+      } else if (error.message.includes('E-mail já cadastrado')) {
+        toast({
+          title: "E-mail já cadastrado",
+          description: "Este e-mail já possui cadastro. Faça login ou recupere sua senha.",
+          variant: "destructive",
+        });
       } else {
         toast({
-          title: "Erro ao processar pagamento",
+          title: "Erro ao processar cadastro",
           description: error.message,
           variant: "destructive",
         });
@@ -146,27 +121,17 @@ export default function SejaProfissional() {
     
     if (!selectedPlan) return;
 
-    const subscriptionData = {
+    const registrationData = {
       planId: selectedPlan.id,
       professionalData: {
         name: formData.name,
         email: formData.email,
-        cpf: formData.cpf.replace(/\D/g, ''),
-        phone: formData.phone.replace(/\D/g, ''),
-      },
-      paymentMethod,
-      ...(paymentMethod === 'credit_card' && {
-        cardData: {
-          number: formData.cardNumber.replace(/\D/g, ''),
-          holderName: formData.cardName,
-          expMonth: formData.cardExpiry.split('/')[0],
-          expYear: '20' + formData.cardExpiry.split('/')[1],
-          cvv: formData.cardCvv,
-        }
-      })
+        cpf: formData.cpf,
+        phone: formData.phone,
+      }
     };
 
-    createSubscriptionMutation.mutate(subscriptionData);
+    createRegistrationMutation.mutate(registrationData);
   };
 
   const formatCurrency = (value: number | string) => {
@@ -195,66 +160,6 @@ export default function SejaProfissional() {
       .replace(/(\d{5})(\d)/, '$1-$2')
       .replace(/(-\d{4})\d+?$/, '$1');
   };
-
-  const formatCardNumber = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{4})(?=\d)/g, '$1 ')
-      .trim();
-  };
-
-  const formatCardExpiry = (value: string) => {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{2})(\d)/, '$1/$2')
-      .replace(/(\d{2}\/\d{2})\d+?$/, '$1');
-  };
-
-  // Função para calcular tempo restante
-  const calculateTimeLeft = (expirationDate: string) => {
-    const now = new Date().getTime();
-    const expiry = new Date(expirationDate).getTime();
-    const difference = expiry - now;
-
-    if (difference > 0) {
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-
-      if (days > 0) {
-        return `${days} dias, ${hours}h ${minutes}min`;
-      } else if (hours > 0) {
-        return `${hours}h ${minutes}min`;
-      } else {
-        return `${minutes} minutos`;
-      }
-    } else {
-      return 'Expirado';
-    }
-  };
-
-  // useEffect para atualizar o timer
-  useEffect(() => {
-    if (paymentInfo && (paymentInfo.expiresAt || paymentInfo.dueAt)) {
-      const expirationDate = paymentInfo.expiresAt || paymentInfo.dueAt;
-      
-      // Atualizar imediatamente
-      setTimeLeft(calculateTimeLeft(expirationDate));
-      
-      // Atualizar a cada minuto
-      const interval = setInterval(() => {
-        const newTimeLeft = calculateTimeLeft(expirationDate);
-        setTimeLeft(newTimeLeft);
-        
-        // Se expirou, parar o timer
-        if (newTimeLeft === 'Expirado') {
-          clearInterval(interval);
-        }
-      }, 60000); // Atualiza a cada minuto
-
-      return () => clearInterval(interval);
-    }
-  }, [paymentInfo]);
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const cep = e.target.value.replace(/\D/g, '');
@@ -508,103 +413,20 @@ export default function SejaProfissional() {
                 </div>
               </div>
 
-              {/* Payment Method Selection */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Forma de Pagamento</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('credit_card')}
-                    className={`p-4 border rounded-lg text-center transition-colors ${
-                      paymentMethod === 'credit_card' 
-                        ? 'border-[#3C8BAB] bg-[#3C8BAB]/10' 
-                        : 'border-border hover:border-[#3C8BAB]/50'
-                    }`}
-                    data-testid="payment-credit-card"
-                  >
-                    <CreditCard className="h-6 w-6 mx-auto mb-2" />
-                    <div className="font-medium">Cartão de Crédito</div>
-                    <div className="text-sm text-muted-foreground">Cobrança recorrente</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('pix')}
-                    className={`p-4 border rounded-lg text-center transition-colors ${
-                      paymentMethod === 'pix' 
-                        ? 'border-[#3C8BAB] bg-[#3C8BAB]/10' 
-                        : 'border-border hover:border-[#3C8BAB]/50'
-                    }`}
-                    data-testid="payment-pix"
-                  >
-                    <Smartphone className="h-6 w-6 mx-auto mb-2" />
-                    <div className="font-medium">PIX</div>
-                    <div className="text-sm text-muted-foreground">Pagamento único</div>
-                  </button>
+              {/* Payment Info */}
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                      Escolha sua forma de pagamento
+                    </p>
+                    <p className="text-blue-700 dark:text-blue-300">
+                      Você poderá pagar com <strong>PIX</strong> ou <strong>Cartão de Crédito</strong> na próxima etapa.
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              {/* Credit Card Fields */}
-              {paymentMethod === 'credit_card' && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Dados do Cartão</h3>
-                  <div>
-                    <Label htmlFor="cardNumber">Número do Cartão</Label>
-                    <Input
-                      id="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        cardNumber: formatCardNumber(e.target.value) 
-                      }))}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength={19}
-                      required
-                      data-testid="input-card-number"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cardName">Nome no Cartão</Label>
-                    <Input
-                      id="cardName"
-                      value={formData.cardName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, cardName: e.target.value }))}
-                      required
-                      data-testid="input-card-name"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="cardExpiry">Validade</Label>
-                      <Input
-                        id="cardExpiry"
-                        value={formData.cardExpiry}
-                        onChange={(e) => setFormData(prev => ({ 
-                          ...prev, 
-                          cardExpiry: formatCardExpiry(e.target.value) 
-                        }))}
-                        placeholder="MM/AA"
-                        maxLength={5}
-                        required
-                        data-testid="input-card-expiry"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cardCvv">CVV</Label>
-                      <Input
-                        id="cardCvv"
-                        value={formData.cardCvv}
-                        onChange={(e) => setFormData(prev => ({ 
-                          ...prev, 
-                          cardCvv: e.target.value.replace(/\D/g, '') 
-                        }))}
-                        maxLength={4}
-                        required
-                        data-testid="input-card-cvv"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Submit Button */}
               <div className="flex gap-4">
@@ -619,188 +441,21 @@ export default function SejaProfissional() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createSubscriptionMutation.isPending}
+                  disabled={createRegistrationMutation.isPending}
                   className="flex-1 bg-[#3C8BAB] hover:bg-[#3C8BAB]/90"
                   data-testid="button-submit"
                 >
-                  {createSubscriptionMutation.isPending ? (
+                  {createRegistrationMutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       Processando...
                     </>
                   ) : (
-                    `Finalizar Assinatura - ${selectedPlan && formatCurrency(selectedPlan.monthlyPrice)}`
+                    `Continuar para Pagamento`
                   )}
                 </Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Payment Info Dialog for PIX/Boleto */}
-        <Dialog open={showPaymentInfo} onOpenChange={setShowPaymentInfo}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5 text-blue-600" />
-                {paymentMethod === 'pix' ? 'Pagamento PIX' : 'Pagamento Boleto'}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {paymentInfo ? (
-              <div className="space-y-4">
-                {/* QR Code for PIX */}
-                {paymentMethod === 'pix' && paymentInfo.qrCodeUrl && (
-                  <div className="text-center">
-                    <div className="bg-white p-4 rounded-lg border inline-block">
-                      <img 
-                        src={paymentInfo.qrCodeUrl} 
-                        alt="QR Code PIX" 
-                        className="w-48 h-48 mx-auto"
-                        data-testid="pix-qr-code"
-                        onError={(e) => {
-                          console.error('QR Code image failed to load:', paymentInfo.qrCodeUrl);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                        onLoad={() => {
-                          console.log('QR Code image loaded successfully:', paymentInfo.qrCodeUrl);
-                        }}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Escaneie o QR Code com seu app de banco para pagar
-                    </p>
-                  </div>
-                )}
-                
-                {/* Debug info - show what we have */}
-                {paymentMethod === 'pix' && paymentInfo && (
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-700 mb-2">
-                      Informações de Pagamento PIX:
-                    </p>
-                    <div className="text-xs text-blue-600 space-y-1">
-                      <div>QR Code URL: {paymentInfo.qrCodeUrl ? '✅ Disponível' : '❌ Não disponível'}</div>
-                      <div>Código PIX: {paymentInfo.pixCode || paymentInfo.qrCode ? '✅ Disponível' : '❌ Não disponível'}</div>
-                      <div>Valor: R$ {paymentInfo.amount ? (paymentInfo.amount / 100).toFixed(2) : 'N/A'}</div>
-                      <div>Expira em: {paymentInfo.expiresAt ? new Date(paymentInfo.expiresAt).toLocaleString('pt-BR') : 'N/A'}</div>
-                    </div>
-                  </div>
-                )}
-
-                {/* PIX Code - Always show if we have payment info */}
-                {paymentInfo && (
-                  <div>
-                    <Label className="text-sm font-medium">Código PIX (Copia e Cola)</Label>
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        value={paymentInfo.pixCode || paymentInfo.qrCode || "Código PIX não disponível"}
-                        readOnly
-                        className="font-mono text-xs"
-                        data-testid="pix-code"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const code = paymentInfo.pixCode || paymentInfo.qrCode;
-                          if (code) {
-                            navigator.clipboard.writeText(code);
-                            toast({ title: "Código PIX copiado!", description: "Cole no seu app bancário para pagar" });
-                          }
-                        }}
-                        data-testid="button-copy-pix"
-                        disabled={!paymentInfo.pixCode && !paymentInfo.qrCode}
-                      >
-                        Copiar PIX
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Boleto info */}
-                {paymentMethod === 'boleto' && paymentInfo.line && (
-                  <div>
-                    <Label className="text-sm font-medium">Código de Barras</Label>
-                    <div className="flex gap-2 mt-1">
-                      <Input
-                        value={paymentInfo.line}
-                        readOnly
-                        className="font-mono text-xs"
-                        data-testid="boleto-line"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(paymentInfo.line);
-                          toast({ title: "Código copiado!", description: "Use no internet banking" });
-                        }}
-                        data-testid="button-copy-boleto"
-                      >
-                        Copiar
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Payment amount and due date */}
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Valor:</span>
-                    <span className="font-medium">
-                      {paymentInfo.amount ? `R$ ${(paymentInfo.amount / 100).toFixed(2)}` : 'N/A'}
-                    </span>
-                  </div>
-                  {(paymentInfo.expiresAt || paymentInfo.dueAt) && (
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-sm text-muted-foreground">
-                        {paymentInfo.expiresAt ? 'Válido até:' : 'Vencimento:'}
-                      </span>
-                      <span className="text-sm">
-                        {new Date(paymentInfo.expiresAt || paymentInfo.dueAt).toLocaleDateString('pt-BR')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Countdown Timer */}
-                  {timeLeft && (
-                    <div className="flex justify-between items-center mt-1 p-2 bg-orange-50 rounded-lg border border-orange-200">
-                      <span className="text-sm font-medium text-orange-700">⏰ Tempo restante:</span>
-                      <span className={`text-sm font-bold ${timeLeft === 'Expirado' ? 'text-red-600' : 'text-orange-600'}`}>
-                        {timeLeft}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Action button */}
-                <Button
-                  onClick={() => {
-                    setShowPaymentInfo(false);
-                    // After payment is completed via webhook, user can login
-                    toast({
-                      title: "Aguardando pagamento",
-                      description: "Você receberá as credenciais por email após a confirmação.",
-                    });
-                  }}
-                  className="w-full bg-[#3C8BAB] hover:bg-[#3C8BAB]/90"
-                  data-testid="button-close-payment"
-                >
-                  Fechar
-                </Button>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  💡 Sua conta será ativada automaticamente após a confirmação do pagamento
-                </p>
-              </div>
-            ) : (
-              <div className="text-center p-4">
-                <p className="text-muted-foreground">
-                  Processando informações de pagamento...
-                </p>
-              </div>
-            )}
           </DialogContent>
         </Dialog>
       </div>

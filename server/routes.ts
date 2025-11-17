@@ -3524,6 +3524,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Register new professional with checkout (for /seja-profissional page)
+  app.post("/api/payments/register-with-checkout", async (req, res) => {
+    try {
+      const { professionalData, planId } = req.body;
+
+      if (!professionalData || !planId) {
+        return res.status(400).json({ error: 'Missing required fields: professionalData and planId are required' });
+      }
+
+      const { name, email, cpf, phone } = professionalData;
+
+      if (!name || !email || !cpf || !phone) {
+        return res.status(400).json({ error: 'Missing required professional data: name, email, cpf, and phone are required' });
+      }
+
+      // Validate CPF (simple validation)
+      const cleanCpf = cpf.replace(/\D/g, '');
+      if (cleanCpf.length !== 11) {
+        return res.status(400).json({ error: 'CPF inválido' });
+      }
+
+      // Check if email already exists
+      const existingProfessional = await storage.getProfessionalByEmail(email);
+      if (existingProfessional) {
+        return res.status(400).json({ error: 'E-mail já cadastrado' });
+      }
+
+      // Get plan
+      const plan = await storage.getSubscriptionPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+
+      console.log('[REGISTER-CHECKOUT] Creating professional with pending payment status');
+
+      // Create professional with pending_payment status
+      const newProfessional = await storage.createProfessional({
+        fullName: name,
+        email: email,
+        document: cleanCpf,
+        phone: phone.replace(/\D/g, ''),
+        password: 'senha123', // Default password
+        status: 'pending_payment',
+        paymentStatus: 'pending',
+        description: `Cadastro aguardando pagamento - ${plan.name}`,
+        categoryId: '', // Will be set when they complete profile
+        serviceArea: '', // Will be set when they complete profile
+        city: '' // Will be set when they complete profile
+      });
+
+      console.log('[REGISTER-CHECKOUT] Professional created:', newProfessional.id);
+
+      // Create checkout payload
+      const amountInCents = Math.round(parseFloat(plan.monthlyPrice) * 100);
+
+      const checkoutPayload: any = {
+        is_building: false,
+        type: 'order',
+        name: `${name} - ${plan.name}`,
+        payment_settings: {
+          accepted_payment_methods: ['pix', 'credit_card'],
+          pix_settings: {
+            expires_in: 2592000, // 30 days in seconds
+            additional_information: [
+              {
+                name: 'Plano',
+                value: plan.name
+              },
+              {
+                name: 'Profissional',
+                value: name
+              }
+            ]
+          },
+          credit_card_settings: {
+            operation_type: 'auth_and_capture',
+            installments: [
+              { number: 1, total: amountInCents }
+            ]
+          }
+        },
+        cart_settings: {
+          items: [{
+            amount: amountInCents,
+            name: `${plan.name} - Assinatura Mensal`,
+            default_quantity: 1,
+            metadata: {
+              professional_id: newProfessional.id,
+              plan_id: plan.id
+            }
+          }]
+        },
+        customer_settings: {
+          name: name,
+          email: email,
+          document: cleanCpf,
+          phone: {
+            country_code: '55',
+            area_code: phone.replace(/\D/g, '').substring(0, 2),
+            number: phone.replace(/\D/g, '').substring(2)
+          }
+        }
+      };
+
+      console.log('[REGISTER-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
+
+      // Get API key from admin configuration
+      const apiKeyConfig = await storage.getSystemConfig('PAGARME_API_KEY');
+      const apiKey = apiKeyConfig?.value;
+      
+      if (!apiKey) {
+        // Delete the professional we just created since we can't proceed
+        await storage.deleteProfessional(newProfessional.id);
+        return res.status(500).json({ 
+          error: 'Pagar.me API key not configured. Please contact support.'
+        });
+      }
+
+      console.log('[REGISTER-CHECKOUT] API Key exists:', !!apiKey);
+      const authHeader = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
+
+      const response = await fetch('https://api.pagar.me/core/v5/paymentlinks', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'content-type': 'application/json',
+          'authorization': authHeader
+        },
+        body: JSON.stringify(checkoutPayload)
+      });
+
+      console.log('[REGISTER-CHECKOUT] Response status:', response.status);
+
+      if (!response.ok) {
+        const responseText = await response.text();
+        console.log('[REGISTER-CHECKOUT] Error response:', responseText);
+        
+        // Delete the professional since payment failed
+        await storage.deleteProfessional(newProfessional.id);
+        
+        if (response.status === 401) {
+          return res.status(500).json({
+            error: 'Payment configuration error',
+            message: 'Erro ao configurar pagamento. Por favor, tente novamente ou entre em contato com o suporte.'
+          });
+        }
+        
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to create checkout`);
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+        }
+      }
+
+      const checkout = await response.json();
+      console.log('[REGISTER-CHECKOUT] Checkout created successfully:', checkout.id);
+      console.log('[REGISTER-CHECKOUT] Payment URL:', checkout.url);
+
+      // Store plan information for later use
+      await storage.updateProfessional(newProfessional.id, {
+        subscriptionPlanId: plan.id
+      });
+
+      res.json({ 
+        success: true, 
+        checkoutUrl: checkout.url,
+        checkoutId: checkout.id,
+        professionalId: newProfessional.id,
+        message: 'Profissional criado com sucesso. Complete o pagamento para ativar sua conta.'
+      });
+    } catch (error) {
+      console.log('[REGISTER-CHECKOUT] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create professional registration', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Webhook for Pagar.me notifications
   app.post("/api/payments/webhook", async (req, res) => {
     try {
