@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -3554,14 +3556,35 @@ export default function AdminDashboard() {
                         <FormItem>
                           <FormLabel>Conteúdo</FormLabel>
                           <FormControl>
-                            <textarea
-                              {...field}
-                              className="w-full min-h-[200px] p-3 border border-gray-300 rounded-md resize-y"
+                            <ReactQuill
+                              theme="snow"
+                              value={field.value}
+                              onChange={field.onChange}
+                              modules={{
+                                toolbar: [
+                                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                  ['bold', 'italic', 'underline', 'strike'],
+                                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                  [{ 'align': [] }],
+                                  [{ 'color': [] }, { 'background': [] }],
+                                  ['link', 'image'],
+                                  ['clean']
+                                ]
+                              }}
+                              formats={[
+                                'header',
+                                'bold', 'italic', 'underline', 'strike',
+                                'list', 'bullet',
+                                'align',
+                                'color', 'background',
+                                'link', 'image'
+                              ]}
+                              className="bg-white"
                               placeholder="Escreva o conteúdo da página aqui..."
                             />
                           </FormControl>
                           <FormDescription>
-                            Suporte a HTML básico para formatação
+                            Use a barra de ferramentas para formatar o texto
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
