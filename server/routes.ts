@@ -2889,11 +2889,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
+      // Get API key from admin configuration
+      const apiKeyConfig = await storage.getSystemConfig('PAGARME_API_KEY');
+      const apiKey = apiKeyConfig?.value;
+      
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: 'Pagar.me API key not configured. Please configure it in the admin panel.' 
+        });
+      }
+
       // Voltar para estrutura de subscription que funcionava, mas com preço correto
       const pagarmeResponse = await fetch('https://api.pagar.me/core/v5/subscriptions', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+          'Authorization': `Basic ${Buffer.from(apiKey + ':').toString('base64')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -3064,7 +3074,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const chargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
             method: 'POST',
             headers: {
-              'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+              'Authorization': `Basic ${Buffer.from(apiKey + ':').toString('base64')}`,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(chargeData)
@@ -3287,10 +3297,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[CREATE-PIX] Creating charge for professional:', professional.id);
 
+      // Get API key from admin configuration
+      const apiKeyConfig = await storage.getSystemConfig('PAGARME_API_KEY');
+      const apiKey = apiKeyConfig?.value;
+      
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: 'Pagar.me API key not configured. Please configure it in the admin panel.' 
+        });
+      }
+
       const chargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+          'Authorization': `Basic ${Buffer.from(apiKey + ':').toString('base64')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(chargeData)
@@ -3412,8 +3432,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[CREATE-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
 
-      // Debug authentication
-      const apiKey = process.env.PAGARME_API_KEY;
+      // Get API key from admin configuration
+      const apiKeyConfig = await storage.getSystemConfig('PAGARME_API_KEY');
+      const apiKey = apiKeyConfig?.value;
+      
+      if (!apiKey) {
+        return res.status(500).json({ 
+          error: 'Pagar.me API key not configured. Please configure it in the admin panel.' 
+        });
+      }
+
       console.log('[CREATE-CHECKOUT] API Key exists:', !!apiKey);
       console.log('[CREATE-CHECKOUT] API Key prefix:', apiKey?.substring(0, 10));
       const authHeader = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
