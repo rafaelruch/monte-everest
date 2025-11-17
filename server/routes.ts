@@ -3350,17 +3350,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create PIX Order for existing professional (using Orders API)
+  // Create Payment Link (Checkout) for existing professional
   app.post("/api/payments/create-checkout", verifyProfessionalToken, async (req, res) => {
     try {
-      const { professionalId, planId, paymentMethod, cpf } = req.body;
+      const { professionalId, planId, paymentMethod } = req.body;
 
       if (!professionalId || !planId) {
         return res.status(400).json({ error: 'Missing required fields: professionalId and planId are required' });
-      }
-
-      if (paymentMethod === 'pix' && !cpf) {
-        return res.status(400).json({ error: 'CPF is required for PIX payments' });
       }
 
       // Get professional and plan
@@ -3375,45 +3371,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Plan not found' });
       }
 
-      const priceInCentavos = Math.round(plan.monthlyPrice * 100);
+      console.log('[CREATE-CHECKOUT] Creating payment link for professional:', professionalId);
 
-      // Create order with PIX payment
-      const orderData = {
-        items: [
-          {
-            amount: priceInCentavos,
-            description: `${plan.name} - Assinatura Mensal`,
-            quantity: 1,
+      const amountInCents = Math.round(plan.monthlyPrice * 100);
+
+      // Determine accepted payment methods based on user selection
+      const acceptedMethods = paymentMethod === 'pix' 
+        ? ['pix']
+        : paymentMethod === 'credit_card'
+        ? ['credit_card']
+        : ['pix', 'credit_card']; // Default: both
+
+      // Create payment link using Checkout API
+      const paymentSettings: any = {
+        accepted_payment_methods: acceptedMethods
+      };
+
+      // Add credit card settings if credit card is accepted
+      if (acceptedMethods.includes('credit_card')) {
+        paymentSettings.credit_card_settings = {
+          operation_type: 'auth_and_capture',
+          installments: [
+            { number: 1, total: amountInCents }
+          ]
+        };
+      }
+
+      const checkoutPayload = {
+        is_building: false,
+        type: 'order',
+        name: `${professional.fullName} - ${plan.name}`,
+        payment_settings: paymentSettings,
+        cart_settings: {
+          items: [{
+            amount: amountInCents,
+            name: `${plan.name} - Assinatura Mensal`,
+            default_quantity: 1,
             code: plan.id
-          }
-        ],
-        customer: {
-          name: professional.fullName,
-          email: professional.email,
-          type: 'individual',
-          document: cpf || professional.document, // Use provided CPF or professional's document
-          phones: {
-            home_phone: {
-              country_code: '55',
-              area_code: professional.phone.substring(0, 2),
-              number: professional.phone.substring(2)
-            }
+          }]
+        },
+        customer_settings: {
+          email: {
+            customer_email: professional.email
           }
         },
-        payments: [
-          {
-            payment_method: 'pix',
-            pix: {
-              expires_in: 2592000, // 30 days in seconds
-              additional_information: [
-                {
-                  name: 'Plano',
-                  value: plan.name
-                }
-              ]
-            }
-          }
-        ],
         metadata: {
           professional_id: professional.id,
           plan_id: plan.id,
@@ -3421,65 +3422,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      console.log('[CREATE-PIX-ORDER] Creating PIX order for professional:', professional.id);
+      console.log('[CREATE-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
 
-      const orderResponse = await fetch('https://api.pagar.me/core/v5/orders', {
+      const response = await fetch('https://api.pagar.me/core/v5/checkouts', {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
-          'Content-Type': 'application/json'
+          'accept': 'application/json',
+          'content-type': 'application/json',
+          'authorization': `Basic ${Buffer.from(`${process.env.PAGARME_API_KEY}:`).toString('base64')}`
         },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(checkoutPayload)
       });
 
-      if (!orderResponse.ok) {
-        const errorText = await orderResponse.text();
-        console.error('[CREATE-PIX-ORDER] Failed to create order:', orderResponse.status, errorText);
-        throw new Error('Failed to create PIX order');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('[CREATE-CHECKOUT] Error response:', JSON.stringify(errorData, null, 2));
+        throw new Error(errorData.message || 'Failed to create checkout');
       }
 
-      const order = await orderResponse.json();
-      console.log('[CREATE-PIX-ORDER] Order created successfully:', order.id);
-      console.log('[CREATE-PIX-ORDER] Order response:', JSON.stringify(order, null, 2));
+      const checkout = await response.json();
+      console.log('[CREATE-CHECKOUT] Checkout created successfully:', checkout.id);
+      console.log('[CREATE-CHECKOUT] Payment URL:', checkout.url);
 
-      // Extract PIX data from the last charge
-      const lastCharge = order.charges?.[order.charges.length - 1];
-      const lastTransaction = lastCharge?.last_transaction;
-
-      if (!lastTransaction || !lastTransaction.qr_code) {
-        console.error('[CREATE-PIX-ORDER] No PIX data in order:', JSON.stringify(order, null, 2));
-        throw new Error('Failed to generate PIX code');
-      }
-
-      const pixData = {
-        qrCode: lastTransaction.qr_code,
-        qrCodeUrl: lastTransaction.qr_code_url,
-        expiresAt: lastTransaction.expires_at,
-        amount: priceInCentavos,
-        orderId: order.id,
-        chargeId: lastCharge.id
-      };
-
-      // Update professional with PIX data
+      // Update professional with payment link
       await storage.updateProfessional(professional.id, {
-        pendingPixCode: pixData.qrCode,
-        pendingPixUrl: pixData.qrCodeUrl,
-        pendingPixExpiry: new Date(pixData.expiresAt),
-        pendingChargeId: pixData.chargeId,
         paymentStatus: 'pending'
       });
-      console.log('[CREATE-PIX-ORDER] Professional updated with PIX data');
 
-      res.json({
-        success: true,
-        pixData
+      res.json({ 
+        success: true, 
+        checkoutUrl: checkout.url,
+        checkoutId: checkout.id
       });
-
     } catch (error) {
-      console.error('[CREATE-PIX-ORDER] Error:', error);
+      console.log('[CREATE-CHECKOUT] Error:', error);
       res.status(500).json({ 
-        error: 'Failed to create PIX payment',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Failed to create checkout', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
