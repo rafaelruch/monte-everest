@@ -3300,12 +3300,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const charge = await chargeResponse.json();
       console.log('[CREATE-PIX] Charge created successfully:', charge.id);
+      console.log('[CREATE-PIX] Full charge response:', JSON.stringify(charge, null, 2));
 
       if (!charge.last_transaction) {
+        console.error('[CREATE-PIX] No last_transaction in charge:', JSON.stringify(charge, null, 2));
         throw new Error('No transaction in charge response');
       }
 
       const transaction = charge.last_transaction;
+      console.log('[CREATE-PIX] Transaction details:', JSON.stringify(transaction, null, 2));
 
       const paymentInfo = {
         qrCode: transaction.qr_code,
@@ -3317,6 +3320,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: charge.amount || priceInCentavos,
         chargeId: charge.id
       };
+      
+      console.log('[CREATE-PIX] PaymentInfo being returned:', JSON.stringify(paymentInfo, null, 2));
 
       // Update professional with PIX data
       await storage.updateProfessional(professional.id, {
