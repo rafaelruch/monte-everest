@@ -2956,6 +2956,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Create new professional account
         console.log(`Creating new professional with email ${professionalData.email}...`);
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30); // 30 days from now
+        
         professional = await storage.createProfessional({
           fullName: professionalData.name,
           email: professionalData.email,
@@ -2967,6 +2970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: '',
           status: 'pending', // Always pending until payment is confirmed
           paymentStatus: paymentMethod === 'pix' ? 'pending' : 'active',
+          subscriptionExpiresAt: paymentMethod === 'credit_card' ? expiryDate : null, // Only set expiry for paid subscriptions
           password: await bcrypt.hash('senha123', 10) // Default password: senha123
         });
       }
@@ -3104,7 +3108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               responseData.autoLogin = true;
               responseData.firstLogin = true;
               responseData.token = token;
-              responseData.redirectTo = '/professional-login?pixPayment=true';
+              responseData.redirectTo = '/professional-dashboard';
             } else {
               console.error('No transaction found in boleto charge');
               responseData.paymentInfo = {
@@ -3160,7 +3164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.autoLogin = true;
         responseData.firstLogin = true;
         responseData.token = token;
-        responseData.redirectTo = '/professional-login?autoLogin=true';
+        responseData.redirectTo = '/professional-dashboard';
         
         // Send email with login credentials for credit card payments
         try {
