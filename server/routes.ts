@@ -3420,6 +3420,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
+      // Add PIX settings if PIX is in accepted methods
+      if (acceptedMethods.includes('pix')) {
+        checkoutPayload.payment_settings.pix_settings = {
+          expires_in: 2592000, // 30 days in seconds
+          additional_information: [
+            {
+              name: 'Plano',
+              value: plan.name
+            }
+          ]
+        };
+      }
+
       // Add credit card settings only if credit card is in accepted methods
       if (acceptedMethods.includes('credit_card')) {
         checkoutPayload.payment_settings.credit_card_settings = {
