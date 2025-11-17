@@ -3424,12 +3424,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[CREATE-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
 
+      // Debug authentication
+      const apiKey = process.env.PAGARME_API_KEY;
+      console.log('[CREATE-CHECKOUT] API Key exists:', !!apiKey);
+      console.log('[CREATE-CHECKOUT] API Key prefix:', apiKey?.substring(0, 10));
+      const authHeader = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
+      console.log('[CREATE-CHECKOUT] Auth Header:', authHeader.substring(0, 30) + '...');
+
       const response = await fetch('https://api.pagar.me/core/v5/paymentlinks', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
           'content-type': 'application/json',
-          'authorization': `Basic ${Buffer.from(`${process.env.PAGARME_API_KEY}:`).toString('base64')}`
+          'authorization': authHeader
         },
         body: JSON.stringify(checkoutPayload)
       });
