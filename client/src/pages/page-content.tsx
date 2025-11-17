@@ -110,7 +110,7 @@ export default function PageContent() {
           </header>
           
           <div 
-            className="content text-foreground leading-relaxed"
+            className="content text-foreground leading-relaxed prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{ __html: page.content }}
             style={{
               lineHeight: '1.8',
