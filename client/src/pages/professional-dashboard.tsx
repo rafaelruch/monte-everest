@@ -88,6 +88,9 @@ export default function ProfessionalDashboard() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [forcePasswordChangeOpen, setForcePasswordChangeOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card'>('pix');
+  const [pixPaymentData, setPixPaymentData] = useState<any>(null);
   const queryClient = useQueryClient();
   const { fetchAddressByCep, loading: cepLoading } = useViaCep();
 
@@ -137,6 +140,10 @@ export default function ProfessionalDashboard() {
 
   const { data: categories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: plans = [] } = useQuery<any[]>({
+    queryKey: ["/api/subscription-plans"],
   });
 
   // Get monthly contact statistics
@@ -560,9 +567,10 @@ export default function ProfessionalDashboard() {
               <strong>Conta Pendente:</strong> Complete seu pagamento para ativar seu perfil e aparecer nas buscas.
               <div className="mt-2">
                 <Button 
-                  onClick={() => window.open('/subscription-plans', '_blank')}
+                  onClick={() => setShowPaymentModal(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   size="sm"
+                  data-testid="button-open-payment-modal"
                 >
                   Realizar Pagamento
                 </Button>
@@ -738,6 +746,186 @@ export default function ProfessionalDashboard() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Modal */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="payment-modal">
+          <DialogHeader>
+            <DialogTitle>Realizar Pagamento</DialogTitle>
+            <DialogDescription>
+              Escolha a forma de pagamento para ativar sua conta profissional
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Payment Method Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant={paymentMethod === 'pix' ? 'default' : 'outline'}
+                onClick={() => {
+                  setPaymentMethod('pix');
+                  setPixPaymentData(null);
+                }}
+                className="h-20 flex flex-col items-center justify-center"
+                data-testid="button-select-pix"
+              >
+                <Smartphone className="h-6 w-6 mb-2" />
+                <span>PIX</span>
+              </Button>
+              <Button
+                variant={paymentMethod === 'credit_card' ? 'default' : 'outline'}
+                onClick={() => {
+                  setPaymentMethod('credit_card');
+                  setPixPaymentData(null);
+                }}
+                className="h-20 flex flex-col items-center justify-center"
+                data-testid="button-select-card"
+              >
+                <span className="text-2xl mb-2">💳</span>
+                <span>Cartão de Crédito</span>
+              </Button>
+            </div>
+
+            {/* Payment Forms */}
+            {paymentMethod === 'pix' && !pixPaymentData && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  Clique no botão abaixo para gerar o código PIX para pagamento
+                </p>
+                <Button
+                  onClick={async () => {
+                    try {
+                      if (!professional?.subscriptionPlanId && plans.length > 0) {
+                        toast({
+                          title: "Erro",
+                          description: "Selecione um plano primeiro",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+
+                      const planId = professional?.subscriptionPlanId || plans[0]?.id;
+                      
+                      const response = await fetch('/api/payments/create-pix', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${professionalAuth.token}`
+                        },
+                        body: JSON.stringify({
+                          professionalId: professional.id,
+                          planId
+                        })
+                      });
+
+                      if (response.ok) {
+                        const data = await response.json();
+                        setPixPaymentData(data.paymentInfo);
+                        
+                        // Update professional with PIX data
+                        queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
+                        
+                        toast({
+                          title: "PIX gerado!",
+                          description: "Escaneie o QR Code ou copie o código PIX para pagar"
+                        });
+                      } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erro ao gerar PIX');
+                      }
+                    } catch (error) {
+                      console.error('Error generating PIX:', error);
+                      toast({
+                        title: "Erro",
+                        description: error instanceof Error ? error.message : "Erro ao gerar PIX",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                  className="w-full"
+                  data-testid="button-generate-pix"
+                >
+                  Gerar código PIX
+                </Button>
+              </div>
+            )}
+
+            {/* PIX Payment Display */}
+            {paymentMethod === 'pix' && pixPaymentData && (
+              <div className="space-y-4 border rounded-lg p-4">
+                <div className="text-center">
+                  <h3 className="font-semibold mb-2">PIX Gerado!</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Escaneie o QR Code ou copie o código abaixo
+                  </p>
+                </div>
+
+                {/* QR Code */}
+                {pixPaymentData.qrCodeUrl && (
+                  <div className="flex justify-center">
+                    <div className="bg-white p-4 rounded-lg border shadow-sm">
+                      <img 
+                        src={pixPaymentData.qrCodeUrl} 
+                        alt="QR Code PIX" 
+                        className="w-48 h-48"
+                        data-testid="pix-qr-code"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* PIX Code */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Código PIX (Copia e Cola):</p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={pixPaymentData.pixCode || pixPaymentData.qrCode}
+                      readOnly
+                      className="font-mono text-xs"
+                      data-testid="pix-code-input"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(pixPaymentData.pixCode || pixPaymentData.qrCode);
+                        toast({ 
+                          title: "Código copiado!", 
+                          description: "Cole no seu app bancário" 
+                        });
+                      }}
+                      className="shrink-0"
+                      data-testid="button-copy-pix"
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copiar
+                    </Button>
+                  </div>
+                </div>
+
+                <Alert className="bg-blue-50 border-blue-200">
+                  <AlertCircle className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-800">
+                    Após o pagamento, sua conta será ativada automaticamente em até 5 minutos.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+
+            {/* Credit Card Form - To be implemented */}
+            {paymentMethod === 'credit_card' && (
+              <div className="space-y-4">
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Pagamento por cartão de crédito será implementado em breve. Por favor, utilize PIX.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

@@ -3216,6 +3216,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create PIX payment for existing professional
+  app.post("/api/payments/create-pix", verifyProfessionalToken, async (req, res) => {
+    try {
+      const { professionalId, planId } = req.body;
+
+      if (!professionalId || !planId) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Get professional and plan
+      const professional = await storage.getProfessional(professionalId);
+      const plan = await storage.getSubscriptionPlan(planId);
+
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+
+      const priceInCentavos = Math.round(plan.monthlyPrice * 100);
+
+      // Create charge with PIX
+      const chargeData = {
+        amount: priceInCentavos,
+        payment: {
+          payment_method: 'boleto',
+          boleto: {
+            due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            type: 'DM',
+            instructions: 'Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.'
+          }
+        },
+        customer: {
+          name: professional.fullName,
+          email: professional.email,
+          document: professional.document,
+          type: 'individual',
+          address: {
+            country: 'BR',
+            state: 'GO',
+            city: professional.city || 'Goiânia',
+            zip_code: professional.serviceArea || '74000000',
+            street: 'Rua Principal',
+            number: '123',
+            neighborhood: 'Centro',
+            line_1: 'Rua Principal, 123',
+            line_2: 'Centro'
+          },
+          phones: {
+            mobile_phone: {
+              country_code: '55',
+              area_code: professional.phone.substring(0, 2),
+              number: professional.phone.substring(2)
+            }
+          }
+        },
+        metadata: {
+          professional_id: professional.id,
+          plan_id: plan.id,
+          plan_name: plan.name
+        }
+      };
+
+      console.log('[CREATE-PIX] Creating charge for professional:', professional.id);
+
+      const chargeResponse = await fetch('https://api.pagar.me/core/v5/charges', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(chargeData)
+      });
+
+      if (!chargeResponse.ok) {
+        const errorText = await chargeResponse.text();
+        console.error('[CREATE-PIX] Failed to create charge:', chargeResponse.status, errorText);
+        throw new Error('Failed to create PIX charge');
+      }
+
+      const charge = await chargeResponse.json();
+      console.log('[CREATE-PIX] Charge created successfully:', charge.id);
+
+      if (!charge.last_transaction) {
+        throw new Error('No transaction in charge response');
+      }
+
+      const transaction = charge.last_transaction;
+
+      const paymentInfo = {
+        qrCode: transaction.qr_code,
+        qrCodeUrl: transaction.qr_code_url || transaction.qr_code,
+        pixCode: transaction.qr_code,
+        line: transaction.line,
+        pdf: transaction.pdf,
+        expiresAt: transaction.due_at,
+        amount: charge.amount || priceInCentavos,
+        chargeId: charge.id
+      };
+
+      // Update professional with PIX data
+      await storage.updateProfessional(professional.id, {
+        pendingPixCode: paymentInfo.pixCode || paymentInfo.qrCode,
+        pendingPixUrl: paymentInfo.qrCodeUrl,
+        pendingPixExpiry: new Date(paymentInfo.expiresAt),
+        paymentStatus: 'pending'
+      });
+
+      console.log('[CREATE-PIX] Professional updated with PIX data');
+
+      res.json({
+        success: true,
+        paymentInfo
+      });
+    } catch (error) {
+      console.error('[CREATE-PIX] Error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Erro ao gerar PIX. Tente novamente.',
+        error: error.message 
+      });
+    }
+  });
+
   // Webhook for Pagar.me notifications
   app.post("/api/payments/webhook", async (req, res) => {
     try {
