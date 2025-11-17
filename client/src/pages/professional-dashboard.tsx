@@ -89,6 +89,8 @@ export default function ProfessionalDashboard() {
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [forcePasswordChangeOpen, setForcePasswordChangeOpen] = useState(false);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [pixData, setPixData] = useState<any>(null);
+  const [showPixModal, setShowPixModal] = useState(false);
   const queryClient = useQueryClient();
   const { fetchAddressByCep, loading: cepLoading} = useViaCep();
 
@@ -593,21 +595,22 @@ export default function ProfessionalDashboard() {
 
                       if (response.ok) {
                         const data = await response.json();
-                        // Open checkout in new tab
-                        window.open(data.checkoutUrl, '_blank');
+                        setPixData(data.pixData);
+                        setShowPixModal(true);
+                        queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
                         toast({
-                          title: "Redirecionando...",
-                          description: "Abrindo página de pagamento em nova aba"
+                          title: "PIX Gerado!",
+                          description: "Escaneie o QR Code ou copie o código"
                         });
                       } else {
                         const error = await response.json();
-                        throw new Error(error.message || 'Erro ao criar checkout');
+                        throw new Error(error.message || 'Erro ao gerar PIX');
                       }
                     } catch (error) {
-                      console.error('Error creating checkout:', error);
+                      console.error('Error creating PIX:', error);
                       toast({
                         title: "Erro",
-                        description: error instanceof Error ? error.message : "Erro ao abrir página de pagamento",
+                        description: error instanceof Error ? error.message : "Erro ao gerar PIX",
                         variant: "destructive"
                       });
                     } finally {
@@ -619,90 +622,8 @@ export default function ProfessionalDashboard() {
                   disabled={isCreatingCheckout}
                   data-testid="button-open-payment-modal"
                 >
-                  {isCreatingCheckout ? "Aguarde..." : "Realizar Pagamento"}
+                  {isCreatingCheckout ? "Gerando PIX..." : "Realizar Pagamento"}
                 </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      {/* PIX Payment Pending Section */}
-      {professional?.paymentStatus === 'pending' && professional?.pendingPixCode && (
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <Alert className="border-yellow-200 bg-yellow-50">
-            <Smartphone className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              <div className="space-y-3">
-                <div>
-                  <strong>Pagamento PIX Pendente:</strong> Complete o pagamento via PIX para ativar sua conta.
-                  {professional.pendingPixExpiry && (
-                    <div className="flex items-center gap-1 mt-1 text-sm">
-                      <Clock className="h-3 w-3" />
-                      <span>Válido até: {new Date(professional.pendingPixExpiry).toLocaleString("pt-BR")}</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* QR Code */}
-                {professional.pendingPixUrl && (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="bg-white p-3 rounded-lg border shadow-sm">
-                      <img 
-                        src={professional.pendingPixUrl} 
-                        alt="QR Code PIX" 
-                        className="w-40 h-40"
-                        data-testid="pending-pix-qr-code"
-                        onError={(e) => {
-                          console.error('QR Code failed to load:', professional.pendingPixUrl);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                        onLoad={() => {
-                          console.log('QR Code loaded successfully:', professional.pendingPixUrl);
-                        }}
-                      />
-                    </div>
-                    <p className="text-xs text-center font-medium">📱 Escaneie com seu app bancário</p>
-                  </div>
-                )}
-                
-                {/* Show debug info if QR Code is not available */}
-                {!professional.pendingPixUrl && professional.pendingPixCode && (
-                  <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <p className="text-sm text-orange-700">
-                      ⚠️ QR Code não disponível, use o código PIX abaixo
-                    </p>
-                  </div>
-                )}
-                
-                {/* PIX Code Copy */}
-                <div>
-                  <p className="text-sm font-medium mb-2">Código PIX (Copia e Cola):</p>
-                  <div className="flex gap-2">
-                    <Input
-                      value={professional.pendingPixCode}
-                      readOnly
-                      className="font-mono text-xs bg-white"
-                      data-testid="pending-pix-code"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(professional.pendingPixCode);
-                        toast({ 
-                          title: "Código PIX copiado!", 
-                          description: "Cole no seu app bancário para pagar" 
-                        });
-                      }}
-                      className="shrink-0"
-                      data-testid="button-copy-pending-pix"
-                    >
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copiar
-                    </Button>
-                  </div>
-                </div>
               </div>
             </AlertDescription>
           </Alert>
@@ -1662,6 +1583,72 @@ export default function ProfessionalDashboard() {
               )}
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* PIX Payment Modal */}
+      <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>PIX Gerado!</DialogTitle>
+            <DialogDescription>
+              Escaneie o QR Code ou copie o código para pagar
+            </DialogDescription>
+          </DialogHeader>
+
+          {pixData && (
+            <div className="space-y-4">
+              {/* QR Code */}
+              {pixData.qrCodeUrl && (
+                <div className="flex justify-center">
+                  <div className="bg-white p-4 rounded-lg border shadow-sm">
+                    <img 
+                      src={pixData.qrCodeUrl} 
+                      alt="QR Code PIX" 
+                      className="w-48 h-48"
+                      data-testid="pix-qr-code"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* PIX Code */}
+              <div>
+                <p className="text-sm font-medium mb-2">Código PIX (Copia e Cola):</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={pixData.qrCode}
+                    readOnly
+                    className="font-mono text-xs"
+                    data-testid="pix-code-input"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText(pixData.qrCode);
+                      toast({ 
+                        title: "Código copiado!", 
+                        description: "Cole no seu app bancário" 
+                      });
+                    }}
+                    className="shrink-0"
+                    data-testid="button-copy-pix"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    Copiar
+                  </Button>
+                </div>
+              </div>
+
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-800">
+                  Após o pagamento, sua conta será ativada automaticamente em até 5 minutos.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
