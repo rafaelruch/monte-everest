@@ -58,6 +58,7 @@ The application uses PostgreSQL with Drizzle ORM:
 ## Payment Processing
 - **Pagar.me Integration**: Brazilian payment gateway for recurring subscription billing for professionals using hosted Checkout solution
 - **Subscription Model**: Monthly recurring payments to maintain active professional profiles
+- **Registration Flow**: New professionals register via `/seja-profissional` page → Professional created with `pending_payment` status → Checkout link generated → Opens in new tab → Webhook activates account upon payment confirmation
 
 ### Pagar.me Payment Links API Documentation
 
