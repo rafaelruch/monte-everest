@@ -54,6 +54,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ImageUploader } from "@/components/ImageUploader";
 import { useViaCep } from "@/hooks/useViaCep";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const updateProfileSchema = z.object({
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -157,6 +158,22 @@ export default function ProfessionalDashboard() {
       return response.json();
     },
     enabled: !!professionalAuth?.id,
+  });
+
+  // Get notifications (recent contacts and reviews)
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["/api/professionals", professionalAuth?.id, "notifications"],
+    queryFn: async () => {
+      const response = await fetch(`/api/professionals/${professionalAuth.id}/notifications`, {
+        headers: {
+          "Authorization": `Bearer ${professionalAuth.token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch notifications");
+      return response.json();
+    },
+    enabled: !!professionalAuth?.id,
+    refetchInterval: 60000, // Refresh every minute
   });
 
   const form = useForm<UpdateProfileData>({
@@ -515,10 +532,13 @@ export default function ProfessionalDashboard() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <NotificationBell notifications={notifications} />
+              <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
