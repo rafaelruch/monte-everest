@@ -3382,45 +3382,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? ['credit_card']
         : ['pix', 'credit_card']; // Default: both
 
-      // Create payment link using Checkout API
-      const paymentSettings: any = {
-        accepted_payment_methods: acceptedMethods
+      // Create payment link using Checkout API  
+      // Simplified payload following exact documentation structure
+      const checkoutPayload: any = {
+        is_building: false,
+        type: 'order',
+        name: `${professional.fullName} - ${plan.name}`,
+        payment_settings: {
+          accepted_payment_methods: acceptedMethods
+        },
+        cart_settings: {
+          items: [{
+            amount: amountInCents,
+            name: `${plan.name} - Assinatura Mensal`,
+            default_quantity: 1
+          }]
+        }
       };
 
-      // Add credit card settings if credit card is accepted
+      // Add credit card settings only if credit card is in accepted methods
       if (acceptedMethods.includes('credit_card')) {
-        paymentSettings.credit_card_settings = {
+        checkoutPayload.payment_settings.credit_card_settings = {
           operation_type: 'auth_and_capture',
           installments: [
             { number: 1, total: amountInCents }
           ]
         };
       }
-
-      const checkoutPayload = {
-        is_building: false,
-        type: 'order',
-        name: `${professional.fullName} - ${plan.name}`,
-        payment_settings: paymentSettings,
-        cart_settings: {
-          items: [{
-            amount: amountInCents,
-            name: `${plan.name} - Assinatura Mensal`,
-            default_quantity: 1,
-            code: plan.id
-          }]
-        },
-        customer_settings: {
-          email: {
-            customer_email: professional.email
-          }
-        },
-        metadata: {
-          professional_id: professional.id,
-          plan_id: plan.id,
-          plan_name: plan.name
-        }
-      };
 
       console.log('[CREATE-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
 
