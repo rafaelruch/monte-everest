@@ -92,6 +92,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Professional, Payment } from "@shared/schema";
 import IconSelector from "@/components/icon-selector";
+import { NotificationBell } from "@/components/NotificationBell";
 
 interface SidebarItem {
   id: string;
@@ -395,6 +396,19 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch reviews");
       return response.json();
     },
+  });
+
+  // Get admin notifications (recent contacts and reviews)
+  const { data: notifications = [] } = useQuery({
+    queryKey: ["/api/admin/notifications"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/notifications", {
+        headers: authHeaders,
+      });
+      if (!response.ok) throw new Error("Failed to fetch notifications");
+      return response.json();
+    },
+    refetchInterval: 60000, // Refresh every minute
   });
 
   const categoryForm = useForm<CategoryFormData>({
@@ -3924,6 +3938,7 @@ export default function AdminDashboard() {
             <div className="text-sm text-gray-600">
               Logado como <span className="font-medium">Administrador</span>
             </div>
+            <NotificationBell notifications={notifications} />
             <div className="w-8 h-8 bg-[#3C8BAB] rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-white" />
             </div>
