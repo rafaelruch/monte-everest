@@ -3243,11 +3243,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const chargeData = {
         amount: priceInCentavos,
         payment: {
-          payment_method: 'boleto',
-          boleto: {
-            due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            type: 'DM',
-            instructions: 'Pague via PIX escaneando o QR Code ou usando o código PIX. Válido por 30 dias.'
+          payment_method: 'pix',
+          pix: {
+            expires_in: 2592000, // 30 days in seconds
+            additional_information: [
+              {
+                name: 'Plano',
+                value: plan.name
+              }
+            ]
           }
         },
         customer: {
@@ -3310,39 +3314,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = charge.last_transaction;
       console.log('[CREATE-PIX] Transaction details:', JSON.stringify(transaction, null, 2));
 
-      // Fetch actual PIX code from QR Code URL
-      let pixCodeText = null;
-      let qrCodeImageUrl = null;
-      
-      if (transaction.qr_code) {
-        try {
-          console.log('[CREATE-PIX] Fetching PIX code from:', transaction.qr_code);
-          const qrCodeResponse = await fetch(transaction.qr_code, {
-            headers: {
-              'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`
-            }
-          });
-          
-          if (qrCodeResponse.ok) {
-            const qrCodeData = await qrCodeResponse.json();
-            console.log('[CREATE-PIX] QR Code data:', JSON.stringify(qrCodeData, null, 2));
-            pixCodeText = qrCodeData.text || qrCodeData.qr_code || qrCodeData.code;
-            qrCodeImageUrl = qrCodeData.qr_code_url || qrCodeData.image_url;
-          } else {
-            console.error('[CREATE-PIX] Failed to fetch QR code:', qrCodeResponse.status);
-          }
-        } catch (error) {
-          console.error('[CREATE-PIX] Error fetching QR code:', error);
-        }
-      }
-
+      // For PIX transactions, the QR code data is different
       const paymentInfo = {
-        qrCode: pixCodeText || transaction.qr_code,
-        qrCodeUrl: qrCodeImageUrl || transaction.barcode, // Try barcode URL as fallback
-        pixCode: pixCodeText || transaction.qr_code,
-        line: transaction.line,
-        pdf: transaction.pdf,
-        expiresAt: transaction.due_at,
+        qrCode: transaction.qr_code || transaction.qr_code_url, // PIX copia e cola code
+        qrCodeUrl: transaction.qr_code_url || transaction.qr_code, // QR Code image URL
+        pixCode: transaction.qr_code || transaction.qr_code_url, // PIX copia e cola code
+        expiresAt: transaction.expires_at || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         amount: charge.amount || priceInCentavos,
         chargeId: charge.id
       };
