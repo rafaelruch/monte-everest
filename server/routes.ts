@@ -3447,7 +3447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authHeader = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
       console.log('[CREATE-CHECKOUT] Auth Header:', authHeader.substring(0, 30) + '...');
 
-      const response = await fetch('https://api.pagar.me/core/v5/paymentlinks', {
+      const response = await fetch('https://api.pagar.me/core/v5/payment-links', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -3462,6 +3462,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!response.ok) {
         const responseText = await response.text();
         console.log('[CREATE-CHECKOUT] Error response text:', responseText);
+        
+        // Check for specific error types
+        if (response.status === 502 || response.status === 503) {
+          return res.status(503).json({
+            error: 'Pagar.me service temporarily unavailable',
+            message: 'O serviço de pagamento do Pagar.me está temporariamente indisponível. Por favor, tente novamente em alguns minutos.',
+            details: 'Se o problema persistir, verifique se as chaves da API estão corretas no painel administrativo.'
+          });
+        }
+        
+        if (response.status === 401) {
+          return res.status(401).json({
+            error: 'Authentication failed',
+            message: 'Chave da API do Pagar.me inválida. Por favor, verifique as configurações no painel administrativo.',
+            details: 'Certifique-se de que a Chave da API está correta e ativa.'
+          });
+        }
         
         try {
           const errorData = JSON.parse(responseText);
