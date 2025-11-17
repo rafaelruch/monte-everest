@@ -911,7 +911,7 @@ export default function ProfessionalDashboard() {
                       Gerencie suas informações profissionais
                     </CardDescription>
                   </div>
-                  {professional?.status === 'active' ? (
+                  {professional?.status === 'active' && professional?.paymentStatus !== 'pending' ? (
                     <Button
                       variant={isEditing ? "outline" : "default"}
                       onClick={() => setIsEditing(!isEditing)}
@@ -936,7 +936,7 @@ export default function ProfessionalDashboard() {
                       data-testid="button-edit-disabled"
                     >
                       <Lock className="h-4 w-4 mr-2" />
-                      Edição Bloqueada
+                      {professional?.paymentStatus === 'pending' ? 'Aguardando Pagamento' : 'Edição Bloqueada'}
                     </Button>
                   )}
                 </div>
@@ -982,10 +982,16 @@ export default function ProfessionalDashboard() {
                         variant="outline"
                         size="sm"
                         onClick={() => document.getElementById('profile-upload-input')?.click()}
+                        disabled={professional?.paymentStatus === 'pending'}
                       >
                         <Camera className="h-4 w-4 mr-2" />
                         {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
                       </Button>
+                      {professional?.paymentStatus === 'pending' && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Complete o pagamento para alterar sua foto de perfil
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1268,7 +1274,7 @@ export default function ProfessionalDashboard() {
                       <button
                         onClick={() => removePhotoMutation.mutate(photoPath)}
                         className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        disabled={removePhotoMutation.isPending}
+                        disabled={removePhotoMutation.isPending || professional?.paymentStatus === 'pending'}
                         data-testid={`remove-photo-${index}`}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -1341,11 +1347,18 @@ export default function ProfessionalDashboard() {
                         variant="outline"
                         className="w-full h-32 border-dashed"
                         onClick={() => document.getElementById('portfolio-upload-input')?.click()}
+                        disabled={professional?.paymentStatus === 'pending'}
                       >
                         <div className="flex flex-col items-center">
                           <ImagePlus className="h-8 w-8 mb-2" />
-                          <span>Adicionar Foto ao Portfólio</span>
-                          <span className="text-xs text-muted-foreground">JPG, PNG até 5MB</span>
+                          <span>
+                            {professional?.paymentStatus === 'pending' ? 'Aguardando Pagamento' : 'Adicionar Foto ao Portfólio'}
+                          </span>
+                          {professional?.paymentStatus === 'pending' ? (
+                            <span className="text-xs text-muted-foreground">Complete o pagamento primeiro</span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">JPG, PNG até 5MB</span>
+                          )}
                         </div>
                       </Button>
                     </div>
