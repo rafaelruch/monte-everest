@@ -797,16 +797,17 @@ export default function ProfessionalDashboard() {
                 <Button
                   onClick={async () => {
                     try {
-                      if (!professional?.subscriptionPlanId && plans.length > 0) {
+                      // Use professional's plan or first available plan
+                      const planId = professional?.subscriptionPlanId || plans[0]?.id;
+                      
+                      if (!planId) {
                         toast({
                           title: "Erro",
-                          description: "Selecione um plano primeiro",
+                          description: "Nenhum plano disponível",
                           variant: "destructive"
                         });
                         return;
                       }
-
-                      const planId = professional?.subscriptionPlanId || plans[0]?.id;
                       
                       const response = await fetch('/api/payments/create-pix', {
                         method: 'POST',
