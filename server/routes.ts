@@ -3546,9 +3546,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if email already exists
-      const existingProfessional = await storage.getProfessionalByEmail(email);
-      if (existingProfessional) {
+      const existingProfessionalByEmail = await storage.getProfessionalByEmail(email);
+      if (existingProfessionalByEmail) {
         return res.status(400).json({ error: 'E-mail já cadastrado' });
+      }
+
+      // Check if CPF already exists
+      const existingProfessionalByCpf = await storage.getProfessionalByDocument(cleanCpf);
+      if (existingProfessionalByCpf) {
+        return res.status(400).json({ error: 'CPF já cadastrado' });
       }
 
       // Get plan

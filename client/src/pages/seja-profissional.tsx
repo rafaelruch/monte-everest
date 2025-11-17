@@ -101,6 +101,12 @@ export default function SejaProfissional() {
           description: "Este e-mail já possui cadastro. Faça login ou recupere sua senha.",
           variant: "destructive",
         });
+      } else if (error.message.includes('CPF já cadastrado')) {
+        toast({
+          title: "CPF já cadastrado",
+          description: "Este CPF já possui cadastro. Faça login ou entre em contato com o suporte.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Erro ao processar cadastro",
