@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { Client as ObjectStorageClient } from '@replit/object-storage';
 
 const { Pool: PgPool } = pg;
-import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens } from "@shared/schema";
+import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens, contacts, reviews } from "@shared/schema";
 import { z } from "zod";
 import { sql, and, isNull, gt } from "drizzle-orm";
 import multer from "multer";
@@ -1372,6 +1372,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contacts);
     } catch (error) {
       console.error("Error fetching contacts:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Get notifications for professional (recent contacts and reviews)
+  app.get("/api/professionals/:id/notifications", verifyProfessionalToken, async (req, res) => {
+    try {
+      const professionalId = req.params.id;
+      
+      // Get contacts from last 7 days
+      const contacts = await storage.getContacts(professionalId);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const recentContacts = contacts
+        .filter((c: any) => new Date(c.createdAt) > sevenDaysAgo)
+        .slice(0, 10)
+        .map((c: any) => ({
+          id: c.id,
+          type: 'contact' as const,
+          title: 'Novo Contato',
+          message: `${c.customerName} entrou em contato via ${c.contactMethod === 'whatsapp' ? 'WhatsApp' : c.contactMethod === 'phone' ? 'Telefone' : 'Formulário'}`,
+          createdAt: c.createdAt,
+          isRead: false
+        }));
+
+      // Get reviews from last 7 days
+      const reviews = await storage.getReviews(professionalId);
+      const recentReviews = reviews
+        .filter((r: any) => new Date(r.createdAt) > sevenDaysAgo)
+        .slice(0, 10)
+        .map((r: any) => ({
+          id: r.id,
+          type: 'review' as const,
+          title: 'Nova Avaliação',
+          message: `${r.customerName} deixou uma avaliação de ${r.rating} estrelas${r.comment ? ': ' + r.comment.substring(0, 50) + (r.comment.length > 50 ? '...' : '') : ''}`,
+          createdAt: r.createdAt,
+          isRead: false
+        }));
+
+      // Combine and sort by date (most recent first)
+      const allNotifications = [...recentContacts, ...recentReviews]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 20);
+
+      res.json(allNotifications);
+    } catch (error) {
+      console.error("Error fetching professional notifications:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Get notifications for admin (all recent contacts and reviews)
+  app.get("/api/admin/notifications", verifyAdminToken, async (req, res) => {
+    try {
+      // Get all contacts from last 7 days
+      const allContacts = await db.select().from(contacts).orderBy(sql`${contacts.createdAt} DESC`).limit(50);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const recentContacts = allContacts
+        .filter((c: any) => new Date(c.createdAt) > sevenDaysAgo)
+        .slice(0, 15)
+        .map((c: any) => ({
+          id: c.id,
+          type: 'contact' as const,
+          title: 'Novo Contato',
+          message: `${c.customerName} entrou em contato com um profissional via ${c.contactMethod === 'whatsapp' ? 'WhatsApp' : c.contactMethod === 'phone' ? 'Telefone' : 'Formulário'}`,
+          createdAt: c.createdAt,
+          isRead: false
+        }));
+
+      // Get all reviews from last 7 days
+      const allReviews = await db.select().from(reviews).orderBy(sql`${reviews.createdAt} DESC`).limit(50);
+      const recentReviews = allReviews
+        .filter((r: any) => new Date(r.createdAt) > sevenDaysAgo)
+        .slice(0, 15)
+        .map((r: any) => ({
+          id: r.id,
+          type: 'review' as const,
+          title: 'Nova Avaliação',
+          message: `${r.customerName} deixou uma avaliação de ${r.rating} estrelas`,
+          createdAt: r.createdAt,
+          isRead: false
+        }));
+
+      // Combine and sort by date (most recent first)
+      const allNotifications = [...recentContacts, ...recentReviews]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 30);
+
+      res.json(allNotifications);
+    } catch (error) {
+      console.error("Error fetching admin notifications:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
