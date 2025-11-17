@@ -3434,10 +3434,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         body: JSON.stringify(checkoutPayload)
       });
 
+      console.log('[CREATE-CHECKOUT] Response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log('[CREATE-CHECKOUT] Error response:', JSON.stringify(errorData, null, 2));
-        throw new Error(errorData.message || 'Failed to create checkout');
+        const responseText = await response.text();
+        console.log('[CREATE-CHECKOUT] Error response text:', responseText);
+        
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to create checkout`);
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+        }
       }
 
       const checkout = await response.json();
