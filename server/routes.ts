@@ -3310,10 +3310,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = charge.last_transaction;
       console.log('[CREATE-PIX] Transaction details:', JSON.stringify(transaction, null, 2));
 
+      // Fetch actual PIX code from QR Code URL
+      let pixCodeText = null;
+      let qrCodeImageUrl = null;
+      
+      if (transaction.qr_code) {
+        try {
+          console.log('[CREATE-PIX] Fetching PIX code from:', transaction.qr_code);
+          const qrCodeResponse = await fetch(transaction.qr_code, {
+            headers: {
+              'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`
+            }
+          });
+          
+          if (qrCodeResponse.ok) {
+            const qrCodeData = await qrCodeResponse.json();
+            console.log('[CREATE-PIX] QR Code data:', JSON.stringify(qrCodeData, null, 2));
+            pixCodeText = qrCodeData.text || qrCodeData.qr_code || qrCodeData.code;
+            qrCodeImageUrl = qrCodeData.qr_code_url || qrCodeData.image_url;
+          } else {
+            console.error('[CREATE-PIX] Failed to fetch QR code:', qrCodeResponse.status);
+          }
+        } catch (error) {
+          console.error('[CREATE-PIX] Error fetching QR code:', error);
+        }
+      }
+
       const paymentInfo = {
-        qrCode: transaction.qr_code,
-        qrCodeUrl: transaction.qr_code_url || transaction.qr_code,
-        pixCode: transaction.qr_code,
+        qrCode: pixCodeText || transaction.qr_code,
+        qrCodeUrl: qrCodeImageUrl || transaction.barcode, // Try barcode URL as fallback
+        pixCode: pixCodeText || transaction.qr_code,
         line: transaction.line,
         pdf: transaction.pdf,
         expiresAt: transaction.due_at,
