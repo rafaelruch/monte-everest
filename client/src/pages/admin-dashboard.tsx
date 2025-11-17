@@ -206,7 +206,8 @@ export default function AdminDashboard() {
 
   // Estados para configurações do Pagar.me
   const [pagarmeApiKey, setPagarmeApiKey] = useState("");
-  const [pagarmeEncryptionKey, setPagarmeEncryptionKey] = useState("");
+  const [pagarmeAccountId, setPagarmeAccountId] = useState("");
+  const [pagarmePublicKey, setPagarmePublicKey] = useState("");
   const [isEditingPagarmeConfig, setIsEditingPagarmeConfig] = useState(false);
   
   // Estado para modal de alteração de senha
@@ -334,26 +335,32 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/configs/pagarme"],
     queryFn: async () => {
       try {
-        const [apiKeyResponse, encryptionKeyResponse] = await Promise.all([
+        const [apiKeyResponse, accountIdResponse, publicKeyResponse] = await Promise.all([
           fetch("/api/admin/configs/PAGARME_API_KEY", {
             headers: authHeaders,
           }),
-          fetch("/api/admin/configs/PAGARME_ENCRYPTION_KEY", {
+          fetch("/api/admin/configs/PAGARME_ACCOUNT_ID", {
+            headers: authHeaders,
+          }),
+          fetch("/api/admin/configs/PAGARME_PUBLIC_KEY", {
             headers: authHeaders,
           })
         ]);
 
         const apiKey = apiKeyResponse.ok ? await apiKeyResponse.json() : null;
-        const encryptionKey = encryptionKeyResponse.ok ? await encryptionKeyResponse.json() : null;
+        const accountId = accountIdResponse.ok ? await accountIdResponse.json() : null;
+        const publicKey = publicKeyResponse.ok ? await publicKeyResponse.json() : null;
 
         return {
           apiKey: apiKey?.value || "",
-          encryptionKey: encryptionKey?.value || "",
+          accountId: accountId?.value || "",
+          publicKey: publicKey?.value || "",
         };
       } catch (error) {
         return {
           apiKey: "",
-          encryptionKey: "",
+          accountId: "",
+          publicKey: "",
         };
       }
     },
@@ -363,7 +370,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (pagarmeConfig) {
       setPagarmeApiKey(pagarmeConfig.apiKey);
-      setPagarmeEncryptionKey(pagarmeConfig.encryptionKey);
+      setPagarmeAccountId(pagarmeConfig.accountId);
+      setPagarmePublicKey(pagarmeConfig.publicKey);
     }
   }, [pagarmeConfig]);
 
@@ -701,7 +709,7 @@ export default function AdminDashboard() {
 
   // Mutation para salvar configurações do Pagar.me
   const savePagarmeConfigMutation = useMutation({
-    mutationFn: async (config: { apiKey: string; encryptionKey: string }) => {
+    mutationFn: async (config: { apiKey: string; accountId: string; publicKey: string }) => {
       const promises = [];
       
       if (config.apiKey) {
@@ -715,13 +723,24 @@ export default function AdminDashboard() {
         );
       }
       
-      if (config.encryptionKey) {
+      if (config.accountId) {
         promises.push(
           apiRequest("POST", "/api/admin/configs", {
-            key: "PAGARME_ENCRYPTION_KEY", 
-            value: config.encryptionKey,
-            description: "Chave de criptografia do Pagar.me",
-            isSecret: true,
+            key: "PAGARME_ACCOUNT_ID", 
+            value: config.accountId,
+            description: "ID da conta do Pagar.me",
+            isSecret: false,
+          })
+        );
+      }
+      
+      if (config.publicKey) {
+        promises.push(
+          apiRequest("POST", "/api/admin/configs", {
+            key: "PAGARME_PUBLIC_KEY", 
+            value: config.publicKey,
+            description: "Chave pública do Pagar.me",
+            isSecret: false,
           })
         );
       }
@@ -2661,35 +2680,50 @@ export default function AdminDashboard() {
             </div>
           ) : isEditingPagarmeConfig ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Chave API
+                    Chave da API *
                   </label>
                   <input
                     type="password"
                     value={pagarmeApiKey}
                     onChange={(e) => setPagarmeApiKey(e.target.value)}
-                    placeholder="sk_test_ ou sk_live_..."
+                    placeholder="sk_test_... ou sk_..."
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3C8BAB] focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Chave secreta para processar pagamentos
+                    Chave secreta para autenticação (sk_test_... para teste ou sk_... para produção)
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Chave de Criptografia
+                    ID da Conta *
                   </label>
                   <input
-                    type="password"
-                    value={pagarmeEncryptionKey}
-                    onChange={(e) => setPagarmeEncryptionKey(e.target.value)}
-                    placeholder="ek_test_ ou ek_live_..."
+                    type="text"
+                    value={pagarmeAccountId}
+                    onChange={(e) => setPagarmeAccountId(e.target.value)}
+                    placeholder="acc_..."
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3C8BAB] focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Chave para criptografia de dados sensíveis
+                    ID da sua conta no Pagar.me (ex: acc_qPMGwPjTnJiRorl7)
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Chave Pública *
+                  </label>
+                  <input
+                    type="text"
+                    value={pagarmePublicKey}
+                    onChange={(e) => setPagarmePublicKey(e.target.value)}
+                    placeholder="pk_test_... ou pk_..."
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3C8BAB] focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Chave pública para integração (pk_test_... para teste ou pk_... para produção)
                   </p>
                 </div>
               </div>
@@ -2698,10 +2732,11 @@ export default function AdminDashboard() {
                   onClick={() => {
                     savePagarmeConfigMutation.mutate({
                       apiKey: pagarmeApiKey,
-                      encryptionKey: pagarmeEncryptionKey
+                      accountId: pagarmeAccountId,
+                      publicKey: pagarmePublicKey
                     });
                   }}
-                  disabled={savePagarmeConfigMutation.isPending || (!pagarmeApiKey && !pagarmeEncryptionKey)}
+                  disabled={savePagarmeConfigMutation.isPending || (!pagarmeApiKey && !pagarmeAccountId && !pagarmePublicKey)}
                   className="flex items-center gap-2"
                 >
                   {savePagarmeConfigMutation.isPending ? (
@@ -2716,7 +2751,8 @@ export default function AdminDashboard() {
                   onClick={() => {
                     setIsEditingPagarmeConfig(false);
                     setPagarmeApiKey(pagarmeConfig?.apiKey || "");
-                    setPagarmeEncryptionKey(pagarmeConfig?.encryptionKey || "");
+                    setPagarmeAccountId(pagarmeConfig?.accountId || "");
+                    setPagarmePublicKey(pagarmeConfig?.publicKey || "");
                   }}
                   disabled={savePagarmeConfigMutation.isPending}
                 >
@@ -2726,17 +2762,17 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     <Key className="h-4 w-4 text-[#3C8BAB]" />
-                    Chave API
+                    Chave da API
                   </h4>
                   <p className="text-sm text-gray-600">
                     {pagarmeConfig?.apiKey ? (
                       <span className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-600" />
-                        Configurada ({pagarmeConfig.apiKey.startsWith('sk_live_') ? 'Produção' : 'Teste'})
+                        Configurada ({pagarmeConfig.apiKey.startsWith('sk_test') ? 'Teste' : 'Produção'})
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 text-orange-600">
@@ -2749,13 +2785,32 @@ export default function AdminDashboard() {
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-medium mb-2 flex items-center gap-2">
                     <Shield className="h-4 w-4 text-[#3C8BAB]" />
-                    Chave de Criptografia
+                    ID da Conta
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {pagarmeConfig?.encryptionKey ? (
+                    {pagarmeConfig?.accountId ? (
                       <span className="flex items-center gap-2">
                         <Check className="h-4 w-4 text-green-600" />
-                        Configurada ({pagarmeConfig.encryptionKey.startsWith('ek_live_') ? 'Produção' : 'Teste'})
+                        Configurado
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2 text-orange-600">
+                        <AlertCircle className="h-4 w-4" />
+                        Não configurado
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    <Key className="h-4 w-4 text-[#3C8BAB]" />
+                    Chave Pública
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {pagarmeConfig?.publicKey ? (
+                      <span className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-green-600" />
+                        Configurada ({pagarmeConfig.publicKey.startsWith('pk_test') ? 'Teste' : 'Produção'})
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 text-orange-600">
@@ -2766,14 +2821,14 @@ export default function AdminDashboard() {
                   </p>
                 </div>
               </div>
-              {(!pagarmeConfig?.apiKey || !pagarmeConfig?.encryptionKey) && (
+              {(!pagarmeConfig?.apiKey || !pagarmeConfig?.accountId || !pagarmeConfig?.publicKey) && (
                 <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
                     <div>
                       <h4 className="font-medium text-orange-800">Configuração Incompleta</h4>
                       <p className="text-sm text-orange-700 mt-1">
-                        Para processar pagamentos, configure as chaves API do Pagar.me. 
+                        Para processar pagamentos, configure todos os dados da conta Pagar.me: Chave da API, ID da Conta e Chave Pública. 
                         Use chaves de teste para desenvolvimento e chaves de produção para o ambiente ao vivo.
                       </p>
                     </div>
