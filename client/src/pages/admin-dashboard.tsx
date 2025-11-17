@@ -3469,7 +3469,13 @@ export default function AdminDashboard() {
                 {pages.length} página{pages.length !== 1 ? 's' : ''} cadastrada{pages.length !== 1 ? 's' : ''}
               </CardDescription>
             </div>
-            <Dialog open={isPageDialogOpen} onOpenChange={setIsPageDialogOpen}>
+            <Dialog open={isPageDialogOpen} onOpenChange={(open) => {
+              setIsPageDialogOpen(open);
+              if (!open) {
+                setEditingPage(null);
+                pageForm.reset();
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button
                   onClick={handleCreatePage}

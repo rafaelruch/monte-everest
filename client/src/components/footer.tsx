@@ -72,7 +72,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/pagina/termos-uso" data-testid="footer-link-terms">
+                <Link href="/pagina/termos-de-uso" data-testid="footer-link-terms">
                   <span className="text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                     Termos de Uso
                   </span>
