@@ -3350,6 +3350,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create Payment Checkout Link for existing professional (using Checkout API)
+  app.post("/api/payments/create-checkout", verifyProfessionalToken, async (req, res) => {
+    try {
+      const { professionalId, planId } = req.body;
+
+      if (!professionalId || !planId) {
+        return res.status(400).json({ error: 'Missing required fields: professionalId and planId are required' });
+      }
+
+      // Get professional and plan
+      const professional = await storage.getProfessional(professionalId);
+      const plan = await storage.getSubscriptionPlan(planId);
+
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+
+      const priceInCentavos = Math.round(plan.monthlyPrice * 100);
+
+      // Create checkout link with PIX and credit card support
+      const checkoutData = {
+        is_building: false,
+        name: `${plan.name} - ${professional.fullName}`,
+        type: 'order', // One-time payment
+        payment_settings: {
+          accepted_payment_methods: ['pix', 'credit_card'],
+          pix_settings: {
+            expires_in: 2592000 // 30 days in seconds
+          },
+          credit_card_settings: {
+            installments: [
+              {
+                number: 1,
+                total: priceInCentavos
+              }
+            ]
+          }
+        },
+        cart_settings: {
+          items: [
+            {
+              name: plan.name,
+              amount: priceInCentavos,
+              default_quantity: 1,
+              description: `Assinatura mensal - ${plan.name}`
+            }
+          ]
+        },
+        customer_settings: {
+          editable: false,
+          required_fields: ['name', 'email', 'document'],
+          default_data: {
+            name: professional.fullName,
+            email: professional.email
+          }
+        },
+        metadata: {
+          professional_id: professional.id,
+          plan_id: plan.id,
+          plan_name: plan.name
+        }
+      };
+
+      console.log('[CREATE-CHECKOUT] Creating checkout for professional:', professional.id);
+
+      // Generate idempotency key to prevent duplicate checkouts
+      const idempotencyKey = `checkout-${professional.id}-${Date.now()}`;
+
+      const checkoutResponse = await fetch('https://api.pagar.me/core/v5/checkouts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${Buffer.from(process.env.PAGARME_API_KEY + ':').toString('base64')}`,
+          'Content-Type': 'application/json',
+          'X-PagarMe-User-Agent': 'Monte Everest/1.0',
+          'X-Idempotency-Key': idempotencyKey
+        },
+        body: JSON.stringify(checkoutData)
+      });
+
+      if (!checkoutResponse.ok) {
+        const errorText = await checkoutResponse.text();
+        console.error('[CREATE-CHECKOUT] Failed to create checkout:', checkoutResponse.status, errorText);
+        throw new Error('Failed to create payment checkout');
+      }
+
+      const checkout = await checkoutResponse.json();
+      console.log('[CREATE-CHECKOUT] Checkout created successfully:', checkout.id);
+      console.log('[CREATE-CHECKOUT] Checkout URL:', checkout.payment_url || checkout.url);
+
+      // Update professional with pending checkout
+      await storage.updateProfessional(professional.id, {
+        pendingCheckoutId: checkout.id,
+        paymentStatus: 'pending'
+      });
+      console.log('[CREATE-CHECKOUT] Professional updated with checkout data');
+
+      res.json({
+        success: true,
+        checkoutUrl: checkout.payment_url || checkout.url,
+        checkoutId: checkout.id
+      });
+
+    } catch (error) {
+      console.error('[CREATE-CHECKOUT] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create payment checkout',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Webhook for Pagar.me notifications
   app.post("/api/payments/webhook", async (req, res) => {
     try {
