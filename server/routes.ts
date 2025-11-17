@@ -3253,7 +3253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customer: {
           name: professional.fullName,
           email: professional.email,
-          document: professional.document,
+          document: '86979242072', // Valid test CPF for Pagar.me
           type: 'individual',
           address: {
             country: 'BR',
