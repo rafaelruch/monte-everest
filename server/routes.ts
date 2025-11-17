@@ -3424,7 +3424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('[CREATE-CHECKOUT] Payload:', JSON.stringify(checkoutPayload, null, 2));
 
-      const response = await fetch('https://api.pagar.me/core/v5/checkout-links', {
+      const response = await fetch('https://api.pagar.me/core/v5/paymentlinks', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
