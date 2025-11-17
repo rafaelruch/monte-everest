@@ -3280,6 +3280,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: 'canceled',
           });
           break;
+        
+        case 'charge.paid':
+          // Handle PIX payment confirmation
+          console.log('📥 [WEBHOOK] Received charge.paid event:', JSON.stringify(data, null, 2));
+          
+          // Get professional ID from charge metadata
+          const professionalId = data.metadata?.professional_id;
+          
+          if (professionalId) {
+            console.log(`✅ [WEBHOOK] PIX payment confirmed for professional: ${professionalId}`);
+            
+            // Define expiry date: 30 days from payment confirmation
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30);
+            
+            // Update professional: activate account and set expiry date
+            await storage.updateProfessional(professionalId, {
+              paymentStatus: 'active',
+              status: 'active',
+              lastPaymentDate: new Date(),
+              subscriptionExpiresAt: expiryDate,
+              pendingPixCode: null, // Clear PIX code
+              pendingPixUrl: null, // Clear PIX QR code URL
+              pendingPixExpiry: null, // Clear PIX expiry
+            });
+            
+            console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
+            
+            // Send email with credentials
+            try {
+              const professional = await storage.getProfessional(professionalId);
+              
+              if (professional) {
+                const emailSent = await emailService.sendCredentialsEmail({
+                  to: professional.email,
+                  professionalName: professional.fullName,
+                  email: professional.email,
+                  password: 'senha123',
+                  planName: 'Plano Monte Everest'
+                });
+                
+                if (emailSent) {
+                  console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
+                } else {
+                  console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
+                }
+              }
+            } catch (emailError) {
+              console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
+            }
+          } else {
+            console.warn('⚠️ [WEBHOOK] charge.paid received but no professional_id in metadata');
+          }
+          break;
       }
       
       res.status(200).json({ received: true });
