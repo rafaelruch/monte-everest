@@ -88,7 +88,10 @@ export default function ProfessionalDashboard() {
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [forcePasswordChangeOpen, setForcePasswordChangeOpen] = useState(false);
-  const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card'>('pix');
+  const [cpfForPayment, setCpfForPayment] = useState('');
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
   const [pixData, setPixData] = useState<any>(null);
   const [showPixModal, setShowPixModal] = useState(false);
   const queryClient = useQueryClient();
@@ -567,62 +570,16 @@ export default function ProfessionalDashboard() {
               <strong>Conta Pendente:</strong> Complete seu pagamento para ativar seu perfil e aparecer nas buscas.
               <div className="mt-2">
                 <Button 
-                  onClick={async () => {
-                    try {
-                      setIsCreatingCheckout(true);
-                      const planId = professional?.subscriptionPlanId || plans[0]?.id;
-                      
-                      if (!planId) {
-                        toast({
-                          title: "Erro",
-                          description: "Nenhum plano disponível",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-                      
-                      const response = await fetch('/api/payments/create-checkout', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': `Bearer ${professionalAuth.token}`
-                        },
-                        body: JSON.stringify({
-                          professionalId: professional.id,
-                          planId
-                        })
-                      });
-
-                      if (response.ok) {
-                        const data = await response.json();
-                        setPixData(data.pixData);
-                        setShowPixModal(true);
-                        queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
-                        toast({
-                          title: "PIX Gerado!",
-                          description: "Escaneie o QR Code ou copie o código"
-                        });
-                      } else {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Erro ao gerar PIX');
-                      }
-                    } catch (error) {
-                      console.error('Error creating PIX:', error);
-                      toast({
-                        title: "Erro",
-                        description: error instanceof Error ? error.message : "Erro ao gerar PIX",
-                        variant: "destructive"
-                      });
-                    } finally {
-                      setIsCreatingCheckout(false);
-                    }
+                  onClick={() => {
+                    setCpfForPayment('');
+                    setPaymentMethod('pix');
+                    setShowPaymentMethodModal(true);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                   size="sm"
-                  disabled={isCreatingCheckout}
                   data-testid="button-open-payment-modal"
                 >
-                  {isCreatingCheckout ? "Gerando PIX..." : "Realizar Pagamento"}
+                  Realizar Pagamento
                 </Button>
               </div>
             </AlertDescription>
@@ -1583,6 +1540,155 @@ export default function ProfessionalDashboard() {
               )}
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Method Selection Modal */}
+      <Dialog open={showPaymentMethodModal} onOpenChange={setShowPaymentMethodModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Escolha o Método de Pagamento</DialogTitle>
+            <DialogDescription>
+              Selecione como deseja realizar o pagamento
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Payment Method Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant={paymentMethod === 'pix' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('pix')}
+                className="h-20 flex flex-col items-center justify-center"
+                data-testid="button-select-pix"
+              >
+                <Smartphone className="h-6 w-6 mb-2" />
+                <span>PIX</span>
+              </Button>
+              <Button
+                variant={paymentMethod === 'credit_card' ? 'default' : 'outline'}
+                onClick={() => setPaymentMethod('credit_card')}
+                className="h-20 flex flex-col items-center justify-center"
+                data-testid="button-select-card"
+              >
+                <span className="text-2xl mb-2">💳</span>
+                <span>Cartão</span>
+              </Button>
+            </div>
+
+            {/* PIX Form */}
+            {paymentMethod === 'pix' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">CPF do titular</label>
+                  <Input
+                    placeholder="000.000.000-00"
+                    value={cpfForPayment}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      let formatted = value;
+                      if (value.length > 3) {
+                        formatted = value.slice(0, 3) + '.' + value.slice(3);
+                      }
+                      if (value.length > 6) {
+                        formatted = formatted.slice(0, 7) + '.' + formatted.slice(7);
+                      }
+                      if (value.length > 9) {
+                        formatted = formatted.slice(0, 11) + '-' + formatted.slice(11, 13);
+                      }
+                      setCpfForPayment(formatted);
+                    }}
+                    maxLength={14}
+                    data-testid="input-cpf-payment"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Informe um CPF válido (11 dígitos)
+                  </p>
+                </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      setIsCreatingPayment(true);
+                      
+                      // Validate CPF
+                      const cpfDigits = cpfForPayment.replace(/\D/g, '');
+                      if (cpfDigits.length !== 11) {
+                        toast({
+                          title: "CPF inválido",
+                          description: "Por favor, informe um CPF com 11 dígitos",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      
+                      const planId = professional?.subscriptionPlanId || plans[0]?.id;
+                      if (!planId) {
+                        toast({
+                          title: "Erro",
+                          description: "Nenhum plano disponível",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      
+                      const response = await fetch('/api/payments/create-checkout', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${professionalAuth.token}`
+                        },
+                        body: JSON.stringify({
+                          professionalId: professional.id,
+                          planId,
+                          paymentMethod: 'pix',
+                          cpf: cpfDigits
+                        })
+                      });
+
+                      if (response.ok) {
+                        const data = await response.json();
+                        setPixData(data.pixData);
+                        setShowPaymentMethodModal(false);
+                        setShowPixModal(true);
+                        queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
+                        toast({
+                          title: "PIX Gerado!",
+                          description: "Escaneie o QR Code ou copie o código"
+                        });
+                      } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erro ao gerar PIX');
+                      }
+                    } catch (error) {
+                      console.error('Error creating PIX:', error);
+                      toast({
+                        title: "Erro",
+                        description: error instanceof Error ? error.message : "Erro ao gerar PIX",
+                        variant: "destructive"
+                      });
+                    } finally {
+                      setIsCreatingPayment(false);
+                    }
+                  }}
+                  className="w-full"
+                  disabled={isCreatingPayment}
+                  data-testid="button-generate-pix"
+                >
+                  {isCreatingPayment ? "Gerando PIX..." : "Gerar código PIX"}
+                </Button>
+              </div>
+            )}
+
+            {/* Credit Card - Coming Soon */}
+            {paymentMethod === 'credit_card' && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Pagamento por cartão de crédito será implementado em breve. Por favor, utilize PIX.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

@@ -3353,10 +3353,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create PIX Order for existing professional (using Orders API)
   app.post("/api/payments/create-checkout", verifyProfessionalToken, async (req, res) => {
     try {
-      const { professionalId, planId } = req.body;
+      const { professionalId, planId, paymentMethod, cpf } = req.body;
 
       if (!professionalId || !planId) {
         return res.status(400).json({ error: 'Missing required fields: professionalId and planId are required' });
+      }
+
+      if (paymentMethod === 'pix' && !cpf) {
+        return res.status(400).json({ error: 'CPF is required for PIX payments' });
       }
 
       // Get professional and plan
@@ -3387,7 +3391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: professional.fullName,
           email: professional.email,
           type: 'individual',
-          document: professional.document,
+          document: cpf || professional.document, // Use provided CPF or professional's document
           phones: {
             home_phone: {
               country_code: '55',
