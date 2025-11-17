@@ -3460,7 +3460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authHeader = `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
       console.log('[CREATE-CHECKOUT] Auth Header:', authHeader.substring(0, 30) + '...');
 
-      const response = await fetch('https://api.pagar.me/core/v5/payment-links', {
+      const response = await fetch('https://api.pagar.me/core/v5/paymentlinks', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
