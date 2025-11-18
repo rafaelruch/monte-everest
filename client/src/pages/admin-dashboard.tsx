@@ -73,6 +73,7 @@ import {
   Calculator,
   Palette,
   Utensils,
+  RefreshCw,
   Shirt,
   Baby,
   Briefcase,
@@ -296,6 +297,23 @@ export default function AdminDashboard() {
       if (!response.ok) throw new Error("Failed to fetch payments");
       return response.json();
     },
+  });
+
+  // Query para buscar pedidos do Pagar.me
+  const { data: pagarmeOrders, isLoading: pagarmeOrdersLoading, refetch: refetchPagarmeOrders } = useQuery({
+    queryKey: ["/api/admin/pagarme/orders"],
+    queryFn: async () => {
+      const response = await fetch("/api/admin/pagarme/orders?page=1&size=100", {
+        headers: authHeaders,
+      });
+      if (!response.ok) {
+        console.error("Failed to fetch Pagar.me orders");
+        return { data: [], paging: { total: 0 } };
+      }
+      return response.json();
+    },
+    retry: 1,
+    enabled: true, // Always try to fetch
   });
 
   const { data: pages = [], isLoading: pagesLoading } = useQuery({
@@ -1677,6 +1695,116 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pedidos do Pagar.me */}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-[#3C8BAB]" />
+                Pedidos Pagar.me
+              </CardTitle>
+              <Button 
+                onClick={() => refetchPagarmeOrders()}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Atualizar
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {pagarmeOrdersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3C8BAB]"></div>
+              </div>
+            ) : pagarmeOrders?.data && pagarmeOrders.data.length > 0 ? (
+              <div className="space-y-4">
+                <div className="text-sm text-gray-500 mb-4">
+                  Total de {pagarmeOrders.paging?.total || pagarmeOrders.data.length} pedidos encontrados
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID do Pedido</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Cobranças</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pagarmeOrders.data.slice(0, 20).map((order: any) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-mono text-xs">
+                          {order.id}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{order.customer?.name || 'N/A'}</div>
+                            <div className="text-sm text-gray-500">{order.customer?.email || ''}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {formatCurrency((order.amount || 0) / 100)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              order.status === 'paid' ? 'default' : 
+                              order.status === 'pending' ? 'secondary' : 
+                              'destructive'
+                            }
+                          >
+                            {order.status === 'paid' ? 'Pago' : 
+                             order.status === 'pending' ? 'Pendente' : 
+                             order.status === 'canceled' ? 'Cancelado' : 
+                             order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {order.created_at 
+                            ? new Date(order.created_at).toLocaleDateString('pt-BR', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })
+                            : "N/A"
+                          }
+                        </TableCell>
+                        <TableCell>
+                          {order.charges && order.charges.length > 0 ? (
+                            <div className="text-sm">
+                              {order.charges.map((charge: any, idx: number) => (
+                                <div key={idx} className="text-xs">
+                                  {charge.payment_method === 'pix' ? '🔵 PIX' : '💳 Cartão'}
+                                  {' - '}
+                                  {charge.status === 'paid' ? '✅ Pago' : charge.status}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">Sem cobranças</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>Nenhum pedido encontrado no Pagar.me</p>
+                <p className="text-sm mt-2">Os pedidos aparecerão aqui quando forem criados</p>
+              </div>
             )}
           </CardContent>
         </Card>
