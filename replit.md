@@ -17,6 +17,7 @@ The frontend is built with React and TypeScript using a modern component-based a
 - **UI Framework**: Radix UI components with Tailwind CSS for styling, following the shadcn/ui design system
 - **Form Handling**: React Hook Form with Zod validation for type-safe form validation
 - **Build Tool**: Vite for fast development and optimized production builds
+- **Notification System**: Real-time notification bell component showing recent contacts and reviews in both professional and admin dashboards with auto-refresh every minute
 
 ## Backend Architecture
 
