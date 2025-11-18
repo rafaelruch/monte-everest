@@ -3871,8 +3871,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/sync/:professionalId", async (req, res) => {
     try {
       const { professionalId } = req.params;
+      const { orderId } = req.body; // Optional: specific order ID to sync
       
       console.log(`🔄 [SYNC] Starting sync for professional ${professionalId}`);
+      if (orderId) {
+        console.log(`📌 [SYNC] Using specific order ID: ${orderId}`);
+      }
       
       // Get professional
       const professional = await storage.getProfessional(professionalId);
@@ -3895,52 +3899,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Search for paid orders in Pagar.me
-      console.log(`🔍 [SYNC] Searching for paid orders in Pagar.me...`);
-      const ordersResponse = await pagarmeService.listOrders(1, 100);
-      
-      if (!ordersResponse.data || !Array.isArray(ordersResponse.data)) {
-        console.warn(`⚠️ [SYNC] No orders found in Pagar.me`);
-        return res.json({
-          success: false,
-          message: 'Nenhum pedido encontrado na Pagar.me',
-          professional: {
-            status: professional.status,
-            paymentStatus: professional.paymentStatus
-          }
-        });
-      }
-      
-      // Search for an order with this professional's ID in metadata
       let matchingOrder = null;
       
-      for (const order of ordersResponse.data) {
-        // Check if order is paid
-        if (order.status !== 'paid') continue;
+      // Method 1: If order ID provided, fetch it directly
+      if (orderId) {
+        console.log(`🎯 [SYNC] Fetching order ${orderId} directly...`);
+        try {
+          const order = await pagarmeService.getOrder(orderId);
+          
+          if (order && order.status === 'paid') {
+            console.log(`✅ [SYNC] Order ${orderId} is paid`);
+            matchingOrder = order;
+          } else {
+            console.warn(`⚠️ [SYNC] Order ${orderId} status: ${order?.status || 'not found'}`);
+          }
+        } catch (error) {
+          console.error(`❌ [SYNC] Error fetching order ${orderId}:`, error);
+        }
+      }
+      
+      // Method 2: Search by email/CPF in all paid orders
+      if (!matchingOrder) {
+        console.log(`🔍 [SYNC] Searching for paid orders by email/CPF in Pagar.me...`);
+        const ordersResponse = await pagarmeService.listOrders(1, 100);
         
-        // Check items metadata
-        if (order.items && Array.isArray(order.items)) {
-          for (const item of order.items) {
-            if (item.metadata?.professional_id === professionalId) {
-              matchingOrder = order;
-              break;
+        if (!ordersResponse.data || !Array.isArray(ordersResponse.data)) {
+          console.warn(`⚠️ [SYNC] No orders found in Pagar.me`);
+          return res.json({
+            success: false,
+            message: 'Nenhum pedido encontrado na Pagar.me. Tente informar o ID do pedido.',
+            professional: {
+              status: professional.status,
+              paymentStatus: professional.paymentStatus
+            }
+          });
+        }
+        
+        // Normalize professional data for matching
+        const professionalEmail = professional.email?.toLowerCase().trim();
+        const professionalDocument = professional.document?.replace(/\D/g, '');
+        
+        console.log(`🔎 [SYNC] Searching among ${ordersResponse.data.length} orders for email: ${professionalEmail} or CPF: ${professionalDocument}`);
+        
+        for (const order of ordersResponse.data) {
+          // Check if order is paid
+          if (order.status !== 'paid') continue;
+          
+          // Method 2a: Check customer email/document
+          const orderEmail = order.customer?.email?.toLowerCase().trim();
+          const orderDocument = order.customer?.document?.replace(/\D/g, '');
+          
+          if ((orderEmail && orderEmail === professionalEmail) || 
+              (orderDocument && orderDocument === professionalDocument)) {
+            console.log(`✅ [SYNC] Found matching order by customer: ${order.id}`);
+            matchingOrder = order;
+            break;
+          }
+          
+          // Method 2b: Check charges customer data
+          if (order.charges && Array.isArray(order.charges)) {
+            for (const charge of order.charges) {
+              const chargeEmail = charge.customer?.email?.toLowerCase().trim();
+              const chargeDocument = charge.customer?.document?.replace(/\D/g, '');
+              
+              if ((chargeEmail && chargeEmail === professionalEmail) || 
+                  (chargeDocument && chargeDocument === professionalDocument)) {
+                console.log(`✅ [SYNC] Found matching order by charge customer: ${order.id}`);
+                matchingOrder = order;
+                break;
+              }
             }
           }
+          
+          if (matchingOrder) break;
         }
-        
-        // Check order metadata
-        if (!matchingOrder && order.metadata?.professional_id === professionalId) {
-          matchingOrder = order;
-        }
-        
-        if (matchingOrder) break;
       }
       
       if (!matchingOrder) {
         console.warn(`⚠️ [SYNC] No paid order found for professional ${professionalId}`);
         return res.json({
           success: false,
-          message: 'Nenhum pagamento confirmado encontrado para este profissional',
+          message: 'Nenhum pagamento confirmado encontrado. Verifique se o email e CPF cadastrados correspondem ao pagamento no Pagar.me.',
+          diagnostics: {
+            searchedEmail: professional.email,
+            searchedDocument: professional.document,
+            suggestion: 'Informe o ID do pedido (order_id) para sincronização direta'
+          },
           professional: {
             status: professional.status,
             paymentStatus: professional.paymentStatus
