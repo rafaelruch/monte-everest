@@ -23,6 +23,7 @@ export default function ProfessionalLogin() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [autoLoginInProgress, setAutoLoginInProgress] = useState(false);
+  const [isFirstAccess, setIsFirstAccess] = useState(false);
   
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -32,10 +33,16 @@ export default function ProfessionalLogin() {
     },
   });
   
-  // Check for auto-login on component mount
+  // Check for auto-login or first-access on component mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const shouldAutoLogin = urlParams.get('autoLogin');
+    const firstAccess = urlParams.get('first-access');
+    
+    // Check if this is a first access after payment
+    if (firstAccess === 'true') {
+      setIsFirstAccess(true);
+    }
     
     if (shouldAutoLogin === 'true') {
       const storedCredentials = localStorage.getItem('autoLoginCredentials');
@@ -101,6 +108,22 @@ export default function ProfessionalLogin() {
         </CardHeader>
         
         <CardContent>
+          {isFirstAccess && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <AlertCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                <strong>✅ Pagamento confirmado!</strong>
+                <p className="mt-2">
+                  Suas credenciais de acesso foram enviadas para seu email. 
+                  Verifique sua caixa de entrada (e spam) e use o email e senha recebidos para fazer login.
+                </p>
+                <p className="mt-1 text-sm">
+                  <strong>Senha padrão:</strong> senha123 (você poderá alterá-la após o primeiro acesso)
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField

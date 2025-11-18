@@ -39,10 +39,10 @@ export default function AguardandoPagamento() {
         setPaymentStatus(data.paymentStatus);
         setProfessionalName(data.fullName);
 
-        // If payment is confirmed, redirect to home
+        // If payment is confirmed, redirect to professional login (first access)
         if (data.status === 'active' && data.paymentStatus === 'active') {
           setTimeout(() => {
-            setLocation('/');
+            setLocation('/professional-login?first-access=true');
           }, 2000);
           return; // Stop polling
         }
