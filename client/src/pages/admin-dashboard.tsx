@@ -618,6 +618,41 @@ export default function AdminDashboard() {
     },
   });
 
+  const syncPaymentMutation = useMutation({
+    mutationFn: async (professionalId: string) => {
+      return apiRequest("POST", `/api/payments/sync/${professionalId}`);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+      
+      if (data.synchronized) {
+        toast({
+          title: "Sincronização concluída!",
+          description: `Profissional ativado com sucesso. Pedido: ${data.orderId}`,
+        });
+      } else if (data.alreadyActive) {
+        toast({
+          title: "Profissional já ativo",
+          description: "Este profissional já está com status ativo.",
+        });
+      } else {
+        toast({
+          title: "Nenhum pagamento encontrado",
+          description: data.message || "Não foi encontrado nenhum pagamento confirmado na Pagar.me.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao sincronizar",
+        description: error.message || "Erro ao sincronizar pagamento. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const changeProfessionalPasswordMutation = useMutation({
     mutationFn: async ({ professionalId, newPassword }: { professionalId: string; newPassword: string }) => {
       const response = await fetch(`/api/admin/professionals/${professionalId}/reset-password`, {
@@ -1330,6 +1365,24 @@ export default function AdminDashboard() {
                                   <SelectItem value="pending">Pendente</SelectItem>
                                 </SelectContent>
                               </Select>
+                              
+                              {(professional.status === 'pending' || professional.status === 'pending_payment' || professional.paymentStatus === 'pending' || professional.paymentStatus === 'pending_payment') && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => syncPaymentMutation.mutate(professional.id)}
+                                  disabled={syncPaymentMutation.isPending}
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                                  data-testid={`button-sync-payment-${professional.id}`}
+                                  title="Sincronizar pagamento com Pagar.me"
+                                >
+                                  {syncPaymentMutation.isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <RefreshCw className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              )}
                               
                               <Button
                                 variant="outline"

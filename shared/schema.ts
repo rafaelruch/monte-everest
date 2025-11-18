@@ -61,7 +61,6 @@ export const subscriptionPlans = pgTable("subscription_plans", {
 export const professionals = pgTable("professionals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   fullName: varchar("full_name").notNull(),
-  slug: varchar("slug").notNull().unique(), // URL-friendly unique identifier
   email: varchar("email").notNull().unique(),
   password: text("password"),
   phone: varchar("phone").notNull(),
