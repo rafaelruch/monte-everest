@@ -622,7 +622,7 @@ export default function AdminDashboard() {
     mutationFn: async (professionalId: string) => {
       return apiRequest("POST", `/api/payments/sync/${professionalId}`);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
       
