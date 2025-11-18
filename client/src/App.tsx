@@ -23,6 +23,7 @@ import ProfessionalChangePassword from "@/pages/professional-change-password";
 import ProfessionalDashboard from "@/pages/professional-dashboard";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+import AguardandoPagamento from "@/pages/aguardando-pagamento";
 import Installation from "@/pages/installation";
 import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
 import SetupTables from "@/pages/setup-tables";
@@ -66,6 +67,7 @@ function Router() {
       <Route path="/professional-dashboard" component={ProfessionalDashboard} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/aguardando-pagamento" component={AguardandoPagamento} />
       
       {/* Public routes - com header/footer */}
       <Route>

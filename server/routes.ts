@@ -3762,6 +3762,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             area_code: phone.replace(/\D/g, '').substring(0, 2),
             number: phone.replace(/\D/g, '').substring(2)
           }
+        },
+        layout_settings: {
+          success_url: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'}/aguardando-pagamento?professionalId=${newProfessional.id}`
         }
       };
 
@@ -3838,6 +3841,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: 'Failed to create professional registration', 
         message: error instanceof Error ? error.message : 'Unknown error' 
       });
+    }
+  });
+
+  // Check payment status for polling (used in aguardando-pagamento page)
+  app.get("/api/payments/status/:professionalId", async (req, res) => {
+    try {
+      const { professionalId } = req.params;
+      
+      const professional = await storage.getProfessional(professionalId);
+      
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+      
+      res.json({
+        status: professional.status,
+        paymentStatus: professional.paymentStatus,
+        email: professional.email,
+        fullName: professional.fullName
+      });
+    } catch (error) {
+      console.error('[PAYMENT-STATUS] Error:', error);
+      res.status(500).json({ error: 'Failed to check payment status' });
     }
   });
 

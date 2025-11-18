@@ -62,29 +62,11 @@ export default function SejaProfissional() {
       return response.json();
     },
     onSuccess: (data) => {
-      toast({
-        title: "Cadastro criado!",
-        description: "Você será redirecionado para completar o pagamento.",
-      });
-      
       setShowCheckout(false);
       
-      // Open checkout in new tab
+      // Redirect to checkout in the same tab
       if (data.checkoutUrl) {
-        window.open(data.checkoutUrl, '_blank');
-        
-        // Show success message and redirect after opening checkout
-        setTimeout(() => {
-          toast({
-            title: "Complete o Pagamento",
-            description: "Após confirmar o pagamento, você receberá suas credenciais por email.",
-          });
-        }, 1000);
-        
-        // Redirect to home or login page
-        setTimeout(() => {
-          setLocation("/");
-        }, 3000);
+        window.location.href = data.checkoutUrl;
       }
     },
     onError: (error) => {
