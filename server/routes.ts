@@ -1795,6 +1795,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get orders from Pagar.me API
+  app.get("/api/admin/pagarme/orders", verifyAdminToken, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const size = parseInt(req.query.size as string) || 100;
+      
+      console.log(`📋 [API] Buscando pedidos do Pagar.me (página ${page}, tamanho ${size})...`);
+      const orders = await pagarmeService.listOrders(page, size);
+      
+      res.json(orders);
+    } catch (error) {
+      console.error("❌ [API] Error fetching orders from Pagar.me:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar pedidos do Pagar.me",
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Get specific order from Pagar.me API
+  app.get("/api/admin/pagarme/orders/:orderId", verifyAdminToken, async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      
+      console.log(`🔍 [API] Buscando pedido ${orderId} do Pagar.me...`);
+      const order = await pagarmeService.getOrder(orderId);
+      
+      res.json(order);
+    } catch (error) {
+      console.error("❌ [API] Error fetching order from Pagar.me:", error);
+      res.status(500).json({ 
+        message: "Erro ao buscar pedido do Pagar.me",
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   app.post("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
       // Convert date strings to Date objects if necessary
@@ -3807,9 +3844,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Webhook for Pagar.me notifications
   app.post("/api/payments/webhook", async (req, res) => {
     try {
+      console.log('🔔 [WEBHOOK] Received webhook:', JSON.stringify(req.body, null, 2));
+      
       const { event, data } = req.body;
       
       switch (event) {
+        case 'order.paid':
+          // Handle order payment confirmation (for Payment Links)
+          console.log('💰 [WEBHOOK] Order paid event received');
+          console.log('📦 [WEBHOOK] Order data:', JSON.stringify(data, null, 2));
+          
+          // Try to find professional_id in items metadata
+          let professionalId = null;
+          
+          if (data.items && Array.isArray(data.items)) {
+            for (const item of data.items) {
+              if (item.metadata?.professional_id) {
+                professionalId = item.metadata.professional_id;
+                break;
+              }
+            }
+          }
+          
+          // Also check in order metadata
+          if (!professionalId && data.metadata?.professional_id) {
+            professionalId = data.metadata.professional_id;
+          }
+          
+          console.log('🔍 [WEBHOOK] Professional ID found:', professionalId);
+          
+          if (professionalId) {
+            console.log(`✅ [WEBHOOK] Payment confirmed for professional: ${professionalId}`);
+            
+            // Define expiry date: 30 days from payment confirmation
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 30);
+            
+            // Update professional: activate account and set expiry date
+            await storage.updateProfessional(professionalId, {
+              paymentStatus: 'active',
+              status: 'active',
+              lastPaymentDate: new Date(),
+              subscriptionExpiresAt: expiryDate,
+              pendingPixCode: null,
+              pendingPixUrl: null,
+              pendingPixExpiry: null,
+            });
+            
+            console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
+            
+            // Send email with credentials
+            try {
+              const professional = await storage.getProfessional(professionalId);
+              
+              if (professional) {
+                const emailSent = await emailService.sendCredentialsEmail({
+                  to: professional.email,
+                  professionalName: professional.fullName,
+                  email: professional.email,
+                  password: 'senha123',
+                  planName: 'Plano Monte Everest'
+                });
+                
+                if (emailSent) {
+                  console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
+                } else {
+                  console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
+                }
+              }
+            } catch (emailError) {
+              console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
+            }
+          } else {
+            console.warn('⚠️ [WEBHOOK] order.paid received but no professional_id found in metadata');
+          }
+          break;
+
         case 'subscription.paid':
           // Update payment status
           const payment = await storage.updatePaymentByPagarmeId(data.id, {
@@ -3871,20 +3981,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         case 'charge.paid':
           // Handle PIX payment confirmation
-          console.log('📥 [WEBHOOK] Received charge.paid event:', JSON.stringify(data, null, 2));
+          console.log('📥 [WEBHOOK] Received charge.paid event');
           
-          // Get professional ID from charge metadata
-          const professionalId = data.metadata?.professional_id;
+          // Try to find professional_id in charge metadata or order items
+          let chargeProfessionalId = data.metadata?.professional_id;
           
-          if (professionalId) {
-            console.log(`✅ [WEBHOOK] PIX payment confirmed for professional: ${professionalId}`);
+          // Also check in order items if available
+          if (!chargeProfessionalId && data.order?.items && Array.isArray(data.order.items)) {
+            for (const item of data.order.items) {
+              if (item.metadata?.professional_id) {
+                chargeProfessionalId = item.metadata.professional_id;
+                break;
+              }
+            }
+          }
+          
+          console.log('🔍 [WEBHOOK] Professional ID found in charge:', chargeProfessionalId);
+          
+          if (chargeProfessionalId) {
+            console.log(`✅ [WEBHOOK] PIX payment confirmed for professional: ${chargeProfessionalId}`);
             
             // Define expiry date: 30 days from payment confirmation
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 30);
             
             // Update professional: activate account and set expiry date
-            await storage.updateProfessional(professionalId, {
+            await storage.updateProfessional(chargeProfessionalId, {
               paymentStatus: 'active',
               status: 'active',
               lastPaymentDate: new Date(),
@@ -3894,11 +4016,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               pendingPixExpiry: null, // Clear PIX expiry
             });
             
-            console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
+            console.log(`✅ [WEBHOOK] Professional ${chargeProfessionalId} activated. Expiry: ${expiryDate.toISOString()}`);
             
             // Send email with credentials
             try {
-              const professional = await storage.getProfessional(professionalId);
+              const professional = await storage.getProfessional(chargeProfessionalId);
               
               if (professional) {
                 const emailSent = await emailService.sendCredentialsEmail({
@@ -3922,11 +4044,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.warn('⚠️ [WEBHOOK] charge.paid received but no professional_id in metadata');
           }
           break;
+
+        default:
+          console.log(`⚠️ [WEBHOOK] Unhandled event: ${event}`);
+          break;
       }
       
       res.status(200).json({ received: true });
     } catch (error) {
-      console.error("Error processing webhook:", error);
+      console.error("❌ [WEBHOOK] Error processing webhook:", error);
       res.status(500).json({ error: "Webhook processing failed" });
     }
   });

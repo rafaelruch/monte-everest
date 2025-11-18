@@ -170,6 +170,69 @@ class PagarMeService {
       throw new Error(`Falha na sincronização com Pagar.me: ${(error as any).message}`);
     }
   }
+
+  // Método para listar todos os pedidos do Pagar.me
+  async listOrders(page: number = 1, size: number = 100) {
+    try {
+      console.log(`📋 Listando pedidos do Pagar.me (página ${page})...`);
+      const apiKey = await getPagarmeApiKey();
+      
+      // Encode the API key for Basic Auth
+      const authHeader = Buffer.from(`${apiKey}:`).toString('base64');
+      
+      const response = await fetch(`https://api.pagar.me/core/v5/orders?page=${page}&size=${size}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${authHeader}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Erro ao listar pedidos:', errorText);
+        throw new Error(`Failed to list orders: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ Pedidos listados com sucesso: ${result.data?.length || 0} pedidos`);
+      return result;
+    } catch (error) {
+      console.error('❌ Error listing orders from Pagar.me:', error);
+      throw error;
+    }
+  }
+
+  // Método para buscar um pedido específico do Pagar.me
+  async getOrder(orderId: string) {
+    try {
+      console.log(`🔍 Buscando pedido ${orderId} do Pagar.me...`);
+      const apiKey = await getPagarmeApiKey();
+      
+      const authHeader = Buffer.from(`${apiKey}:`).toString('base64');
+      
+      const response = await fetch(`https://api.pagar.me/core/v5/orders/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${authHeader}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Erro ao buscar pedido:', errorText);
+        throw new Error(`Failed to get order: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log(`✅ Pedido ${orderId} encontrado:`, JSON.stringify(result, null, 2));
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting order from Pagar.me:', error);
+      throw error;
+    }
+  }
 }
 
 export const pagarmeService = new PagarMeService();
