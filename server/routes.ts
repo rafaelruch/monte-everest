@@ -3867,6 +3867,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync payment status with Pagar.me (manual sync)
+  app.post("/api/payments/sync/:professionalId", async (req, res) => {
+    try {
+      const { professionalId } = req.params;
+      
+      console.log(`🔄 [SYNC] Starting sync for professional ${professionalId}`);
+      
+      // Get professional
+      const professional = await storage.getProfessional(professionalId);
+      
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+      
+      // If already active, return current status
+      if (professional.status === 'active' && professional.paymentStatus === 'active') {
+        console.log(`ℹ️ [SYNC] Professional ${professionalId} is already active`);
+        return res.json({
+          success: true,
+          alreadyActive: true,
+          professional: {
+            status: professional.status,
+            paymentStatus: professional.paymentStatus,
+            subscriptionExpiresAt: professional.subscriptionExpiresAt
+          }
+        });
+      }
+      
+      // Search for paid orders in Pagar.me
+      console.log(`🔍 [SYNC] Searching for paid orders in Pagar.me...`);
+      const ordersResponse = await pagarmeService.listOrders(1, 100);
+      
+      if (!ordersResponse.data || !Array.isArray(ordersResponse.data)) {
+        console.warn(`⚠️ [SYNC] No orders found in Pagar.me`);
+        return res.json({
+          success: false,
+          message: 'Nenhum pedido encontrado na Pagar.me',
+          professional: {
+            status: professional.status,
+            paymentStatus: professional.paymentStatus
+          }
+        });
+      }
+      
+      // Search for an order with this professional's ID in metadata
+      let matchingOrder = null;
+      
+      for (const order of ordersResponse.data) {
+        // Check if order is paid
+        if (order.status !== 'paid') continue;
+        
+        // Check items metadata
+        if (order.items && Array.isArray(order.items)) {
+          for (const item of order.items) {
+            if (item.metadata?.professional_id === professionalId) {
+              matchingOrder = order;
+              break;
+            }
+          }
+        }
+        
+        // Check order metadata
+        if (!matchingOrder && order.metadata?.professional_id === professionalId) {
+          matchingOrder = order;
+        }
+        
+        if (matchingOrder) break;
+      }
+      
+      if (!matchingOrder) {
+        console.warn(`⚠️ [SYNC] No paid order found for professional ${professionalId}`);
+        return res.json({
+          success: false,
+          message: 'Nenhum pagamento confirmado encontrado para este profissional',
+          professional: {
+            status: professional.status,
+            paymentStatus: professional.paymentStatus
+          }
+        });
+      }
+      
+      console.log(`✅ [SYNC] Found paid order ${matchingOrder.id} for professional ${professionalId}`);
+      
+      // Define expiry date: 30 days from now
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      
+      // Create payment record (with idempotency check)
+      try {
+        const existingPayment = await storage.getPaymentByTransactionId(matchingOrder.id);
+        
+        if (!existingPayment) {
+          const orderAmount = matchingOrder.amount || matchingOrder.charges?.[0]?.amount || 0;
+          const planId = professional.subscriptionPlanId || matchingOrder.items?.[0]?.metadata?.plan_id;
+          
+          await storage.createPayment({
+            professionalId: professionalId,
+            planId: planId,
+            transactionId: matchingOrder.id,
+            amount: (orderAmount / 100).toString(),
+            status: 'paid',
+            paymentMethod: matchingOrder.charges?.[0]?.payment_method || 'unknown',
+            dueDate: new Date(),
+            paidAt: new Date(),
+          });
+          
+          console.log(`✅ [SYNC] Payment record created for professional ${professionalId}`);
+        } else {
+          console.log(`ℹ️ [SYNC] Payment record already exists for transaction ${matchingOrder.id}`);
+        }
+      } catch (paymentError) {
+        console.error('❌ [SYNC] Error creating payment record:', paymentError);
+      }
+      
+      // Activate professional
+      await storage.updateProfessional(professionalId, {
+        paymentStatus: 'active',
+        status: 'active',
+        lastPaymentDate: new Date(),
+        subscriptionExpiresAt: expiryDate,
+        pendingPixCode: null,
+        pendingPixUrl: null,
+        pendingPixExpiry: null,
+      });
+      
+      console.log(`✅ [SYNC] Professional ${professionalId} activated successfully. Expiry: ${expiryDate.toISOString()}`);
+      
+      // Send credentials email
+      try {
+        const emailSent = await emailService.sendCredentialsEmail({
+          to: professional.email,
+          professionalName: professional.fullName,
+          email: professional.email,
+          password: 'senha123',
+          planName: 'Plano Monte Everest'
+        });
+        
+        if (emailSent) {
+          console.log('✅ [SYNC/EMAIL] Credentials sent to:', professional.email);
+        }
+      } catch (emailError) {
+        console.error('❌ [SYNC/EMAIL ERROR]:', emailError);
+      }
+      
+      res.json({
+        success: true,
+        synchronized: true,
+        orderId: matchingOrder.id,
+        professional: {
+          status: 'active',
+          paymentStatus: 'active',
+          subscriptionExpiresAt: expiryDate
+        }
+      });
+      
+    } catch (error) {
+      console.error('[SYNC] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to sync payment status',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Webhook for Pagar.me notifications
   app.post("/api/payments/webhook", async (req, res) => {
     try {
