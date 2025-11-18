@@ -140,11 +140,29 @@ export default function ProfessionalDashboard() {
 
   const { data: reviews = [], isLoading: reviewsLoading } = useQuery<any[]>({
     queryKey: ["/api/reviews", professionalAuth?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/reviews/${professionalAuth.id}`, {
+        headers: {
+          "Authorization": `Bearer ${professionalAuth.token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch reviews");
+      return response.json();
+    },
     enabled: !!professionalAuth?.id,
   });
 
   const { data: contacts = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: ["/api/contacts", professionalAuth?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/contacts/${professionalAuth.id}`, {
+        headers: {
+          "Authorization": `Bearer ${professionalAuth.token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch contacts");
+      return response.json();
+    },
     enabled: !!professionalAuth?.id,
   });
 
