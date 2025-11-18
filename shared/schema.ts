@@ -9,6 +9,7 @@ import {
   boolean,
   jsonb,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -145,6 +146,7 @@ export const payments = pgTable("payments", {
   professionalIdx: index("payments_professional_idx").on(table.professionalId),
   statusIdx: index("payments_status_idx").on(table.status),
   dueDateIdx: index("payments_due_date_idx").on(table.dueDate),
+  transactionIdIdx: uniqueIndex("payments_transaction_id_unique_idx").on(table.transactionId),
 }));
 
 // Contact interactions for statistics

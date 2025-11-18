@@ -3902,9 +3902,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (professionalId) {
             console.log(`✅ [WEBHOOK] Payment confirmed for professional: ${professionalId}`);
             
+            // Get professional data
+            const professional = await storage.getProfessional(professionalId);
+            
+            if (!professional) {
+              console.error(`❌ [WEBHOOK] Professional ${professionalId} not found`);
+              break;
+            }
+            
             // Define expiry date: 30 days from payment confirmation
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 30);
+            
+            // Create payment record for reporting (with idempotency check)
+            try {
+              // Check if payment already exists to avoid duplicates from webhook retries
+              const existingPayment = await storage.getPaymentByTransactionId(data.id);
+              
+              if (existingPayment) {
+                console.log(`ℹ️ [WEBHOOK] Payment record already exists for transaction ${data.id}, skipping creation`);
+              } else {
+                // Try to get amount from data.amount or charges[0].amount
+                const orderAmount = data.amount || data.charges?.[0]?.amount || 0; // Amount in cents
+                const planId = professional.subscriptionPlanId || data.items?.[0]?.metadata?.plan_id;
+                
+                await storage.createPayment({
+                  professionalId: professionalId,
+                  planId: planId,
+                  transactionId: data.id,
+                  amount: (orderAmount / 100).toString(), // Convert cents to reais
+                  status: 'paid',
+                  paymentMethod: data.charges?.[0]?.payment_method || 'unknown',
+                  dueDate: new Date(), // Set to payment date
+                  paidAt: new Date(),
+                });
+                
+                console.log(`✅ [WEBHOOK] Payment record created for professional ${professionalId}, amount: R$ ${orderAmount / 100}`);
+              }
+            } catch (paymentError) {
+              console.error('❌ [WEBHOOK] Error creating payment record:', paymentError);
+              // Continue with activation even if payment record fails
+            }
             
             // Update professional: activate account and set expiry date
             await storage.updateProfessional(professionalId, {
@@ -3921,22 +3959,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Send email with credentials
             try {
-              const professional = await storage.getProfessional(professionalId);
+              const emailSent = await emailService.sendCredentialsEmail({
+                to: professional.email,
+                professionalName: professional.fullName,
+                email: professional.email,
+                password: 'senha123',
+                planName: 'Plano Monte Everest'
+              });
               
-              if (professional) {
-                const emailSent = await emailService.sendCredentialsEmail({
-                  to: professional.email,
-                  professionalName: professional.fullName,
-                  email: professional.email,
-                  password: 'senha123',
-                  planName: 'Plano Monte Everest'
-                });
-                
-                if (emailSent) {
-                  console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
-                } else {
-                  console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
-                }
+              if (emailSent) {
+                console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
+              } else {
+                console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
               }
             } catch (emailError) {
               console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
