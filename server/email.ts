@@ -1,12 +1,10 @@
 import nodemailer from 'nodemailer';
+import { db } from './db';
+import { systemConfigs } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
-// Email configuration
-// Users will need to set these environment variables:
-// - EMAIL_HOST (e.g., smtp.gmail.com)
-// - EMAIL_PORT (e.g., 587)
-// - EMAIL_USER (email address)
-// - EMAIL_PASSWORD (app password or email password)
-// - EMAIL_FROM (sender email address and name)
+// Email configuration from database system_configs table
+// Required keys: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
 
 export interface EmailOptions {
   to: string;
@@ -15,34 +13,51 @@ export interface EmailOptions {
   text?: string;
 }
 
+async function getSystemConfig(key: string): Promise<string | null> {
+  try {
+    const [config] = await db.select()
+      .from(systemConfigs)
+      .where(eq(systemConfigs.key, key))
+      .limit(1);
+    
+    return config?.value || null;
+  } catch (error) {
+    console.error(`[email] Erro ao buscar configuração ${key}:`, error);
+    return null;
+  }
+}
+
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  const {
-    EMAIL_HOST,
-    EMAIL_PORT,
-    EMAIL_USER,
-    EMAIL_PASSWORD,
-    EMAIL_FROM
-  } = process.env;
+  // Get SMTP configuration from database
+  const SMTP_HOST = await getSystemConfig('SMTP_HOST');
+  const SMTP_PORT = await getSystemConfig('SMTP_PORT');
+  const SMTP_USER = await getSystemConfig('SMTP_USER');
+  const SMTP_PASSWORD = await getSystemConfig('SMTP_PASSWORD');
 
   // Check if email is configured
-  if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASSWORD) {
-    console.warn('[email] Email não configurado. Configure as variáveis EMAIL_HOST, EMAIL_USER, EMAIL_PASSWORD');
-    console.warn('[email] Email que seria enviado:', options);
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) {
+    console.warn('[email] ⚠️ Email não configurado no banco de dados!');
+    console.warn('[email] Configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD na tabela system_configs');
+    console.warn('[email] Email que seria enviado:', {
+      to: options.to,
+      subject: options.subject,
+      from: 'servicosmonteeverest@gmail.com'
+    });
     return;
   }
 
   const transporter = nodemailer.createTransport({
-    host: EMAIL_HOST,
-    port: parseInt(EMAIL_PORT || '587'),
-    secure: EMAIL_PORT === '465', // true for 465, false for other ports
+    host: SMTP_HOST,
+    port: parseInt(SMTP_PORT || '587'),
+    secure: SMTP_PORT === '465', // true for 465, false for other ports
     auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASSWORD,
+      user: SMTP_USER,
+      pass: SMTP_PASSWORD,
     },
   });
 
   const mailOptions = {
-    from: EMAIL_FROM || EMAIL_USER,
+    from: '"Monte Everest" <servicosmonteeverest@gmail.com>', // Always use this as sender
     to: options.to,
     subject: options.subject,
     html: options.html,
@@ -51,9 +66,9 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`[email] Email enviado com sucesso para ${options.to}`);
+    console.log(`✅ [email] Email enviado com sucesso para ${options.to}`);
   } catch (error) {
-    console.error('[email] Erro ao enviar email:', error);
+    console.error('❌ [email] Erro ao enviar email:', error);
     throw new Error('Falha ao enviar email');
   }
 }

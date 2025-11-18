@@ -4105,7 +4105,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
             professionalId = data.metadata.professional_id;
           }
           
-          console.log('🔍 [WEBHOOK] Professional ID found:', professionalId);
+          console.log('🔍 [WEBHOOK] Professional ID found in metadata:', professionalId);
+          
+          // If no professional_id in metadata, try to find by customer data (CPF/Email)
+          if (!professionalId) {
+            console.log('🔍 [WEBHOOK] No professional_id in metadata, searching by customer data...');
+            
+            const customerDocument = data.customer?.document;
+            const customerEmail = data.customer?.email;
+            
+            // Try to find by CPF first
+            if (customerDocument) {
+              const cleanCpf = customerDocument.replace(/\D/g, '');
+              console.log(`🔍 [WEBHOOK] Searching professional by CPF: ${cleanCpf}`);
+              
+              const allProfessionals = await storage.getProfessionals();
+              const matchingProfessional = allProfessionals.find(p => {
+                const profCpf = p.document?.replace(/\D/g, '');
+                return profCpf === cleanCpf;
+              });
+              
+              if (matchingProfessional) {
+                professionalId = matchingProfessional.id;
+                console.log(`✅ [WEBHOOK] Found professional by CPF: ${professionalId}`);
+              }
+            }
+            
+            // If not found by CPF, try by email
+            if (!professionalId && customerEmail) {
+              console.log(`🔍 [WEBHOOK] Searching professional by email: ${customerEmail}`);
+              
+              const allProfessionals = await storage.getProfessionals();
+              const matchingProfessional = allProfessionals.find(p => 
+                p.email?.toLowerCase() === customerEmail.toLowerCase()
+              );
+              
+              if (matchingProfessional) {
+                professionalId = matchingProfessional.id;
+                console.log(`✅ [WEBHOOK] Found professional by email: ${professionalId}`);
+              }
+            }
+          }
           
           if (professionalId) {
             console.log(`✅ [WEBHOOK] Payment confirmed for professional: ${professionalId}`);
