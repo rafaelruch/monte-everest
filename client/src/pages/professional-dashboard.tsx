@@ -79,6 +79,17 @@ const changePasswordSchema = z.object({
 
 type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 
+// Helper function to check if subscription is active
+function isSubscriptionActive(professional: any): boolean {
+  if (!professional) return false;
+  if (professional.status !== 'active') return false;
+  if (!professional.subscriptionExpiresAt) return false;
+  
+  const expiryDate = new Date(professional.subscriptionExpiresAt);
+  const today = new Date();
+  return expiryDate >= today;
+}
+
 export default function ProfessionalDashboard() {
   // ALL HOOKS MUST BE AT THE TOP - NO CONDITIONAL HOOKS
   const { toast } = useToast();
@@ -906,7 +917,7 @@ export default function ProfessionalDashboard() {
                       Gerencie suas informações profissionais
                     </CardDescription>
                   </div>
-                  {professional?.status === 'active' && professional?.paymentStatus !== 'pending' ? (
+                  {isSubscriptionActive(professional) ? (
                     <Button
                       variant={isEditing ? "outline" : "default"}
                       onClick={() => setIsEditing(!isEditing)}
@@ -931,7 +942,7 @@ export default function ProfessionalDashboard() {
                       data-testid="button-edit-disabled"
                     >
                       <Lock className="h-4 w-4 mr-2" />
-                      {professional?.paymentStatus === 'pending' ? 'Aguardando Pagamento' : 'Edição Bloqueada'}
+                      {!professional?.subscriptionExpiresAt ? 'Aguardando Pagamento' : 'Assinatura Expirada'}
                     </Button>
                   )}
                 </div>
@@ -977,14 +988,14 @@ export default function ProfessionalDashboard() {
                         variant="outline"
                         size="sm"
                         onClick={() => document.getElementById('profile-upload-input')?.click()}
-                        disabled={professional?.paymentStatus === 'pending'}
+                        disabled={!isSubscriptionActive(professional)}
                       >
                         <Camera className="h-4 w-4 mr-2" />
                         {professional?.profileImage ? "Alterar Foto" : "Adicionar Foto"}
                       </Button>
-                      {professional?.paymentStatus === 'pending' && (
+                      {!isSubscriptionActive(professional) && (
                         <p className="text-xs text-muted-foreground mt-2">
-                          Complete o pagamento para alterar sua foto de perfil
+                          {!professional?.subscriptionExpiresAt ? 'Complete o pagamento para alterar sua foto de perfil' : 'Assinatura expirada. Renove para continuar editando'}
                         </p>
                       )}
                     </div>
@@ -1269,10 +1280,10 @@ export default function ProfessionalDashboard() {
                       <button
                         onClick={() => removePhotoMutation.mutate(photoPath)}
                         className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        disabled={removePhotoMutation.isPending || professional?.paymentStatus === 'pending'}
+                        disabled={removePhotoMutation.isPending || !isSubscriptionActive(professional)}
                         data-testid={`remove-photo-${index}`}
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3 w-4" />
                       </button>
                     </div>
                   ))}
@@ -1342,15 +1353,15 @@ export default function ProfessionalDashboard() {
                         variant="outline"
                         className="w-full h-32 border-dashed"
                         onClick={() => document.getElementById('portfolio-upload-input')?.click()}
-                        disabled={professional?.paymentStatus === 'pending'}
+                        disabled={!isSubscriptionActive(professional)}
                       >
                         <div className="flex flex-col items-center">
                           <ImagePlus className="h-8 w-8 mb-2" />
                           <span>
-                            {professional?.paymentStatus === 'pending' ? 'Aguardando Pagamento' : 'Adicionar Foto ao Portfólio'}
+                            {!isSubscriptionActive(professional) ? (!professional?.subscriptionExpiresAt ? 'Aguardando Pagamento' : 'Assinatura Expirada') : 'Adicionar Foto ao Portfólio'}
                           </span>
-                          {professional?.paymentStatus === 'pending' ? (
-                            <span className="text-xs text-muted-foreground">Complete o pagamento primeiro</span>
+                          {!isSubscriptionActive(professional) ? (
+                            <span className="text-xs text-muted-foreground">{!professional?.subscriptionExpiresAt ? 'Complete o pagamento primeiro' : 'Renove sua assinatura'}</span>
                           ) : (
                             <span className="text-xs text-muted-foreground">JPG, PNG até 5MB</span>
                           )}
