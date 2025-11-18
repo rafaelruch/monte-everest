@@ -232,14 +232,6 @@ export default function AdminDashboard() {
     adminName: string;
   }>({ open: false, adminId: null, adminName: '' });
   
-  // Estado para modal de sincronização de pagamento
-  const [syncPaymentModal, setSyncPaymentModal] = useState<{
-    open: boolean;
-    professionalId: string | null;
-    professionalName: string;
-  }>({ open: false, professionalId: null, professionalName: '' });
-  const [syncOrderId, setSyncOrderId] = useState("");
-  
   const itemsPerPage = 20;
 
   // Check if user is authenticated
@@ -627,38 +619,34 @@ export default function AdminDashboard() {
   });
 
   const syncPaymentMutation = useMutation({
-    mutationFn: async ({ professionalId, orderId }: { professionalId: string; orderId?: string }) => {
-      return apiRequest("POST", `/api/payments/sync/${professionalId}`, { orderId });
+    mutationFn: async (professionalId: string) => {
+      return apiRequest("POST", `/api/payments/sync/${professionalId}`, {});
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
       
-      // Fechar modal de sincronização
-      setSyncPaymentModal({ open: false, professionalId: null, professionalName: '' });
-      setSyncOrderId('');
-      
       if (data.synchronized) {
         toast({
-          title: "Sincronização concluída!",
-          description: `Profissional ativado com sucesso. Pedido: ${data.orderId}`,
+          title: "✅ Sincronização concluída!",
+          description: `Profissional ativado. Pedido: ${data.orderId}`,
         });
       } else if (data.alreadyActive) {
         toast({
-          title: "Profissional já ativo",
+          title: "ℹ️ Profissional já ativo",
           description: "Este profissional já está com status ativo.",
         });
       } else {
         toast({
-          title: "Nenhum pagamento encontrado",
-          description: data.message || "Não foi encontrado nenhum pagamento confirmado na Pagar.me.",
+          title: "⚠️ Pagamento não encontrado",
+          description: data.message || "Não foi encontrado pagamento confirmado com o CPF/email deste profissional.",
           variant: "destructive",
         });
       }
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao sincronizar",
+        title: "❌ Erro ao sincronizar",
         description: error.message || "Erro ao sincronizar pagamento. Tente novamente.",
         variant: "destructive",
       });
@@ -1382,15 +1370,11 @@ export default function AdminDashboard() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setSyncPaymentModal({
-                                    open: true,
-                                    professionalId: professional.id,
-                                    professionalName: professional.fullName
-                                  })}
+                                  onClick={() => syncPaymentMutation.mutate(professional.id)}
                                   disabled={syncPaymentMutation.isPending}
                                   className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
                                   data-testid={`button-sync-payment-${professional.id}`}
-                                  title="Sincronizar pagamento com Pagar.me"
+                                  title="Sincronizar pagamento automaticamente por CPF/Email"
                                 >
                                   {syncPaymentMutation.isPending ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -4334,91 +4318,6 @@ export default function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de Sincronização de Pagamento */}
-      <Dialog 
-        open={syncPaymentModal.open} 
-        onOpenChange={(open) => {
-          setSyncPaymentModal({ ...syncPaymentModal, open });
-          if (!open) {
-            setSyncOrderId('');
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <RefreshCw className="h-5 w-5" />
-              Sincronizar Pagamento
-            </DialogTitle>
-            <DialogDescription>
-              Buscar pagamento confirmado no Pagar.me para ativar o profissional <strong>{syncPaymentModal.professionalName}</strong>
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="order-id">ID do Pedido (Opcional)</Label>
-              <Input
-                id="order-id"
-                placeholder="or_BZ7RK7KIyJf9RWGm"
-                value={syncOrderId}
-                onChange={(e) => setSyncOrderId(e.target.value)}
-                disabled={syncPaymentMutation.isPending}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Se deixar em branco, o sistema buscará automaticamente pelo email/CPF do profissional
-              </p>
-            </div>
-
-            <Alert className="border-blue-200 bg-blue-50">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800 text-sm">
-                <strong>Como funciona:</strong>
-                <ul className="list-disc list-inside mt-1 space-y-1">
-                  <li>Informando o ID: busca direta no Pagar.me</li>
-                  <li>Sem ID: busca por email e CPF cadastrados</li>
-                  <li>Pagamento encontrado: profissional ativado automaticamente</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSyncPaymentModal({ open: false, professionalId: null, professionalName: '' })}
-                disabled={syncPaymentMutation.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  if (syncPaymentModal.professionalId) {
-                    syncPaymentMutation.mutate({
-                      professionalId: syncPaymentModal.professionalId,
-                      orderId: syncOrderId.trim() || undefined
-                    });
-                  }
-                }}
-                disabled={syncPaymentMutation.isPending}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {syncPaymentMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Sincronizando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Sincronizar
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

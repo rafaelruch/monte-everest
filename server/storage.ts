@@ -120,6 +120,14 @@ export interface IStorage {
     monthlyRevenue: string;
     averageRating: string;
     growthPercentage: string;
+    mrr: number;
+    totalRevenue: number;
+    averageTicket: number;
+    conversionRate: number;
+    revenueByMonth: Array<{ month: string; revenue: number }>;
+    professionalsByStatus: { active: number; inactive: number; pending: number; suspended: number };
+    planPerformance: Array<{ planId: string; planName: string; activeSubscriptions: number; revenue: number }>;
+    projectedRevenue: number;
   }>;
 
   // Logs
@@ -713,20 +721,143 @@ export class DatabaseStorage implements IStorage {
     monthlyRevenue: string;
     averageRating: string;
     growthPercentage: string;
+    mrr: number;
+    totalRevenue: number;
+    averageTicket: number;
+    conversionRate: number;
+    revenueByMonth: Array<{ month: string; revenue: number }>;
+    professionalsByStatus: { active: number; inactive: number; pending: number; suspended: number };
+    planPerformance: Array<{ planId: string; planName: string; activeSubscriptions: number; revenue: number }>;
+    projectedRevenue: number;
   }> {
+    // Contar profissionais por status
     const [professionalCount] = await db.select({
       count: count()
     }).from(professionals)
       .where(eq(professionals.status, 'active'));
 
-    const [revenueData] = await db.select({
-      total: sql<string>`COALESCE(SUM(${payments.amount}), 0)`
+    const statusCounts = await db.select({
+      status: professionals.status,
+      count: count()
+    }).from(professionals)
+      .groupBy(professionals.status);
+
+    const professionalsByStatus = {
+      active: statusCounts.find(s => s.status === 'active')?.count || 0,
+      inactive: statusCounts.find(s => s.status === 'inactive')?.count || 0,
+      pending: (statusCounts.find(s => s.status === 'pending')?.count || 0) + 
+               (statusCounts.find(s => s.status === 'pending_payment')?.count || 0),
+      suspended: statusCounts.find(s => s.status === 'suspended')?.count || 0,
+    };
+
+    // Receita do mês atual
+    const [currentMonthRevenue] = await db.select({
+      total: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`
     }).from(payments)
       .where(and(
         eq(payments.status, 'paid'),
         sql`${payments.paidAt} >= DATE_TRUNC('month', CURRENT_DATE)`
       ));
 
+    const monthlyRevenueValue = parseFloat(currentMonthRevenue.total || '0');
+
+    // MRR - Receita Mensal Recorrente (profissionais ativos * preço médio dos planos)
+    const [activeProfessionalsWithPlans] = await db.select({
+      count: count(),
+      avgPrice: sql<string>`COALESCE(AVG(CAST(${subscriptionPlans.monthlyPrice} AS DECIMAL)), 0)`
+    }).from(professionals)
+      .leftJoin(subscriptionPlans, eq(professionals.subscriptionPlanId, subscriptionPlans.id))
+      .where(and(
+        eq(professionals.status, 'active'),
+        eq(professionals.paymentStatus, 'active')
+      ));
+
+    const mrr = professionalCount.count * parseFloat(activeProfessionalsWithPlans.avgPrice || '0');
+
+    // Receita total (todos os pagamentos pagos)
+    const [totalRevenueData] = await db.select({
+      total: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`
+    }).from(payments)
+      .where(eq(payments.status, 'paid'));
+
+    const totalRevenue = parseFloat(totalRevenueData.total || '0');
+
+    // Ticket médio
+    const [paymentCount] = await db.select({
+      count: count()
+    }).from(payments)
+      .where(eq(payments.status, 'paid'));
+
+    const averageTicket = paymentCount.count > 0 ? totalRevenue / paymentCount.count : 0;
+
+    // Taxa de conversão (profissionais ativos / total de profissionais)
+    const [totalProfessionals] = await db.select({
+      count: count()
+    }).from(professionals);
+
+    const conversionRate = totalProfessionals.count > 0 
+      ? (professionalCount.count / totalProfessionals.count) * 100 
+      : 0;
+
+    // Evolução de receita (últimos 6 meses)
+    const revenueByMonthData = await db.select({
+      month: sql<string>`TO_CHAR(${payments.paidAt}, 'YYYY-MM')`,
+      revenue: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`
+    }).from(payments)
+      .where(and(
+        eq(payments.status, 'paid'),
+        sql`${payments.paidAt} >= CURRENT_DATE - INTERVAL '6 months'`
+      ))
+      .groupBy(sql`TO_CHAR(${payments.paidAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${payments.paidAt}, 'YYYY-MM')`);
+
+    const revenueByMonth = revenueByMonthData.map(r => ({
+      month: r.month,
+      revenue: parseFloat(r.revenue || '0')
+    }));
+
+    // Performance por plano
+    const planPerformanceData = await db.select({
+      planId: subscriptionPlans.id,
+      planName: subscriptionPlans.name,
+      activeSubscriptions: count(),
+      revenue: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`
+    }).from(subscriptionPlans)
+      .leftJoin(professionals, eq(professionals.subscriptionPlanId, subscriptionPlans.id))
+      .leftJoin(payments, eq(payments.professionalId, professionals.id))
+      .where(and(
+        eq(professionals.status, 'active'),
+        eq(payments.status, 'paid')
+      ))
+      .groupBy(subscriptionPlans.id, subscriptionPlans.name);
+
+    const planPerformance = planPerformanceData.map(p => ({
+      planId: p.planId,
+      planName: p.planName,
+      activeSubscriptions: p.activeSubscriptions,
+      revenue: parseFloat(p.revenue || '0')
+    }));
+
+    // Previsão de receita (MRR * 12)
+    const projectedRevenue = mrr * 12;
+
+    // Crescimento percentual (comparando mês atual com mês anterior)
+    const [lastMonthRevenue] = await db.select({
+      total: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`
+    }).from(payments)
+      .where(and(
+        eq(payments.status, 'paid'),
+        sql`${payments.paidAt} >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month')`,
+        sql`${payments.paidAt} < DATE_TRUNC('month', CURRENT_DATE)`
+      ));
+
+    const lastMonthValue = parseFloat(lastMonthRevenue.total || '0');
+    const growthValue = lastMonthValue > 0 
+      ? ((monthlyRevenueValue - lastMonthValue) / lastMonthValue) * 100 
+      : 0;
+    const growthPercentage = `${growthValue >= 0 ? '+' : ''}${growthValue.toFixed(1)}%`;
+
+    // Avaliação média
     const [ratingData] = await db.select({
       avgRating: avg(professionals.rating)
     }).from(professionals)
@@ -734,9 +865,17 @@ export class DatabaseStorage implements IStorage {
 
     return {
       activeProfessionals: professionalCount.count,
-      monthlyRevenue: `R$ ${parseFloat(revenueData.total || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      monthlyRevenue: `R$ ${monthlyRevenueValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       averageRating: ratingData.avgRating ? parseFloat(ratingData.avgRating).toFixed(1) : '0.0',
-      growthPercentage: '+12%' // This would need more complex calculation
+      growthPercentage,
+      mrr,
+      totalRevenue,
+      averageTicket,
+      conversionRate,
+      revenueByMonth,
+      professionalsByStatus,
+      planPerformance,
+      projectedRevenue
     };
   }
 
