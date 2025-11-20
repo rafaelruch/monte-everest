@@ -4480,6 +4480,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email endpoint - Admin only for security
+  app.post("/api/test-email", verifyAdminToken, async (req, res) => {
+    try {
+      const { to } = req.body;
+      
+      if (!to) {
+        return res.status(400).json({ error: "Email destinatário é obrigatório" });
+      }
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+              .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
+              .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Monte Everest</h1>
+              </div>
+              <div class="content">
+                <h2>Email de Teste</h2>
+                <p>Este é um email de teste do sistema Monte Everest.</p>
+                <p>Se você recebeu este email, significa que o sistema de envio de emails está funcionando corretamente!</p>
+                <p>Data/Hora: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
+              </div>
+              <div class="footer">
+                <p>Monte Everest - Conectando profissionais e clientes</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      await emailService.sendEmail({
+        to,
+        subject: 'Teste de Email - Monte Everest',
+        html,
+      });
+
+      res.json({ message: "Email de teste enviado com sucesso!" });
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ error: "Falha ao enviar email de teste", details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

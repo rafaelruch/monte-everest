@@ -32,12 +32,16 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   const SMTP_HOST = await getSystemConfig('SMTP_HOST');
   const SMTP_PORT = await getSystemConfig('SMTP_PORT');
   const SMTP_USER = await getSystemConfig('SMTP_USER');
-  const SMTP_PASSWORD = await getSystemConfig('SMTP_PASSWORD');
+  
+  // Get password from environment variable (Replit Secrets)
+  const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
 
   // Check if email is configured
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) {
-    console.warn('[email] ⚠️ Email não configurado no banco de dados!');
-    console.warn('[email] Configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD na tabela system_configs');
+    console.warn('[email] ⚠️ Email não configurado!');
+    console.warn('[email] SMTP_HOST:', SMTP_HOST);
+    console.warn('[email] SMTP_USER:', SMTP_USER);
+    console.warn('[email] SMTP_PASSWORD:', SMTP_PASSWORD ? '***configurado***' : 'NÃO CONFIGURADO');
     console.warn('[email] Email que seria enviado:', {
       to: options.to,
       subject: options.subject,
@@ -158,6 +162,10 @@ function generateCredentialsEmail(professionalName: string, email: string, passw
 
 // Email service object for compatibility
 export const emailService = {
+  async sendEmail(options: EmailOptions): Promise<void> {
+    return sendEmail(options);
+  },
+
   async sendCredentialsEmail(options: {
     to: string;
     professionalName: string;
