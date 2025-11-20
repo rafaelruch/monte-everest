@@ -4224,7 +4224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
             }
           } else {
-            console.warn('⚠️ [WEBHOOK] order.paid received but no professional_id found in metadata');
+            console.error('❌ [WEBHOOK] order.paid received but could not identify professional. Customer document:', data.customer?.document, 'Customer email:', data.customer?.email);
           }
           break;
 

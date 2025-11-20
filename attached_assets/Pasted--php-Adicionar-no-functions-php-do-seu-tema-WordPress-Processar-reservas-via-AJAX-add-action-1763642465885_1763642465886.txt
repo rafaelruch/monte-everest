@@ -1,0 +1,84 @@
+<?php
+// Adicionar no functions.php do seu tema WordPress
+
+// Processar reservas via AJAX
+add_action('wp_ajax_process_booking', 'process_booking_submission');
+add_action('wp_ajax_nopriv_process_booking', 'process_booking_submission');
+
+function process_booking_submission() {
+    // Receber dados
+    $meal = sanitize_text_field($_POST['meal']);
+    $date = sanitize_text_field($_POST['date']);
+    $time = sanitize_text_field($_POST['time']);
+    $people = sanitize_text_field($_POST['people']);
+    $name = sanitize_text_field($_POST['name']);
+    $email = sanitize_email($_POST['email']);
+    $phone = sanitize_text_field($_POST['phone']);
+    $notes = sanitize_textarea_field($_POST['notes']);
+
+    // Montar mensagem
+    $message = "🎉 NOVA RESERVA!\n\n";
+    $message .= "📅 {$meal} - {$date}\n";
+    $message .= "⏰ Horário: {$time}\n";
+    $message .= "👥 Pessoas: {$people}\n\n";
+    $message .= "📋 Dados do Cliente:\n";
+    $message .= "Nome: {$name}\n";
+    $message .= "Email: {$email}\n";
+    $message .= "Telefone: {$phone}\n";
+    if (!empty($notes)) {
+        $message .= "Obs: {$notes}\n";
+    }
+
+    // 1. ENVIAR EMAIL
+    $to = 'rafael@ruch.com.br';
+    $subject = 'Nova Reserva - ' . $name;
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        'From: Estaleiro Jatobá <noreply@seusite.com>'
+    );
+    
+    $email_sent = wp_mail($to, $subject, $message, $headers);
+
+    // 2. ENVIAR WHATSAPP (usando API do WhatsApp Business ou serviço terceiro)
+    // Opção 1: Usar API do WhatsApp Business Cloud API (requer configuração)
+    // Opção 2: Usar serviço como Twilio, Zenvia, ou Evolution API
+    
+    // Exemplo com Evolution API (você precisa instalar e configurar):
+    $whatsapp_sent = send_whatsapp_message($message);
+
+    // Retornar resposta
+    if ($email_sent) {
+        wp_send_json_success(array(
+            'message' => 'Reserva processada com sucesso!'
+        ));
+    } else {
+        wp_send_json_error(array(
+            'message' => 'Erro ao processar reserva'
+        ));
+    }
+}
+
+// Função para enviar WhatsApp (você precisa configurar uma API)
+function send_whatsapp_message($message) {
+    // Exemplo usando Evolution API (instale localmente ou use serviço)
+    $api_url = 'https://sua-evolution-api.com/message/sendText';
+    $api_key = 'SUA_API_KEY_AQUI';
+    
+    $data = array(
+        'number' => '5562996918770',
+        'textMessage' => array(
+            'text' => $message
+        )
+    );
+
+    $response = wp_remote_post($api_url, array(
+        'headers' => array(
+            'Content-Type' => 'application/json',
+            'apikey' => $api_key
+        ),
+        'body' => json_encode($data),
+        'timeout' => 15
+    ));
+
+    return !is_wp_error($response);
+}

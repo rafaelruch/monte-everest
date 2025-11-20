@@ -1150,7 +1150,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatBRL(currentMonthRevenue * 100)}
+              {formatBRL(currentMonthRevenue)}
             </div>
             <p className="text-xs opacity-90">
               {payments.filter((p: Payment) => p.status === 'active' || p.status === 'paid').length} pagamentos ativos
@@ -1180,7 +1180,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatBRL(averageTicket * 100)}
+              {formatBRL(averageTicket)}
             </div>
             <p className="text-xs opacity-90">
               Valor médio por assinante ativo
@@ -1573,17 +1573,18 @@ export default function AdminDashboard() {
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
   });
 
-  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
-  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+  // Payments are stored in reais (not cents), so no need to divide by 100
+  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
+  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
   const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
   const activePayments = payments.filter((p: Payment) => p.status === 'active');
-  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
   const projectedAnnualRevenue = monthlyRecurringRevenue * 12;
 
   const validPayments = payments.filter((p: Payment) => p.status === 'paid' || p.status === 'active');
   const averageTicket = validPayments.length > 0 ? 
-    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100 / validPayments.length : 0;
+    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / validPayments.length : 0;
 
   const conversionRate = professionals.length > 0 ? 
     (activePayments.length / professionals.length * 100) : 0;
@@ -1895,7 +1896,7 @@ export default function AdminDashboard() {
       name: plan.name,
       assinantes: payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid')).length,
       receita: payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid'))
-        .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100,
+        .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0),
     }));
 
     return (
@@ -1915,7 +1916,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatBRL(currentMonthRevenue * 100)}
+                  {formatBRL(currentMonthRevenue)}
                 </p>
                 <p className={`text-sm ${revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {revenueGrowth >= 0 ? '↗' : '↘'} {Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior
@@ -1932,7 +1933,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">MRR (Receita Recorrente)</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {formatBRL(monthlyRecurringRevenue * 100)}
+                  {formatBRL(monthlyRecurringRevenue)}
                 </p>
                 <p className="text-sm text-gray-500">
                   {activePayments.length} assinantes ativos
@@ -1949,7 +1950,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {formatBRL(averageTicket * 100)}
+                  {formatBRL(averageTicket)}
                 </p>
                 <p className="text-sm text-gray-500">
                   Por profissional/mês
@@ -2000,11 +2001,11 @@ export default function AdminDashboard() {
                 <YAxis 
                   tick={{ fontSize: 12 }}
                   stroke="#666"
-                  tickFormatter={(value) => formatBRL(value * 100)}
+                  tickFormatter={(value) => formatBRL(value)}
                 />
                 <Tooltip 
                   formatter={(value: any, name: string) => [
-                    name === 'receita' ? formatBRL(parseFloat(value) * 100) : value,
+                    name === 'receita' ? formatBRL(parseFloat(value)) : value,
                     name === 'receita' ? 'Receita' : 'Assinantes'
                   ]}
                   labelStyle={{ color: '#333' }}
@@ -2100,11 +2101,11 @@ export default function AdminDashboard() {
                 orientation="right"
                 tick={{ fontSize: 12 }}
                 stroke="#666"
-                tickFormatter={(value) => formatBRL(value * 100)}
+                tickFormatter={(value) => formatBRL(value)}
               />
               <Tooltip 
                 formatter={(value: any, name: string) => [
-                  name === 'receita' ? formatBRL(parseFloat(value) * 100) : value,
+                  name === 'receita' ? formatBRL(parseFloat(value)) : value,
                   name === 'receita' ? 'Receita Total' : 'Assinantes'
                 ]}
                 contentStyle={{ 
@@ -2183,19 +2184,19 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
                 <span className="text-gray-600">Receita Anual Projetada</span>
                 <span className="font-bold text-green-600">
-                  {formatBRL(projectedAnnualRevenue * 100)}
+                  {formatBRL(projectedAnnualRevenue)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                 <span className="text-gray-600">Próximo Mês (estimativa)</span>
                 <span className="font-bold text-blue-600">
-                  {formatBRL(monthlyRecurringRevenue * 100)}
+                  {formatBRL(monthlyRecurringRevenue)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50">
                 <span className="text-gray-600">Trimestre Atual</span>
                 <span className="font-bold text-purple-600">
-                  {formatBRL((monthlyRecurringRevenue * 3) * 100)}
+                  {formatBRL(monthlyRecurringRevenue * 3)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
@@ -2256,7 +2257,7 @@ export default function AdminDashboard() {
             <div className="space-y-3">
               {plans.map((plan: any) => {
                 const planPayments = payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid'));
-                const planRevenue = planPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+                const planRevenue = planPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
                 return (
                   <div key={plan.id} className="flex items-center justify-between p-2 border-l-4 border-[#3C8BAB] bg-gray-50">
                     <div>
@@ -2264,7 +2265,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500">{planPayments.length} assinantes</p>
                     </div>
                     <span className="font-bold text-sm">
-                      {formatBRL(planRevenue * 100)}
+                      {formatBRL(planRevenue)}
                     </span>
                   </div>
                 );
@@ -2575,7 +2576,7 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="text-2xl font-bold text-[#3C8BAB]">
-                        {formatBRL(parseFloat(plan.monthlyPrice) * 100)}
+                        {formatBRL(parseFloat(plan.monthlyPrice))}
                         <span className="text-sm font-normal text-gray-500">/mês</span>
                       </div>
                       <div className="space-y-2">
