@@ -1251,10 +1251,23 @@ export default function ProfessionalDashboard() {
                     
                     <Separator />
                     
+                    {/* Show Plan Info when payment is active */}
+                    {professional?.status === 'active' && professional?.paymentStatus === 'active' && (
+                      <div className="flex items-center space-x-3">
+                        <Shield className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Plano Ativo</p>
+                          <p className="font-medium text-green-600" data-testid="display-plan">
+                            {plans?.find((p: any) => p.id === professional?.subscriptionPlanId)?.name || 'Plano Ativo'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Descrição dos Serviços</p>
                       <p className="text-sm leading-relaxed" data-testid="display-description">
-                        {professional?.description}
+                        {professional?.description || <span className="text-muted-foreground italic">Adicione uma descrição dos seus serviços</span>}
                       </p>
                     </div>
                   </div>
