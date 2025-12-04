@@ -25,8 +25,6 @@ export default function SejaProfissional() {
   const [location, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [showPaymentPendingModal, setShowPaymentPendingModal] = useState(false);
-  const [pendingProfessionalId, setPendingProfessionalId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -71,22 +69,21 @@ export default function SejaProfissional() {
     onSuccess: (data) => {
       setShowCheckout(false);
       
-      // Open Pagar.me checkout in new tab and show our modal with instructions
+      // Redirect to Pagar.me checkout page
+      // After payment, Pagar.me will redirect back to /aguardando-pagamento via success_url
       if (data.checkoutUrl && data.professionalId) {
-        // Store professionalId for the aguardando-pagamento page
+        // Store professionalId as fallback for the aguardando-pagamento page
         localStorage.setItem('pendingProfessionalId', data.professionalId);
-        setPendingProfessionalId(data.professionalId);
-        
-        // Open checkout in new tab
-        window.open(data.checkoutUrl, '_blank');
-        
-        // Show our modal with instructions
-        setShowPaymentPendingModal(true);
         
         toast({
-          title: "Página de pagamento aberta",
-          description: "Complete o pagamento na nova aba e clique em 'Já fiz o pagamento'.",
+          title: "Redirecionando para pagamento...",
+          description: "Você será redirecionado para a página de pagamento seguro.",
         });
+        
+        // Redirect to Pagar.me checkout in the same tab
+        setTimeout(() => {
+          window.location.href = data.checkoutUrl;
+        }, 1000);
       }
     },
     onError: (error) => {
@@ -464,57 +461,6 @@ export default function SejaProfissional() {
                 </Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
-
-        {/* Payment Pending Modal - Shows after Pagar.me opens in new tab */}
-        <Dialog open={showPaymentPendingModal} onOpenChange={() => {}}>
-          <DialogContent className="max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
-            <DialogHeader>
-              <DialogTitle className="text-xl text-center">Finalize seu Pagamento</DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-4 py-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-medium text-blue-900 mb-2">
-                      Uma nova aba foi aberta com a página de pagamento.
-                    </p>
-                    <ul className="text-blue-700 space-y-1">
-                      <li>1. Complete o pagamento na nova aba</li>
-                      <li>2. Escolha <strong>PIX</strong> ou <strong>Cartão de Crédito</strong></li>
-                      <li>3. Após pagar, clique no botão abaixo</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-sm text-yellow-800">
-                  <strong>PIX:</strong> Após escanear o QR Code e pagar no app do banco, aguarde alguns segundos e clique no botão abaixo.
-                </p>
-              </div>
-
-              <Button
-                onClick={() => {
-                  if (pendingProfessionalId) {
-                    setShowPaymentPendingModal(false);
-                    setLocation(`/aguardando-pagamento?professionalId=${pendingProfessionalId}`);
-                  }
-                }}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
-                data-testid="button-payment-done"
-              >
-                <Check className="w-5 h-5 mr-2" />
-                Já fiz o pagamento
-              </Button>
-
-              <p className="text-xs text-gray-500 text-center">
-                Não fechou a aba? O pagamento ainda está aberto na outra aba.
-              </p>
-            </div>
           </DialogContent>
         </Dialog>
 
