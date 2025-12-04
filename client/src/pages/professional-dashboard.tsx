@@ -923,6 +923,7 @@ export default function ProfessionalDashboard() {
             <TabsTrigger value="portfolio">Portfólio</TabsTrigger>
             <TabsTrigger value="reviews">Avaliações</TabsTrigger>
             <TabsTrigger value="contacts">Contatos</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -1527,6 +1528,122 @@ export default function ProfessionalDashboard() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Configurações da Conta
+                </CardTitle>
+                <CardDescription>
+                  Gerencie as configurações de segurança da sua conta
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Password Change Section */}
+                <div className="border rounded-lg p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-primary" />
+                    Alterar Senha
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Para sua segurança, recomendamos trocar sua senha periodicamente.
+                  </p>
+                  
+                  <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4 max-w-md">
+                      <FormField
+                        control={passwordForm.control}
+                        name="currentPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Senha Atual</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Digite sua senha atual"
+                                data-testid="settings-current-password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={passwordForm.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nova Senha</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Mínimo 6 caracteres"
+                                data-testid="settings-new-password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={passwordForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirmar Nova Senha</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Digite novamente"
+                                data-testid="settings-confirm-password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      {changePasswordMutation.error && (
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            {changePasswordMutation.error instanceof Error 
+                              ? changePasswordMutation.error.message 
+                              : "Erro ao alterar senha"}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      
+                      <Button 
+                        type="submit"
+                        disabled={changePasswordMutation.isPending}
+                        data-testid="settings-change-password-button"
+                      >
+                        {changePasswordMutation.isPending ? (
+                          <>
+                            <Lock className="mr-2 h-4 w-4 animate-spin" />
+                            Alterando...
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="mr-2 h-4 w-4" />
+                            Alterar Senha
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
