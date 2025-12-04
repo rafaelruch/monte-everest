@@ -2085,11 +2085,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingTransactionIds = new Set(
         existingPayments.map((p: any) => p.transactionId).filter(Boolean)
       );
+      
+      // Track professionals who already have payments synced in this batch
+      const professionalsPaidThisSync = new Set<string>();
+      
+      // Track professionals with existing active/paid payments
+      const professionalsWithActivePayments = new Set(
+        existingPayments
+          .filter((p: any) => p.status === 'active' || p.status === 'paid')
+          .map((p: any) => p.professionalId)
+      );
 
       // Get all professionals for matching
       const professionals = await storage.getProfessionals();
 
-      for (const order of ordersResponse.data) {
+      // Sort orders by date (most recent first) to sync only the latest
+      const sortedOrders = [...ordersResponse.data].sort((a: any, b: any) => {
+        const dateA = new Date(a.closed_at || a.updated_at || 0);
+        const dateB = new Date(b.closed_at || b.updated_at || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      for (const order of sortedOrders) {
         try {
           // Only process paid orders
           if (order.status !== 'paid') {
@@ -2126,6 +2143,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             skippedCount++;
             continue;
           }
+          
+          // Skip if this professional already has an active/paid payment or was already synced in this batch
+          if (professionalsWithActivePayments.has(matchingProfessional.id) || 
+              professionalsPaidThisSync.has(matchingProfessional.id)) {
+            console.log(`⏭️ [SYNC] Professional ${matchingProfessional.fullName} already has active payment, skipping order ${orderId}`);
+            skippedCount++;
+            continue;
+          }
 
           // Calculate amount in reais (Pagar.me sends in cents)
           const amountInReais = order.amount ? order.amount / 100 : 0;
@@ -2151,6 +2176,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           console.log(`✅ [SYNC] Created payment for professional ${matchingProfessional.fullName}: R$ ${amountInReais} (Order: ${orderId})`);
+          
+          // Mark this professional as synced to avoid duplicate payments in this batch
+          professionalsPaidThisSync.add(matchingProfessional.id);
           
           syncedPayments.push({
             orderId,
