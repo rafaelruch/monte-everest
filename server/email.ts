@@ -92,10 +92,13 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 const BRAND_COLOR = '#3C8CAA';
 // A logo será carregada do servidor atual dinamicamente
 function getLogoUrl(): string {
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+  // Prioridade: FRONTEND_BASE_URL (EasyPanel) > REPLIT_DEPLOYMENT_URL > REPLIT_DEV_DOMAIN > localhost
+  const baseUrl = process.env.FRONTEND_BASE_URL
+    ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '') // Remove trailing slash if present
     : process.env.REPLIT_DEPLOYMENT_URL
     ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+    : process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
     : 'http://localhost:5000';
   return `${baseUrl}/assets/logo-branca.png`;
 }
@@ -285,7 +288,11 @@ export const emailService = {
     password: string;
     planName?: string;
   }): Promise<boolean> {
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    const baseUrl = process.env.FRONTEND_BASE_URL
+      ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '')
+      : process.env.REPLIT_DEPLOYMENT_URL
+      ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+      : process.env.REPLIT_DEV_DOMAIN 
       ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
       : 'http://localhost:5000';
     const loginUrl = `${baseUrl}/professional-login`;

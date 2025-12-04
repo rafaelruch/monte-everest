@@ -329,7 +329,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt
       });
       
-      const resetUrl = `${process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000'}/reset-password?token=${plainToken}`;
+      const baseUrl = process.env.FRONTEND_BASE_URL
+        ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '')
+        : process.env.REPLIT_DEPLOYMENT_URL
+        ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+        : process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : 'http://localhost:5000';
+      const resetUrl = `${baseUrl}/reset-password?token=${plainToken}`;
       
       await emailService.sendPasswordResetEmail({
         to: professional.email,
@@ -3990,7 +3997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         },
         layout_settings: {
-          success_url: `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'}/aguardando-pagamento?professionalId=${newProfessional.id}`
+          success_url: `${process.env.FRONTEND_BASE_URL ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '') : process.env.REPLIT_DEPLOYMENT_URL ? `https://${process.env.REPLIT_DEPLOYMENT_URL}` : process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'}/aguardando-pagamento?professionalId=${newProfessional.id}`
         }
       };
 
@@ -4165,10 +4172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
                 
                 // Send credentials email
-                const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-                  ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+                const baseUrl = process.env.FRONTEND_BASE_URL
+                  ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '')
                   : process.env.REPLIT_DEPLOYMENT_URL
                   ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+                  : process.env.REPLIT_DEV_DOMAIN 
+                  ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
                   : 'http://localhost:5000';
                 
                 try {
@@ -4858,10 +4867,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const BRAND_COLOR = '#3C8CAA';
       // Logo branca servida do próprio servidor
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      const baseUrl = process.env.FRONTEND_BASE_URL
+        ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '')
         : process.env.REPLIT_DEPLOYMENT_URL
         ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+        : process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
         : 'http://localhost:5000';
       const LOGO_URL = `${baseUrl}/assets/logo-branca.png`;
       const dateTime = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
