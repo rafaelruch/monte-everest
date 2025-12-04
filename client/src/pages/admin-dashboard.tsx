@@ -1224,7 +1224,7 @@ export default function AdminDashboard() {
               {formatReais(currentMonthRevenue)}
             </div>
             <p className="text-xs opacity-90">
-              {activePayments.length} assinaturas ativas
+              {currentMonthPayments.length} pagamentos neste mês
             </p>
           </CardContent>
         </Card>
@@ -1640,17 +1640,25 @@ export default function AdminDashboard() {
   // Pagamentos ativos (assinaturas ativas)
   const activePayments = payments.filter((p: Payment) => p.status === 'active');
   
+  // Pagamentos do mês atual (criados neste mês)
+  const currentMonthPayments = payments.filter((p: Payment) => {
+    const paymentDate = new Date(p.createdAt || '');
+    return paymentDate >= currentMonthStart && (p.status === 'active' || p.status === 'paid');
+  });
+  
+  // Receita do mês atual - apenas pagamentos criados neste mês
+  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => {
+    const amount = parseFloat(p.amount) || 0;
+    return sum + toReaisValue(amount);
+  }, 0);
+  
   // MRR (Receita Recorrente Mensal) - soma dos valores das assinaturas ativas
-  // This is the true "monthly revenue" for a subscription business
   const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => {
     const amount = parseFloat(p.amount) || 0;
     return sum + toReaisValue(amount);
   }, 0);
   
-  // Current month revenue now uses MRR (active subscriptions)
-  const currentMonthRevenue = monthlyRecurringRevenue;
-  
-  // Para crescimento, comparamos com novos pagamentos do mês anterior
+  // Para crescimento, comparamos com pagamentos do mês anterior
   const lastMonthPayments = payments.filter((p: Payment) => {
     const paymentDate = new Date(p.createdAt || '');
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
@@ -1661,7 +1669,7 @@ export default function AdminDashboard() {
     return sum + toReaisValue(amount);
   }, 0);
   
-  // Se não há histórico do mês passado, não mostra crescimento negativo
+  // Crescimento comparado ao mês anterior
   const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
   const projectedAnnualRevenue = monthlyRecurringRevenue * 12;
