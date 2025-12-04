@@ -3712,7 +3712,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: placeholderPassword, // Placeholder - will be replaced after payment
         status: 'pending_payment',
         paymentStatus: 'pending',
-        description: `Cadastro aguardando pagamento - ${plan.name}`,
+        description: '', // Will be filled by professional after activation
         categoryId: '', // Will be set when they complete profile
         serviceArea: '', // Will be set when they complete profile
         city: '' // Will be set when they complete profile
