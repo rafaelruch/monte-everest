@@ -2018,7 +2018,7 @@ export default function AdminDashboard() {
         </div>
 
       {/* Métricas Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -2040,26 +2040,9 @@ export default function AdminDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">MRR (Receita Recorrente)</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {formatPaymentAmount(monthlyRecurringRevenue)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {activePayments.length} assinantes ativos
-                </p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
                 <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {formatPaymentAmount(averageTicket)}
+                  {formatReais(averageTicket)}
                 </p>
                 <p className="text-sm text-gray-500">
                   Por profissional/mês
@@ -2285,31 +2268,31 @@ export default function AdminDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-[#3C8BAB]" />
-              Previsão de Receita
+              Previsão de Receita (MRR)
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
-                <span className="text-gray-600">Receita Anual Projetada</span>
-                <span className="font-bold text-green-600">
-                  {formatPaymentAmount(projectedAnnualRevenue)}
-                </span>
-              </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
-                <span className="text-gray-600">Próximo Mês (estimativa)</span>
+                <span className="text-gray-600">MRR (Receita Recorrente Mensal)</span>
                 <span className="font-bold text-blue-600">
-                  {formatPaymentAmount(monthlyRecurringRevenue)}
+                  {formatReais(monthlyRecurringRevenue)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50">
-                <span className="text-gray-600">Trimestre Atual</span>
+                <span className="text-gray-600">Projeção Trimestral</span>
                 <span className="font-bold text-purple-600">
-                  {formatPaymentAmount(monthlyRecurringRevenue * 3)}
+                  {formatReais(monthlyRecurringRevenue * 3)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
+                <span className="text-gray-600">Projeção Anual</span>
+                <span className="font-bold text-green-600">
+                  {formatReais(projectedAnnualRevenue)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
-                * Baseado na receita recorrente mensal atual
+                * Baseado em {activePayments.length} assinaturas ativas
               </div>
             </div>
           </CardContent>
