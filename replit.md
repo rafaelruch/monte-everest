@@ -6,6 +6,11 @@ Monte Everest is a service marketplace platform that connects service providers 
 
 Preferred communication style: Simple, everyday language.
 
+## Important Development Rules
+- **DO NOT change working flows without explicit user approval**
+- **DO NOT implement alternative solutions that break existing functionality**
+- Always ask before making changes to critical flows like payment, authentication, and email delivery
+
 # System Architecture
 
 ## Frontend Architecture
@@ -59,16 +64,18 @@ The application uses PostgreSQL with Drizzle ORM:
 ## Payment Processing
 - **Pagar.me Integration**: Brazilian payment gateway for recurring subscription billing for professionals using hosted Checkout solution
 - **Subscription Model**: Monthly recurring payments to maintain active professional profiles
-- **Registration Flow**: 
+- **Registration Flow** (DO NOT CHANGE WITHOUT APPROVAL):
   1. New professionals register via `/seja-profissional` page
   2. Professional created with `pending_payment` status
   3. Payment Link generated with `success_url` redirecting to `/aguardando-pagamento`
-  4. User redirected to Pagar.me checkout in same tab (not new tab)
+  4. User redirected to Pagar.me checkout **in same tab** (window.location.href, NOT window.open)
   5. After payment, Pagar.me redirects back to `/aguardando-pagamento?professionalId=X`
   6. Page polls `/api/payments/status/:professionalId` every 5 seconds (max 5 minutes)
   7. Webhook receives `order.paid` event and activates professional (status='active', paymentStatus='active')
-  8. Polling detects activation and redirects to home page
-  9. Professional receives credentials email for first access
+  8. **Credentials email sent via Resend** with login URL and temporary password
+  9. Polling detects activation and redirects to home page
+
+- **CRITICAL**: The iframe approach does NOT work in production due to Pagar.me X-Frame-Options security restrictions. The redirect flow is the only secure solution.
 
 ### Pagar.me Payment Links API Documentation
 
@@ -161,9 +168,21 @@ The application uses PostgreSQL with Drizzle ORM:
 - **Geographic Search**: Location-based filtering for finding nearby service providers
 
 ## Communication Channels
-- **WhatsApp Integration**: Direct messaging capability through WhatsApp Business API
+- **WhatsApp Integration**: Direct messaging capability through WhatsApp links (uses `window.location.href` for iOS compatibility, NOT `window.open`)
 - **Phone Integration**: Click-to-call functionality for immediate contact
-- **Email Service**: Nodemailer integration for transactional emails (password recovery, credentials delivery)
+- **Email Service**: Resend integration for transactional emails
+
+## Email Configuration (Resend)
+- **Sender**: `info@monteeverest.com.br`
+- **Brand Color**: `#3C8CAA`
+- **Logo**: White logo at `/assets/logo-branca.png`
+- **Email Types**:
+  - Credentials email (after payment confirmation)
+  - Password reset email
+- **Production Environment Variables**:
+  - `RESEND_API_KEY`: API key from Resend
+  - `RESEND_FROM_EMAIL`: `info@monteeverest.com.br` (optional, defaults to this)
+  - `FRONTEND_BASE_URL`: `https://monteeverest.com.br` (required for correct URLs in emails)
 
 ## Database Infrastructure
 - **Neon Database**: Serverless PostgreSQL hosting with automatic scaling
