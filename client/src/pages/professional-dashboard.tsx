@@ -932,20 +932,23 @@ export default function ProfessionalDashboard() {
               <div className="flex items-center space-x-2">
                 <Shield className="h-5 w-5 text-primary" />
                 <div>
+                  <p className="text-lg font-semibold" data-testid="plan-name">
+                    {plans?.find((p: any) => p.id === professional?.subscriptionPlanId)?.name || 'Sem plano'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Plano Ativo</p>
                   <Badge 
                     variant={professional?.status === "active" ? "default" : professional?.status === "inactive" ? "secondary" : "outline"}
-                    className={
+                    className={`text-xs mt-1 ${
                       professional?.status === "active" 
                         ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
                         : professional?.status === "inactive"
                         ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
                         : "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200"
-                    }
+                    }`}
                     data-testid="status-badge"
                   >
                     {professional?.status === "active" ? "Ativo" : professional?.status === "inactive" ? "Inativo" : "Pendente"}
                   </Badge>
-                  <p className="text-sm text-muted-foreground">Status</p>
                 </div>
               </div>
             </CardContent>
@@ -1346,19 +1349,6 @@ export default function ProfessionalDashboard() {
                     </div>
                     
                     <Separator />
-                    
-                    {/* Show Plan Info when payment is active */}
-                    {professional?.status === 'active' && professional?.paymentStatus === 'active' && (
-                      <div className="flex items-center space-x-3">
-                        <Shield className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Plano Ativo</p>
-                          <p className="font-medium text-green-600" data-testid="display-plan">
-                            {plans?.find((p: any) => p.id === professional?.subscriptionPlanId)?.name || 'Plano Ativo'}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                     
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Descrição dos Serviços</p>
