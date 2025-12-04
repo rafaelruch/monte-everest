@@ -4517,7 +4517,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const BRAND_COLOR = '#3C8CAA';
-      const LOGO_URL = 'https://monteeverest.com.br/assets/logo-monteeverest_1757122359057-BNEerdKC.png';
+      // Logo branca servida do próprio servidor
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : process.env.REPLIT_DEPLOYMENT_URL
+        ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+        : 'http://localhost:5000';
+      const LOGO_URL = `${baseUrl}/assets/logo-branca.png`;
       const dateTime = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
       const html = `

@@ -90,9 +90,18 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 }
 
 const BRAND_COLOR = '#3C8CAA';
-const LOGO_URL = 'https://monteeverest.com.br/assets/logo-monteeverest_1757122359057-BNEerdKC.png';
+// A logo será carregada do servidor atual dinamicamente
+function getLogoUrl(): string {
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : process.env.REPLIT_DEPLOYMENT_URL
+    ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+    : 'http://localhost:5000';
+  return `${baseUrl}/assets/logo-branca.png`;
+}
 
 export function generatePasswordResetEmail(resetUrl: string, professionalName: string): string {
+  const logoUrl = getLogoUrl();
   return `
     <!DOCTYPE html>
     <html>
@@ -109,7 +118,7 @@ export function generatePasswordResetEmail(resetUrl: string, professionalName: s
                 <!-- Header with Logo -->
                 <tr>
                   <td style="background-color: ${BRAND_COLOR}; padding: 30px 40px; text-align: center;">
-                    <img src="${LOGO_URL}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
+                    <img src="${logoUrl}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
                   </td>
                 </tr>
                 <!-- Content -->
@@ -164,6 +173,7 @@ export function generatePasswordResetEmail(resetUrl: string, professionalName: s
 }
 
 function generateCredentialsEmail(professionalName: string, email: string, password: string, loginUrl: string): string {
+  const logoUrl = getLogoUrl();
   return `
     <!DOCTYPE html>
     <html>
@@ -180,7 +190,7 @@ function generateCredentialsEmail(professionalName: string, email: string, passw
                 <!-- Header with Logo -->
                 <tr>
                   <td style="background-color: ${BRAND_COLOR}; padding: 30px 40px; text-align: center;">
-                    <img src="${LOGO_URL}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
+                    <img src="${logoUrl}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
                   </td>
                 </tr>
                 <!-- Welcome Banner -->

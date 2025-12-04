@@ -28,6 +28,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Serve static files from public folder (for email assets like logos)
+import nodePath from "path";
+app.use('/assets', express.static(nodePath.join(process.cwd(), 'public')));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
