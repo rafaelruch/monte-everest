@@ -75,15 +75,8 @@ export default function SejaProfissional() {
         // Store professionalId as fallback for the aguardando-pagamento page
         localStorage.setItem('pendingProfessionalId', data.professionalId);
         
-        toast({
-          title: "Redirecionando para pagamento...",
-          description: "Você será redirecionado para a página de pagamento seguro.",
-        });
-        
-        // Redirect to Pagar.me checkout in the same tab
-        setTimeout(() => {
-          window.location.href = data.checkoutUrl;
-        }, 1000);
+        // Redirect immediately to Pagar.me checkout
+        window.location.href = data.checkoutUrl;
       }
     },
     onError: (error) => {
