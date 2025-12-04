@@ -758,6 +758,44 @@ export default function AdminDashboard() {
     },
   });
 
+  // Sync all payments from Pagar.me to local database
+  const syncAllPaymentsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/admin/pagarme/sync`, {
+        method: "POST",
+        headers: authHeaders,
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao sincronizar pagamentos");
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/payments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+      
+      if (data.synced > 0) {
+        toast({
+          title: "✅ Sincronização concluída!",
+          description: `${data.synced} pagamentos sincronizados do Pagar.me.`,
+        });
+      } else {
+        toast({
+          title: "ℹ️ Nenhum pagamento novo",
+          description: `Todos os pagamentos já estão sincronizados. (${data.skipped} ignorados)`,
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "❌ Erro ao sincronizar",
+        description: error.message || "Erro ao sincronizar pagamentos. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const syncPlanMutation = useMutation({
     mutationFn: async (planId: string) => {
       const response = await fetch(`/api/admin/plans/${planId}/sync-pagarme`, {
@@ -1640,9 +1678,9 @@ export default function AdminDashboard() {
   // Pagamentos ativos (assinaturas ativas)
   const activePayments = payments.filter((p: Payment) => p.status === 'active');
   
-  // Pagamentos do mês atual (criados neste mês)
+  // Pagamentos do mês atual (pagos neste mês - usa paidAt se disponível, senão createdAt)
   const currentMonthPayments = payments.filter((p: Payment) => {
-    const paymentDate = new Date(p.createdAt || '');
+    const paymentDate = new Date(p.paidAt || p.createdAt || '');
     return paymentDate >= currentMonthStart && (p.status === 'active' || p.status === 'paid');
   });
   
@@ -1660,7 +1698,7 @@ export default function AdminDashboard() {
   
   // Para crescimento, comparamos com pagamentos do mês anterior
   const lastMonthPayments = payments.filter((p: Payment) => {
-    const paymentDate = new Date(p.createdAt || '');
+    const paymentDate = new Date(p.paidAt || p.createdAt || '');
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
   });
   
@@ -1739,6 +1777,24 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Histórico de Pagamentos</h1>
             <p className="text-gray-600 mt-1">Visualize e gerencie todos os pagamentos da plataforma.</p>
           </div>
+          <Button
+            onClick={() => syncAllPaymentsMutation.mutate()}
+            disabled={syncAllPaymentsMutation.isPending}
+            className="bg-[#3C8BAB] hover:bg-[#2d6a84]"
+            data-testid="button-sync-payments"
+          >
+            {syncAllPaymentsMutation.isPending ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Sincronizando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Sincronizar Pagar.me
+              </>
+            )}
+          </Button>
         </div>
 
         <Card>
@@ -1970,7 +2026,7 @@ export default function AdminDashboard() {
       const date = new Date();
       date.setMonth(date.getMonth() - (11 - i));
       const monthPayments = payments.filter((p: Payment) => {
-        const paymentDate = new Date(p.createdAt || '');
+        const paymentDate = new Date(p.paidAt || p.createdAt || '');
         return paymentDate.getMonth() === date.getMonth() && 
                paymentDate.getFullYear() === date.getFullYear() &&
                (p.status === 'active' || p.status === 'paid');

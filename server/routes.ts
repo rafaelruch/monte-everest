@@ -2058,6 +2058,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync payments from Pagar.me to local database
+  app.post("/api/admin/pagarme/sync", verifyAdminToken, async (req, res) => {
+    try {
+      console.log(`🔄 [SYNC] Iniciando sincronização de pagamentos do Pagar.me...`);
+      
+      // Fetch all orders from Pagar.me
+      const ordersResponse = await pagarmeService.listOrders(1, 100);
+      
+      if (!ordersResponse.data || !Array.isArray(ordersResponse.data)) {
+        return res.json({ 
+          success: false, 
+          message: 'Nenhum pedido encontrado no Pagar.me',
+          synced: 0,
+          skipped: 0
+        });
+      }
+
+      let syncedCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+      const syncedPayments: any[] = [];
+
+      // Get all existing payments to check for duplicates
+      const existingPayments = await storage.getPayments();
+      const existingTransactionIds = new Set(
+        existingPayments.map((p: any) => p.transactionId).filter(Boolean)
+      );
+
+      // Get all professionals for matching
+      const professionals = await storage.getProfessionals();
+
+      for (const order of ordersResponse.data) {
+        try {
+          // Only process paid orders
+          if (order.status !== 'paid') {
+            skippedCount++;
+            continue;
+          }
+
+          // Check if this order already exists as a payment
+          const orderId = order.id;
+          if (existingTransactionIds.has(orderId)) {
+            console.log(`⏭️ [SYNC] Order ${orderId} already exists, skipping`);
+            skippedCount++;
+            continue;
+          }
+
+          // Try to find matching professional by email or CPF
+          const orderEmail = order.customer?.email?.toLowerCase().trim();
+          const orderDocument = order.customer?.document?.replace(/\D/g, '');
+
+          let matchingProfessional = null;
+          for (const prof of professionals) {
+            const profEmail = prof.email?.toLowerCase().trim();
+            const profDocument = prof.document?.replace(/\D/g, '');
+
+            if ((orderEmail && profEmail && orderEmail === profEmail) ||
+                (orderDocument && profDocument && orderDocument === profDocument)) {
+              matchingProfessional = prof;
+              break;
+            }
+          }
+
+          if (!matchingProfessional) {
+            console.log(`⚠️ [SYNC] No matching professional for order ${orderId} (email: ${orderEmail}, doc: ${orderDocument})`);
+            skippedCount++;
+            continue;
+          }
+
+          // Calculate amount in reais (Pagar.me sends in cents)
+          const amountInReais = order.amount ? order.amount / 100 : 0;
+          
+          // Get payment date from order
+          const paidAt = order.closed_at ? new Date(order.closed_at) : 
+                        order.updated_at ? new Date(order.updated_at) : new Date();
+
+          // Create payment record
+          const dueDate = new Date(paidAt);
+          dueDate.setDate(dueDate.getDate() + 30);
+
+          const newPayment = await storage.createPayment({
+            professionalId: matchingProfessional.id,
+            planId: matchingProfessional.subscriptionPlanId || '',
+            amount: amountInReais.toString(),
+            paymentMethod: order.charges?.[0]?.payment_method || 'pix',
+            status: 'paid',
+            transactionId: orderId,
+            gatewayResponse: JSON.stringify(order),
+            dueDate: dueDate,
+            paidAt: paidAt
+          });
+
+          console.log(`✅ [SYNC] Created payment for professional ${matchingProfessional.fullName}: R$ ${amountInReais} (Order: ${orderId})`);
+          
+          syncedPayments.push({
+            orderId,
+            professionalName: matchingProfessional.fullName,
+            amount: amountInReais,
+            paidAt
+          });
+          
+          syncedCount++;
+
+        } catch (orderError) {
+          console.error(`❌ [SYNC] Error processing order ${order.id}:`, orderError);
+          errorCount++;
+        }
+      }
+
+      console.log(`🔄 [SYNC] Sincronização concluída: ${syncedCount} sincronizados, ${skippedCount} ignorados, ${errorCount} erros`);
+
+      res.json({
+        success: true,
+        message: `Sincronização concluída`,
+        synced: syncedCount,
+        skipped: skippedCount,
+        errors: errorCount,
+        payments: syncedPayments
+      });
+
+    } catch (error) {
+      console.error("❌ [SYNC] Error syncing payments:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Erro ao sincronizar pagamentos",
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   app.post("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
       // Convert date strings to Date objects if necessary
