@@ -2892,6 +2892,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a review (admin only)
+  app.delete("/api/admin/reviews/:id", verifyAdminToken, async (req, res) => {
+    try {
+      const reviewId = req.params.id;
+      
+      await storage.deleteReview(reviewId);
+      
+      await storage.createLog({
+        userId: req.user!.id,
+        action: 'delete_review',
+        entityType: 'review',
+        entityId: reviewId,
+        details: { deleted: true },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ success: true, message: "Avaliação excluída com sucesso" });
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ message: "Erro ao excluir avaliação" });
+    }
+  });
+
   // =========================================
   // ADMIN USER MANAGEMENT ROUTES
   // =========================================

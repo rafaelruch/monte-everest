@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -1181,6 +1182,26 @@ export default function AdminDashboard() {
       toast({
         title: "Erro",
         description: "Erro ao atualizar verificação. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: async (reviewId: string) => {
+      return apiRequest("DELETE", `/api/admin/reviews/${reviewId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reviews"] });
+      toast({
+        title: "Sucesso",
+        description: "Avaliação excluída com sucesso!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir avaliação. Tente novamente.",
         variant: "destructive",
       });
     },
@@ -3814,23 +3835,56 @@ export default function AdminDashboard() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant={review.isVerified ? "outline" : "default"}
-                            size="sm"
-                            onClick={() => updateReviewVerificationMutation.mutate({
-                              reviewId: review.id,
-                              isVerified: !review.isVerified
-                            })}
-                            disabled={updateReviewVerificationMutation.isPending}
-                            data-testid={`toggle-verification-${review.id}`}
-                            title={review.isVerified ? "Remover Verificação" : "Verificar"}
-                          >
-                            {review.isVerified ? (
-                              <XCircle className="h-4 w-4" />
-                            ) : (
-                              <CheckCircle className="h-4 w-4" />
-                            )}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant={review.isVerified ? "outline" : "default"}
+                              size="sm"
+                              onClick={() => updateReviewVerificationMutation.mutate({
+                                reviewId: review.id,
+                                isVerified: !review.isVerified
+                              })}
+                              disabled={updateReviewVerificationMutation.isPending}
+                              data-testid={`toggle-verification-${review.id}`}
+                              title={review.isVerified ? "Remover Verificação" : "Verificar"}
+                            >
+                              {review.isVerified ? (
+                                <XCircle className="h-4 w-4" />
+                              ) : (
+                                <CheckCircle className="h-4 w-4" />
+                              )}
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  data-testid={`delete-review-${review.id}`}
+                                  title="Excluir Avaliação"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Excluir Avaliação</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja excluir esta avaliação de <strong>{review.customerName}</strong>? 
+                                    Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteReviewMutation.mutate(review.id)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Excluir
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
