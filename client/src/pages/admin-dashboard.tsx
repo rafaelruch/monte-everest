@@ -1221,10 +1221,10 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatPaymentAmount(currentMonthRevenue)}
+              {formatReais(currentMonthRevenue)}
             </div>
             <p className="text-xs opacity-90">
-              {payments.filter((p: Payment) => p.status === 'active' || p.status === 'paid').length} pagamentos ativos
+              {activePayments.length} assinaturas ativas
             </p>
           </CardContent>
         </Card>
@@ -1251,7 +1251,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatPaymentAmount(averageTicket)}
+              {formatReais(averageTicket)}
             </div>
             <p className="text-xs opacity-90">
               Valor médio por assinante ativo
@@ -1628,34 +1628,50 @@ export default function AdminDashboard() {
       );
     };
 
+  // Helper to convert payment amount to reais (handles both centavos and reais stored values)
+  const toReaisValue = (amount: number) => amount > 1000 ? amount / 100 : amount;
+  
   // Cálculos adicionais para relatórios
   const currentDate = new Date();
   const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
   const lastMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
 
-  const currentMonthPayments = payments.filter((p: Payment) => {
-    const paymentDate = new Date(p.createdAt || '');
-    return paymentDate >= currentMonthStart && (p.status === 'active' || p.status === 'paid');
-  });
-
+  // Pagamentos ativos (assinaturas ativas)
+  const activePayments = payments.filter((p: Payment) => p.status === 'active');
+  
+  // MRR (Receita Recorrente Mensal) - soma dos valores das assinaturas ativas
+  // This is the true "monthly revenue" for a subscription business
+  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => {
+    const amount = parseFloat(p.amount) || 0;
+    return sum + toReaisValue(amount);
+  }, 0);
+  
+  // Current month revenue now uses MRR (active subscriptions)
+  const currentMonthRevenue = monthlyRecurringRevenue;
+  
+  // Para crescimento, comparamos com novos pagamentos do mês anterior
   const lastMonthPayments = payments.filter((p: Payment) => {
     const paymentDate = new Date(p.createdAt || '');
     return paymentDate >= lastMonthStart && paymentDate <= lastMonthEnd && (p.status === 'active' || p.status === 'paid');
   });
-
-  // Payments are stored in reais (not cents), so no need to divide by 100
-  const currentMonthRevenue = currentMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
-  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
+  
+  const lastMonthRevenue = lastMonthPayments.reduce((sum: number, p: Payment) => {
+    const amount = parseFloat(p.amount) || 0;
+    return sum + toReaisValue(amount);
+  }, 0);
+  
+  // Se não há histórico do mês passado, não mostra crescimento negativo
   const revenueGrowth = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
 
-  const activePayments = payments.filter((p: Payment) => p.status === 'active');
-  const monthlyRecurringRevenue = activePayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0);
   const projectedAnnualRevenue = monthlyRecurringRevenue * 12;
 
   const validPayments = payments.filter((p: Payment) => p.status === 'paid' || p.status === 'active');
   const averageTicket = validPayments.length > 0 ? 
-    validPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / validPayments.length : 0;
+    validPayments.reduce((sum: number, p: Payment) => {
+      const amount = parseFloat(p.amount) || 0;
+      return sum + toReaisValue(amount);
+    }, 0) / validPayments.length : 0;
 
   const conversionRate = professionals.length > 0 ? 
     (activePayments.length / professionals.length * 100) : 0;
@@ -2001,7 +2017,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatPaymentAmount(currentMonthRevenue)}
+                  {formatReais(currentMonthRevenue)}
                 </p>
                 <p className={`text-sm ${revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {revenueGrowth >= 0 ? '↗' : '↘'} {Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior
