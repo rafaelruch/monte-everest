@@ -155,9 +155,24 @@ type ChangeAdminPasswordData = z.infer<typeof changeAdminPasswordSchema>;
 // Ícones disponíveis para as categorias (substituído pelo IconSelector com Font Awesome)
 // const availableIcons = []; // Removido - usando IconSelector agora
 
-// Centralized Brazilian currency formatter
+// Brazilian currency formatter - expects value in centavos
 const formatBRL = (centavos: number) => 
   new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(centavos / 100);
+
+// Brazilian currency formatter - expects value in reais (no division)
+const formatReais = (reais: number) => 
+  new Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(reais);
+
+// Smart currency formatter - detects if value is in centavos (>100) or reais (<100)
+// Payments from Pagar.me may be stored in centavos (5990) or reais (59.90)
+const formatPaymentAmount = (amount: number) => {
+  // If amount is greater than 1000, it's likely in centavos and needs conversion
+  // Typical plan prices are under R$ 1000, so 5990 = R$ 59,90 in centavos
+  if (amount > 1000) {
+    return formatBRL(amount); // Convert from centavos
+  }
+  return formatReais(amount); // Already in reais
+};
 
 const sidebarItems: SidebarItem[] = [
   { id: "overview", label: "Visão Geral", icon: LayoutDashboard },
@@ -1206,7 +1221,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatBRL(currentMonthRevenue)}
+              {formatPaymentAmount(currentMonthRevenue)}
             </div>
             <p className="text-xs opacity-90">
               {payments.filter((p: Payment) => p.status === 'active' || p.status === 'paid').length} pagamentos ativos
@@ -1236,7 +1251,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatBRL(averageTicket)}
+              {formatPaymentAmount(averageTicket)}
             </div>
             <p className="text-xs opacity-90">
               Valor médio por assinante ativo
@@ -1310,7 +1325,7 @@ export default function AdminDashboard() {
                       <DollarSign className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-medium">{formatCurrency(parseFloat(payment.amount))}</p>
+                      <p className="font-medium">{formatPaymentAmount(parseFloat(payment.amount))}</p>
                       <p className="text-sm text-gray-500">ID: {payment.professionalId?.slice(0, 8)}</p>
                       <p className="text-xs text-gray-400">
                         {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString('pt-BR') : 'Data não informada'}
@@ -1756,7 +1771,7 @@ export default function AdminDashboard() {
                           <Badge variant="outline">Plano</Badge>
                         </TableCell>
                         <TableCell className="font-medium">
-                          {formatCurrency(parseFloat(payment.amount || '0'))}
+                          {formatPaymentAmount(parseFloat(payment.amount || '0'))}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
@@ -1924,6 +1939,9 @@ export default function AdminDashboard() {
 
   const renderReports = () => {
     // Preparar dados para gráficos
+    // Helper to convert payment amount to reais (handles both centavos and reais stored values)
+    const toReais = (amount: number) => amount > 1000 ? amount / 100 : amount;
+    
     const revenueChartData = Array.from({ length: 12 }, (_, i) => {
       const date = new Date();
       date.setMonth(date.getMonth() - (11 - i));
@@ -1933,7 +1951,11 @@ export default function AdminDashboard() {
                paymentDate.getFullYear() === date.getFullYear() &&
                (p.status === 'active' || p.status === 'paid');
       });
-      const monthRevenue = monthPayments.reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0) / 100;
+      // Convert each payment amount properly (handles centavos vs reais)
+      const monthRevenue = monthPayments.reduce((sum: number, p: Payment) => {
+        const amount = parseFloat(p.amount) || 0;
+        return sum + toReais(amount);
+      }, 0);
       
       return {
         name: date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
@@ -1948,12 +1970,19 @@ export default function AdminDashboard() {
       { name: 'Rejeitados', value: professionals.filter((p: Professional) => p.status === 'rejected').length, color: '#EF4444' },
     ];
 
-    const plansChartData = plans.map((plan: any) => ({
-      name: plan.name,
-      assinantes: payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid')).length,
-      receita: payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid'))
-        .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0),
-    }));
+    const plansChartData = plans.map((plan: any) => {
+      const planPayments = payments.filter((p: Payment) => p.planId === plan.id && (p.status === 'active' || p.status === 'paid'));
+      // Convert each payment amount properly (handles centavos vs reais)
+      const receita = planPayments.reduce((sum: number, p: Payment) => {
+        const amount = parseFloat(p.amount) || 0;
+        return sum + toReais(amount);
+      }, 0);
+      return {
+        name: plan.name,
+        assinantes: planPayments.length,
+        receita,
+      };
+    });
 
     return (
       <div className="space-y-6">
@@ -1972,7 +2001,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Receita Mensal</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatBRL(currentMonthRevenue)}
+                  {formatPaymentAmount(currentMonthRevenue)}
                 </p>
                 <p className={`text-sm ${revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   {revenueGrowth >= 0 ? '↗' : '↘'} {Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior
@@ -1989,7 +2018,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">MRR (Receita Recorrente)</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {formatBRL(monthlyRecurringRevenue)}
+                  {formatPaymentAmount(monthlyRecurringRevenue)}
                 </p>
                 <p className="text-sm text-gray-500">
                   {activePayments.length} assinantes ativos
@@ -2006,7 +2035,7 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Ticket Médio</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {formatBRL(averageTicket)}
+                  {formatPaymentAmount(averageTicket)}
                 </p>
                 <p className="text-sm text-gray-500">
                   Por profissional/mês
@@ -2057,11 +2086,11 @@ export default function AdminDashboard() {
                 <YAxis 
                   tick={{ fontSize: 12 }}
                   stroke="#666"
-                  tickFormatter={(value) => formatBRL(value)}
+                  tickFormatter={(value) => formatReais(value)}
                 />
                 <Tooltip 
                   formatter={(value: any, name: string) => [
-                    name === 'receita' ? formatBRL(parseFloat(value)) : value,
+                    name === 'receita' ? formatReais(parseFloat(value)) : value,
                     name === 'receita' ? 'Receita' : 'Assinantes'
                   ]}
                   labelStyle={{ color: '#333' }}
@@ -2157,11 +2186,11 @@ export default function AdminDashboard() {
                 orientation="right"
                 tick={{ fontSize: 12 }}
                 stroke="#666"
-                tickFormatter={(value) => formatBRL(value)}
+                tickFormatter={(value) => formatReais(value)}
               />
               <Tooltip 
                 formatter={(value: any, name: string) => [
-                  name === 'receita' ? formatBRL(parseFloat(value)) : value,
+                  name === 'receita' ? formatReais(parseFloat(value)) : value,
                   name === 'receita' ? 'Receita Total' : 'Assinantes'
                 ]}
                 contentStyle={{ 
@@ -2217,7 +2246,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-orange-50">
                 <span className="text-gray-600">Receita Total</span>
                 <span className="font-bold text-orange-600">
-                  {formatBRL(
+                  {formatPaymentAmount(
                     payments
                       .filter((p: Payment) => p.status === 'active' || p.status === 'paid')
                       .reduce((sum: number, p: Payment) => sum + (parseFloat(p.amount) || 0), 0)
@@ -2240,19 +2269,19 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
                 <span className="text-gray-600">Receita Anual Projetada</span>
                 <span className="font-bold text-green-600">
-                  {formatBRL(projectedAnnualRevenue)}
+                  {formatPaymentAmount(projectedAnnualRevenue)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                 <span className="text-gray-600">Próximo Mês (estimativa)</span>
                 <span className="font-bold text-blue-600">
-                  {formatBRL(monthlyRecurringRevenue)}
+                  {formatPaymentAmount(monthlyRecurringRevenue)}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50">
                 <span className="text-gray-600">Trimestre Atual</span>
                 <span className="font-bold text-purple-600">
-                  {formatBRL(monthlyRecurringRevenue * 3)}
+                  {formatPaymentAmount(monthlyRecurringRevenue * 3)}
                 </span>
               </div>
               <div className="text-xs text-gray-500 p-3 bg-gray-50 rounded-lg">
@@ -2321,7 +2350,7 @@ export default function AdminDashboard() {
                       <p className="text-xs text-gray-500">{planPayments.length} assinantes</p>
                     </div>
                     <span className="font-bold text-sm">
-                      {formatBRL(planRevenue)}
+                      {formatPaymentAmount(planRevenue)}
                     </span>
                   </div>
                 );
@@ -2632,7 +2661,7 @@ export default function AdminDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="text-2xl font-bold text-[#3C8BAB]">
-                        {formatBRL(parseFloat(plan.monthlyPrice))}
+                        {formatReais(parseFloat(plan.monthlyPrice))}
                         <span className="text-sm font-normal text-gray-500">/mês</span>
                       </div>
                       <div className="space-y-2">

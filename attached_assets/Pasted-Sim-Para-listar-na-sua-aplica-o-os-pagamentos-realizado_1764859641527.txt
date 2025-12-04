@@ -1,0 +1,45 @@
+Sim. Para listar na sua aplicação os pagamentos realizados via Checkout, você precisa listar pedidos ou cobranças na API e usar algum identificador que relacione esses pedidos ao Checkout (por exemplo, o próprio `checkout_link_id`, `code` ou `metadata`).[1][2][3]
+
+## Endpoints relevantes
+
+- O Checkout em si é apenas a “porta de entrada”; os pagamentos realizados ali viram `orders` e `charges` na API Core (`/core/v5`).[2][3]
+- Para trazer esses pagamentos para dentro da sua aplicação você usa principalmente:
+  - `GET /core/v5/orders` → listar pedidos com filtros por status, data, código etc.[4][1]
+  - `GET /core/v5/charges` → listar cobranças com filtros por status (`pending`, `paid`, `canceled`, `failed`, `overpaid`, etc.).[5][6]
+
+## Como diferenciar “pagos no Checkout”
+
+- A página de Checkout orienta que você crie o Link de Pagamento via API de Checkout (`/checkout`) e receba uma URL para enviar ao cliente; esse link costuma estar associado a um pedido ou pode carregar um `code`/`metadata` que você define.[3][2]
+- Na hora de criar o pedido ou o link, defina um identificador (ex.: `code: "checkout_site"`, ou um campo em `metadata`) e depois use esse campo como filtro nos endpoints de `orders`/`charges` para listar apenas pagamentos que vieram desse Checkout.[1][5]
+
+## Fluxo típico na sua aplicação
+
+- Quando criar o Checkout/Link, armazene no seu banco: `order_id` (se já existir), algum `code` próprio e a URL do checkout; assim você consegue relacionar futuramente a cobrança ao seu pedido interno.[2][3]
+- Para listar na tela “Pagamentos realizados no Checkout”, sua API faz:
+  - Uma chamada periódica ou sob demanda para `GET /core/v5/orders` ou `GET /core/v5/charges` filtrando por:
+    - status = `paid` (ou os que fizerem sentido para você)  
+    - e, opcionalmente, `code`/`metadata` que você usou para marcar o pedido como vindo do Checkout.[5][1]
+
+Se quiser, na próxima mensagem dá para montar um exemplo concreto em Node (ou no n8n) com a query para `GET /core/v5/orders` filtrando os pagamentos gerados pelo Checkout e o modelo de tabela para exibir isso no seu CRM.
+
+[1](https://docs.pagar.me/reference/listar-pedidos)
+[2](https://docs.pagar.me/reference/checkout-link)
+[3](https://docs.pagar.me/docs/checkout-use)
+[4](https://docs.pagar.me/reference/criar-pedido-2)
+[5](https://docs.pagar.me/reference/listar-cobran%C3%A7as)
+[6](https://docs.pagar.me/reference/cobran%C3%A7as-1)
+[7](https://docs.pagar.me/docs/checkout-about)
+[8](https://docs.pagar.me/reference/obter-pedido)
+[9](https://docs.pagar.me/reference/introdu%C3%A7%C3%A3o-1)
+[10](https://docs.pagar.me/reference/obter-item-do-pedido)
+[11](https://github.com/pagarme/pagarme-core-api-php)
+[12](https://docs.pagar.me/reference/listar-uso)
+[13](https://pagarme.helpjuice.com/pt_BR/sobre-o-pagarme/passo-a-passo-de-migracao-de-api)
+[14](https://docs.pagar.me)
+[15](https://connect-stone.stone.com.br/reference/criar-pedido)
+[16](https://docs.pagar.me/reference/criar-pedido-multicompradores)
+[17](https://docs.pagar.me/docs/meios-de-pagamento)
+[18](https://docs.pagar.me/reference/fechar-um-pedido)
+[19](https://docs.pagar.me/reference/obter-cobran%C3%A7a)
+[20](https://docs.pagar.me/v2/docs/inserindo-o-checkout)
+[21](https://docs.pagar.me/reference/criar-pedido-com-split-1)
