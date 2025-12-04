@@ -366,6 +366,23 @@ export const insertDismissedNotificationSchema = createInsertSchema(dismissedNot
   dismissedAt: true,
 });
 
+// Profile views - tracks when someone views a professional's profile
+export const profileViews = pgTable("profile_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  professionalId: varchar("professional_id").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  ipAddress: varchar("ip_address"), // Optional: to prevent counting same visitor multiple times
+  userAgent: text("user_agent"), // Optional: browser info
+}, (table) => ({
+  professionalIdx: index("profile_views_professional_idx").on(table.professionalId),
+  viewedAtIdx: index("profile_views_viewed_at_idx").on(table.viewedAt),
+}));
+
+export const insertProfileViewSchema = createInsertSchema(profileViews).omit({
+  id: true,
+  viewedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -405,3 +422,6 @@ export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSc
 
 export type DismissedNotification = typeof dismissedNotifications.$inferSelect;
 export type InsertDismissedNotification = z.infer<typeof insertDismissedNotificationSchema>;
+
+export type ProfileView = typeof profileViews.$inferSelect;
+export type InsertProfileView = z.infer<typeof insertProfileViewSchema>;

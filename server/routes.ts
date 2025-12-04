@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { Client as ObjectStorageClient } from '@replit/object-storage';
 
 const { Pool: PgPool } = pg;
-import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens, contacts, reviews, dismissedNotifications } from "@shared/schema";
+import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens, contacts, reviews, dismissedNotifications, profileViews } from "@shared/schema";
 import { z } from "zod";
 import { sql, and, isNull, gt } from "drizzle-orm";
 import multer from "multer";
@@ -1732,6 +1732,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error fetching monthly contact stats:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Track profile view (public endpoint)
+  app.post("/api/profile-views", async (req, res) => {
+    try {
+      const { professionalId } = req.body;
+      
+      if (!professionalId) {
+        return res.status(400).json({ message: "ID do profissional é obrigatório" });
+      }
+
+      // Get IP and user agent for deduplication (optional)
+      const ipAddress = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || '';
+      const userAgent = req.headers['user-agent'] || '';
+
+      await db.insert(profileViews).values({
+        professionalId,
+        ipAddress: ipAddress.split(',')[0]?.trim() || null,
+        userAgent: userAgent || null,
+      });
+
+      res.status(201).json({ success: true });
+    } catch (error) {
+      console.error("Error tracking profile view:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Get monthly profile view stats for professional (protected route)
+  app.get("/api/professionals/:id/views/monthly", verifyProfessionalToken, async (req, res) => {
+    try {
+      const professionalId = req.params.id;
+      
+      if (professionalId !== req.professional!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      // Get current month views
+      const currentDate = new Date();
+      const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+      const monthlyViews = await db.select()
+        .from(profileViews)
+        .where(
+          and(
+            sql`${profileViews.professionalId} = ${professionalId}`,
+            sql`${profileViews.viewedAt} >= ${monthStart}`
+          )
+        );
+
+      res.json({
+        currentMonth: monthlyViews.length
+      });
+    } catch (error) {
+      console.error("Error fetching monthly view stats:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

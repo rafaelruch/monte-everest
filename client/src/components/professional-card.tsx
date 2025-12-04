@@ -99,15 +99,14 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
   });
 
   const handleContactClick = () => {
-    // Record contact interaction
-    fetch("/api/contacts", {
+    // Record profile view (not a contact)
+    fetch("/api/profile-views", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         professionalId: professional.id,
-        contactMethod: "form",
       }),
     });
     

@@ -189,6 +189,21 @@ export default function ProfessionalDashboard() {
     enabled: !!professionalAuth?.id,
   });
 
+  // Get monthly profile views statistics
+  const { data: monthlyViews } = useQuery({
+    queryKey: ["/api/professionals", professionalAuth?.id, "views/monthly"],
+    queryFn: async () => {
+      const response = await fetch(`/api/professionals/${professionalAuth.id}/views/monthly`, {
+        headers: {
+          "Authorization": `Bearer ${professionalAuth.token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch monthly views");
+      return response.json();
+    },
+    enabled: !!professionalAuth?.id,
+  });
+
   // Get notifications (recent contacts and reviews)
   const { data: notifications = [] } = useQuery({
     queryKey: ["/api/professionals", professionalAuth?.id, "notifications"],
@@ -838,7 +853,8 @@ export default function ProfessionalDashboard() {
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* First row: Rating, Reviews, Contacts, Views */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
           {/* Stats Cards */}
           <Card>
             <CardContent className="p-6">
@@ -892,6 +908,25 @@ export default function ProfessionalDashboard() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2">
+                <Eye className="h-5 w-5 text-purple-500" />
+                <div>
+                  <p className="text-2xl font-bold" data-testid="monthly-views">
+                    {monthlyViews?.currentMonth || 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Visualizações este mês
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Second row: Status and Subscription */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
