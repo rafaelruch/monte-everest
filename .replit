@@ -48,3 +48,8 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_object_storage:1.0.0", "javascript_database:1.0.0", "javascript_log_in_with_replit:1.0.0", "javascript_stripe:1.0.0", "resend:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "K0oWAVQwE1CLq/gH6ZiYzoSk45sCOU3iZTqQHfpSwqLiejvgYLpHlLI2cOUEwIq1"
