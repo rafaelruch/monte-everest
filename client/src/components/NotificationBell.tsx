@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { useState } from "react";
+import { Bell, X, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -104,19 +104,14 @@ export function NotificationBell({
             </div>
           ) : (
             notifications.map((notification) => (
-              <DropdownMenuItem
+              <div
                 key={notification.id}
-                className={`flex flex-col items-start p-4 cursor-pointer ${
+                className={`flex items-start p-4 border-b last:border-b-0 ${
                   !notification.isRead ? 'bg-primary/5' : ''
                 }`}
-                onClick={() => {
-                  if (!notification.isRead && onMarkAsRead) {
-                    onMarkAsRead(notification.id);
-                  }
-                }}
                 data-testid={`notification-item-${notification.id}`}
               >
-                <div className="flex items-start gap-3 w-full">
+                <div className="flex items-start gap-3 flex-1">
                   <span className="text-2xl flex-shrink-0">
                     {getNotificationIcon(notification.type)}
                   </span>
@@ -135,7 +130,22 @@ export function NotificationBell({
                     </p>
                   </div>
                 </div>
-              </DropdownMenuItem>
+                {!notification.isRead && onMarkAsRead && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 flex-shrink-0 hover:bg-green-100 hover:text-green-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMarkAsRead(notification.id);
+                    }}
+                    title="Marcar como lida"
+                    data-testid={`dismiss-notification-${notification.id}`}
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             ))
           )}
         </ScrollArea>

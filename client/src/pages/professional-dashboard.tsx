@@ -205,6 +205,62 @@ export default function ProfessionalDashboard() {
     refetchInterval: 60000, // Refresh every minute
   });
 
+  // Mutation to mark notification as read
+  const markNotificationAsReadMutation = useMutation({
+    mutationFn: async ({ notificationId, type }: { notificationId: string; type: string }) => {
+      const response = await fetch(`/api/professionals/${professionalAuth.id}/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${professionalAuth.token}`
+        },
+        body: JSON.stringify({ type })
+      });
+      if (!response.ok) throw new Error("Failed to mark notification as read");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth?.id, "notifications"] });
+    }
+  });
+
+  // Mutation to mark all notifications as read
+  const markAllNotificationsAsReadMutation = useMutation({
+    mutationFn: async (notificationsList: Array<{ id: string; type: string }>) => {
+      const response = await fetch(`/api/professionals/${professionalAuth.id}/notifications/read-all`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${professionalAuth.token}`
+        },
+        body: JSON.stringify({ notifications: notificationsList })
+      });
+      if (!response.ok) throw new Error("Failed to mark all notifications as read");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth?.id, "notifications"] });
+    }
+  });
+
+  // Handler to mark a single notification as read
+  const handleMarkNotificationAsRead = (notificationId: string) => {
+    const notification = notifications.find((n: any) => n.id === notificationId);
+    if (notification) {
+      markNotificationAsReadMutation.mutate({ notificationId, type: notification.type });
+    }
+  };
+
+  // Handler to mark all notifications as read
+  const handleMarkAllNotificationsAsRead = () => {
+    const unreadNotifications = notifications
+      .filter((n: any) => !n.isRead)
+      .map((n: any) => ({ id: n.id, type: n.type }));
+    if (unreadNotifications.length > 0) {
+      markAllNotificationsAsReadMutation.mutate(unreadNotifications);
+    }
+  };
+
   const form = useForm<UpdateProfileData>({
     resolver: zodResolver(updateProfileSchema),
     values: professional ? {
@@ -562,7 +618,11 @@ export default function ProfessionalDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <NotificationBell notifications={notifications} />
+              <NotificationBell 
+                notifications={notifications} 
+                onMarkAsRead={handleMarkNotificationAsRead}
+                onMarkAllAsRead={handleMarkAllNotificationsAsRead}
+              />
               <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair

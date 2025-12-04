@@ -348,6 +348,24 @@ export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTo
   usedAt: true,
 });
 
+// Dismissed notifications - tracks which notifications have been marked as read
+export const dismissedNotifications = pgTable("dismissed_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(), // Can be professional ID or admin user ID
+  userType: varchar("user_type").notNull(), // 'professional' or 'admin'
+  notificationId: varchar("notification_id").notNull(), // ID of the contact or review
+  notificationType: varchar("notification_type").notNull(), // 'contact' or 'review'
+  dismissedAt: timestamp("dismissed_at").defaultNow(),
+}, (table) => ({
+  userIdx: index("dismissed_notifications_user_idx").on(table.userId, table.userType),
+  notificationIdx: index("dismissed_notifications_notification_idx").on(table.notificationId, table.notificationType),
+}));
+
+export const insertDismissedNotificationSchema = createInsertSchema(dismissedNotifications).omit({
+  id: true,
+  dismissedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -384,3 +402,6 @@ export type InsertImage = z.infer<typeof insertImageSchema>;
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+
+export type DismissedNotification = typeof dismissedNotifications.$inferSelect;
+export type InsertDismissedNotification = z.infer<typeof insertDismissedNotificationSchema>;

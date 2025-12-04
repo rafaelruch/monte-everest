@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { Client as ObjectStorageClient } from '@replit/object-storage';
 
 const { Pool: PgPool } = pg;
-import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens, contacts, reviews } from "@shared/schema";
+import { insertProfessionalSchema, insertReviewSchema, insertContactSchema, images, insertImageSchema, passwordResetTokens, contacts, reviews, dismissedNotifications } from "@shared/schema";
 import { z } from "zod";
 import { sql, and, isNull, gt } from "drizzle-orm";
 import multer from "multer";
@@ -1381,6 +1381,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const professionalId = req.params.id;
       
+      // Get dismissed notifications for this professional
+      const dismissed = await db.select()
+        .from(dismissedNotifications)
+        .where(sql`${dismissedNotifications.userId} = ${professionalId} AND ${dismissedNotifications.userType} = 'professional'`);
+      
+      const dismissedSet = new Set(dismissed.map(d => `${d.notificationType}-${d.notificationId}`));
+      
       // Get contacts from last 7 days
       const contacts = await storage.getContacts(professionalId);
       const sevenDaysAgo = new Date();
@@ -1395,7 +1402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: 'Novo Contato',
           message: `${c.customerName} entrou em contato via ${c.contactMethod === 'whatsapp' ? 'WhatsApp' : c.contactMethod === 'phone' ? 'Telefone' : 'Formulário'}`,
           createdAt: c.createdAt,
-          isRead: false
+          isRead: dismissedSet.has(`contact-${c.id}`)
         }));
 
       // Get reviews from last 7 days
@@ -1409,7 +1416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: 'Nova Avaliação',
           message: `${r.customerName} deixou uma avaliação de ${r.rating} estrelas${r.comment ? ': ' + r.comment.substring(0, 50) + (r.comment.length > 50 ? '...' : '') : ''}`,
           createdAt: r.createdAt,
-          isRead: false
+          isRead: dismissedSet.has(`review-${r.id}`)
         }));
 
       // Combine and sort by date (most recent first)
@@ -1424,9 +1431,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mark notification as read for professional
+  app.post("/api/professionals/:id/notifications/:notificationId/read", verifyProfessionalToken, async (req, res) => {
+    try {
+      const professionalId = req.params.id;
+      const { notificationId } = req.params;
+      const { type } = req.body; // 'contact' or 'review'
+      
+      if (!type || !['contact', 'review'].includes(type)) {
+        return res.status(400).json({ message: "Tipo de notificação inválido" });
+      }
+      
+      // Check if already dismissed
+      const existing = await db.select()
+        .from(dismissedNotifications)
+        .where(sql`${dismissedNotifications.userId} = ${professionalId} 
+          AND ${dismissedNotifications.userType} = 'professional'
+          AND ${dismissedNotifications.notificationId} = ${notificationId}
+          AND ${dismissedNotifications.notificationType} = ${type}`);
+      
+      if (existing.length === 0) {
+        await db.insert(dismissedNotifications).values({
+          userId: professionalId,
+          userType: 'professional',
+          notificationId: notificationId,
+          notificationType: type
+        });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Mark all notifications as read for professional
+  app.post("/api/professionals/:id/notifications/read-all", verifyProfessionalToken, async (req, res) => {
+    try {
+      const professionalId = req.params.id;
+      const { notifications } = req.body; // Array of { id, type }
+      
+      if (!Array.isArray(notifications)) {
+        return res.status(400).json({ message: "Lista de notificações inválida" });
+      }
+      
+      for (const notification of notifications) {
+        if (!notification.id || !notification.type) continue;
+        
+        // Check if already dismissed
+        const existing = await db.select()
+          .from(dismissedNotifications)
+          .where(sql`${dismissedNotifications.userId} = ${professionalId} 
+            AND ${dismissedNotifications.userType} = 'professional'
+            AND ${dismissedNotifications.notificationId} = ${notification.id}
+            AND ${dismissedNotifications.notificationType} = ${notification.type}`);
+        
+        if (existing.length === 0) {
+          await db.insert(dismissedNotifications).values({
+            userId: professionalId,
+            userType: 'professional',
+            notificationId: notification.id,
+            notificationType: notification.type
+          });
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Get notifications for admin (all recent contacts and reviews)
   app.get("/api/admin/notifications", verifyAdminToken, async (req, res) => {
     try {
+      const adminId = req.user?.id || 'admin';
+      
+      // Get dismissed notifications for this admin
+      const dismissed = await db.select()
+        .from(dismissedNotifications)
+        .where(sql`${dismissedNotifications.userId} = ${adminId} AND ${dismissedNotifications.userType} = 'admin'`);
+      
+      const dismissedSet = new Set(dismissed.map(d => `${d.notificationType}-${d.notificationId}`));
+      
       // Get all contacts from last 7 days
       const allContacts = await db.select().from(contacts).orderBy(sql`${contacts.createdAt} DESC`).limit(50);
       const sevenDaysAgo = new Date();
@@ -1441,7 +1530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: 'Novo Contato',
           message: `${c.customerName} entrou em contato com um profissional via ${c.contactMethod === 'whatsapp' ? 'WhatsApp' : c.contactMethod === 'phone' ? 'Telefone' : 'Formulário'}`,
           createdAt: c.createdAt,
-          isRead: false
+          isRead: dismissedSet.has(`contact-${c.id}`)
         }));
 
       // Get all reviews from last 7 days
@@ -1455,7 +1544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           title: 'Nova Avaliação',
           message: `${r.customerName} deixou uma avaliação de ${r.rating} estrelas`,
           createdAt: r.createdAt,
-          isRead: false
+          isRead: dismissedSet.has(`review-${r.id}`)
         }));
 
       // Combine and sort by date (most recent first)
@@ -1466,6 +1555,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allNotifications);
     } catch (error) {
       console.error("Error fetching admin notifications:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Mark notification as read for admin
+  app.post("/api/admin/notifications/:notificationId/read", verifyAdminToken, async (req, res) => {
+    try {
+      const adminId = req.user?.id || 'admin';
+      const { notificationId } = req.params;
+      const { type } = req.body; // 'contact' or 'review'
+      
+      if (!type || !['contact', 'review'].includes(type)) {
+        return res.status(400).json({ message: "Tipo de notificação inválido" });
+      }
+      
+      // Check if already dismissed
+      const existing = await db.select()
+        .from(dismissedNotifications)
+        .where(sql`${dismissedNotifications.userId} = ${adminId} 
+          AND ${dismissedNotifications.userType} = 'admin'
+          AND ${dismissedNotifications.notificationId} = ${notificationId}
+          AND ${dismissedNotifications.notificationType} = ${type}`);
+      
+      if (existing.length === 0) {
+        await db.insert(dismissedNotifications).values({
+          userId: adminId,
+          userType: 'admin',
+          notificationId: notificationId,
+          notificationType: type
+        });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking admin notification as read:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Mark all notifications as read for admin
+  app.post("/api/admin/notifications/read-all", verifyAdminToken, async (req, res) => {
+    try {
+      const adminId = req.user?.id || 'admin';
+      const { notifications } = req.body; // Array of { id, type }
+      
+      if (!Array.isArray(notifications)) {
+        return res.status(400).json({ message: "Lista de notificações inválida" });
+      }
+      
+      for (const notification of notifications) {
+        if (!notification.id || !notification.type) continue;
+        
+        // Check if already dismissed
+        const existing = await db.select()
+          .from(dismissedNotifications)
+          .where(sql`${dismissedNotifications.userId} = ${adminId} 
+            AND ${dismissedNotifications.userType} = 'admin'
+            AND ${dismissedNotifications.notificationId} = ${notification.id}
+            AND ${dismissedNotifications.notificationType} = ${notification.type}`);
+        
+        if (existing.length === 0) {
+          await db.insert(dismissedNotifications).values({
+            userId: adminId,
+            userType: 'admin',
+            notificationId: notification.id,
+            notificationType: notification.type
+          });
+        }
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all admin notifications as read:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

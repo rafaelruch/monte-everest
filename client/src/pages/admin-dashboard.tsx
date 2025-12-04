@@ -429,6 +429,62 @@ export default function AdminDashboard() {
     refetchInterval: 60000, // Refresh every minute
   });
 
+  // Mutation to mark notification as read (admin)
+  const markNotificationAsReadMutation = useMutation({
+    mutationFn: async ({ notificationId, type }: { notificationId: string; type: string }) => {
+      const response = await fetch(`/api/admin/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ type })
+      });
+      if (!response.ok) throw new Error("Failed to mark notification as read");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+    }
+  });
+
+  // Mutation to mark all notifications as read (admin)
+  const markAllNotificationsAsReadMutation = useMutation({
+    mutationFn: async (notificationsList: Array<{ id: string; type: string }>) => {
+      const response = await fetch(`/api/admin/notifications/read-all`, {
+        method: 'POST',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notifications: notificationsList })
+      });
+      if (!response.ok) throw new Error("Failed to mark all notifications as read");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+    }
+  });
+
+  // Handler to mark a single notification as read
+  const handleMarkNotificationAsRead = (notificationId: string) => {
+    const notification = notifications.find((n: any) => n.id === notificationId);
+    if (notification) {
+      markNotificationAsReadMutation.mutate({ notificationId, type: notification.type });
+    }
+  };
+
+  // Handler to mark all notifications as read
+  const handleMarkAllNotificationsAsRead = () => {
+    const unreadNotifications = notifications
+      .filter((n: any) => !n.isRead)
+      .map((n: any) => ({ id: n.id, type: n.type }));
+    if (unreadNotifications.length > 0) {
+      markAllNotificationsAsReadMutation.mutate(unreadNotifications);
+    }
+  };
+
   const categoryForm = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
@@ -4120,7 +4176,11 @@ export default function AdminDashboard() {
             <div className="text-sm text-gray-600">
               Logado como <span className="font-medium">Administrador</span>
             </div>
-            <NotificationBell notifications={notifications} />
+            <NotificationBell 
+              notifications={notifications}
+              onMarkAsRead={handleMarkNotificationAsRead}
+              onMarkAllAsRead={handleMarkAllNotificationsAsRead}
+            />
             <div className="w-8 h-8 bg-[#3C8BAB] rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-white" />
             </div>
