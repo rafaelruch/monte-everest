@@ -62,6 +62,7 @@ export default function ProfessionalProfile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -216,7 +217,10 @@ export default function ProfessionalProfile() {
         const whatsappPhone = formatWhatsAppPhone(professional.phone);
         const message = `Vi seu perfil no Monte Everest, meu nome é ${data.customerName} e gostaria de saber mais sobre seus serviços.`;
         const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, "_blank");
+        
+        // Use location.href for better iOS/iPhone compatibility
+        // window.open with _blank doesn't work well on iOS for external apps
+        window.location.href = whatsappUrl;
       }
       
       toast({
