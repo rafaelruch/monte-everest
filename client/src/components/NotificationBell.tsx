@@ -98,55 +98,53 @@ export function NotificationBell({
         <DropdownMenuSeparator />
         
         <ScrollArea className="h-[400px]">
-          {notifications.length === 0 ? (
+          {unreadCount === 0 ? (
             <div className="py-8 text-center text-sm text-muted-foreground" data-testid="text-no-notifications">
-              Nenhuma notificação
+              Nenhuma notificação nova
             </div>
           ) : (
-            notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`flex items-start p-4 border-b last:border-b-0 ${
-                  !notification.isRead ? 'bg-primary/5' : ''
-                }`}
-                data-testid={`notification-item-${notification.id}`}
-              >
-                <div className="flex items-start gap-3 flex-1">
-                  <span className="text-2xl flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm">{notification.title}</p>
-                      {!notification.isRead && (
+            notifications
+              .filter(n => !n.isRead)
+              .map((notification) => (
+                <div
+                  key={notification.id}
+                  className="flex items-start p-4 border-b last:border-b-0 bg-primary/5"
+                  data-testid={`notification-item-${notification.id}`}
+                >
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="text-2xl flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm">{notification.title}</p>
                         <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
-                      )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {formatTime(notification.createdAt)}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {formatTime(notification.createdAt)}
-                    </p>
                   </div>
+                  {onMarkAsRead && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 flex-shrink-0 hover:bg-green-100 hover:text-green-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMarkAsRead(notification.id);
+                      }}
+                      title="Marcar como lida"
+                      data-testid={`dismiss-notification-${notification.id}`}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-                {!notification.isRead && onMarkAsRead && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 flex-shrink-0 hover:bg-green-100 hover:text-green-600"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMarkAsRead(notification.id);
-                    }}
-                    title="Marcar como lida"
-                    data-testid={`dismiss-notification-${notification.id}`}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))
+              ))
           )}
         </ScrollArea>
       </DropdownMenuContent>
