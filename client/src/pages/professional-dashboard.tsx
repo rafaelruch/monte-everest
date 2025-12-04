@@ -1848,6 +1848,11 @@ export default function ProfessionalDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Footer */}
+      <div className="text-center text-sm text-muted-foreground" style={{ paddingTop: '30px', paddingBottom: '30px' }}>
+        © {new Date().getFullYear()} Monte Everest - Todos os direitos reservados
+      </div>
+
     </div>
   );
 }
