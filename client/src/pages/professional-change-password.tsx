@@ -36,7 +36,7 @@ export default function ProfessionalChangePassword() {
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      currentPassword: "senha123",
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -97,7 +97,7 @@ export default function ProfessionalChangePassword() {
           <Alert className="mb-6 border-amber-200 bg-amber-50">
             <Shield className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800">
-              Sua senha atual é <strong>senha123</strong>. Crie uma nova senha segura para proteger sua conta.
+              Use a senha que você recebeu por email. Crie uma nova senha segura para proteger sua conta.
             </AlertDescription>
           </Alert>
 
@@ -114,7 +114,7 @@ export default function ProfessionalChangePassword() {
                         <Input
                           {...field}
                           type={showCurrentPassword ? "text" : "password"}
-                          placeholder="Digite sua senha atual (senha123)"
+                          placeholder="Digite sua senha atual (recebida por email)"
                           className="pr-10"
                           data-testid="input-current-password"
                         />

@@ -117,8 +117,8 @@ export default function ProfessionalLogin() {
                   Suas credenciais de acesso foram enviadas para seu email. 
                   Verifique sua caixa de entrada (e spam) e use o email e senha recebidos para fazer login.
                 </p>
-                <p className="mt-1 text-sm">
-                  <strong>Senha padrão:</strong> senha123 (você poderá alterá-la após o primeiro acesso)
+                <p className="mt-1 text-sm text-green-700">
+                  A senha de acesso foi enviada para o seu email cadastrado. Você poderá alterá-la após o primeiro acesso.
                 </p>
               </AlertDescription>
             </Alert>

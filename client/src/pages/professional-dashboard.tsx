@@ -252,7 +252,7 @@ export default function ProfessionalDashboard() {
   const passwordForm = useForm<ChangePasswordData>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
-      currentPassword: "senha123", // Pre-fill with temporary password
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
@@ -698,7 +698,7 @@ export default function ProfessionalDashboard() {
                 name="currentPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Senha Atual (senha123)</FormLabel>
+                    <FormLabel>Senha Atual (recebida por email)</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
@@ -1554,8 +1554,7 @@ export default function ProfessionalDashboard() {
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="senha123"
-                        readOnly
+                        placeholder="Senha recebida por email"
                         className="bg-gray-50"
                         {...field}
                       />

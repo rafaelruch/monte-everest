@@ -105,7 +105,6 @@ export default function ProfessionalCheckout() {
           // Store credentials for auto-login
           localStorage.setItem('autoLoginCredentials', JSON.stringify({
             email: data.professional.email,
-            password: 'senha123',
             token: data.token,
             firstLogin: data.firstLogin,
             professionalData: data.professional
@@ -121,7 +120,7 @@ export default function ProfessionalCheckout() {
           console.log('Auto-login failed, showing credentials');
           setCredentials({
             email: data.credentials?.email || '',
-            password: data.credentials?.password || 'senha123'
+            password: data.credentials?.password || ''
           });
           setShowCredentialsModal(true);
         }
