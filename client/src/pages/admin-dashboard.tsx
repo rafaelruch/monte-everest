@@ -3617,7 +3617,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Reviews Table */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-[#3C8BAB]" />
@@ -3644,16 +3644,16 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-full">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Cliente</TableHead>
-                      <TableHead>Profissional</TableHead>
-                      <TableHead>Avaliação</TableHead>
-                      <TableHead>Comentário</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="min-w-[150px]">Cliente</TableHead>
+                      <TableHead className="min-w-[150px]">Profissional</TableHead>
+                      <TableHead className="min-w-[100px]">Avaliação</TableHead>
+                      <TableHead className="min-w-[150px] max-w-[200px]">Comentário</TableHead>
+                      <TableHead className="min-w-[100px]">Data</TableHead>
+                      <TableHead className="min-w-[120px]">Status</TableHead>
+                      <TableHead className="text-right min-w-[100px]">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -3682,9 +3682,9 @@ export default function AdminDashboard() {
                         <TableCell>
                           {renderStars(review.rating)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="max-w-[200px]">
                           {review.comment ? (
-                            <p className="text-sm text-muted-foreground max-w-xs truncate" title={review.comment}>
+                            <p className="text-sm text-muted-foreground truncate" title={review.comment}>
                               {review.comment}
                             </p>
                           ) : (
@@ -3731,17 +3731,12 @@ export default function AdminDashboard() {
                             })}
                             disabled={updateReviewVerificationMutation.isPending}
                             data-testid={`toggle-verification-${review.id}`}
+                            title={review.isVerified ? "Remover Verificação" : "Verificar"}
                           >
                             {review.isVerified ? (
-                              <>
-                                <XCircle className="h-4 w-4 mr-1" />
-                                Remover Verificação
-                              </>
+                              <XCircle className="h-4 w-4" />
                             ) : (
-                              <>
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Verificar
-                              </>
+                              <CheckCircle className="h-4 w-4" />
                             )}
                           </Button>
                         </TableCell>
@@ -4164,9 +4159,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-semibold text-gray-800">
               {sidebarItems.find(item => item.id === activeTab)?.label || "Painel"}
@@ -4197,8 +4192,10 @@ export default function AdminDashboard() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          {renderContent()}
+        <main className="flex-1 p-6 overflow-auto">
+          <div className="max-w-full">
+            {renderContent()}
+          </div>
         </main>
       </div>
 
