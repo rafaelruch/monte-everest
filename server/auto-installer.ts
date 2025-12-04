@@ -208,6 +208,35 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- Tabela de tokens de recuperação de senha
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        professional_id VARCHAR NOT NULL,
+        token VARCHAR NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        used_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Tabela de notificações descartadas
+    CREATE TABLE IF NOT EXISTS dismissed_notifications (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id VARCHAR NOT NULL,
+        user_type VARCHAR NOT NULL,
+        notification_id VARCHAR NOT NULL,
+        notification_type VARCHAR NOT NULL,
+        dismissed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- Tabela de visualizações de perfil
+    CREATE TABLE IF NOT EXISTS profile_views (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        professional_id VARCHAR NOT NULL,
+        viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        ip_address VARCHAR,
+        user_agent TEXT
+    );
+
     -- Criar índices para performance
     CREATE INDEX IF NOT EXISTS professionals_category_idx ON professionals(category_id);
     CREATE INDEX IF NOT EXISTS professionals_service_area_idx ON professionals(service_area);
@@ -218,6 +247,12 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
     CREATE INDEX IF NOT EXISTS reviews_created_at_idx ON reviews(created_at);
     CREATE INDEX IF NOT EXISTS images_professional_idx ON images(professional_id);
     CREATE INDEX IF NOT EXISTS images_type_idx ON images(type);
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_token_idx ON password_reset_tokens(token);
+    CREATE INDEX IF NOT EXISTS password_reset_tokens_expires_at_idx ON password_reset_tokens(expires_at);
+    CREATE INDEX IF NOT EXISTS dismissed_notifications_user_idx ON dismissed_notifications(user_id, user_type);
+    CREATE INDEX IF NOT EXISTS dismissed_notifications_notification_idx ON dismissed_notifications(notification_id, notification_type);
+    CREATE INDEX IF NOT EXISTS profile_views_professional_idx ON profile_views(professional_id);
+    CREATE INDEX IF NOT EXISTS profile_views_viewed_at_idx ON profile_views(viewed_at);
 
     -- Atualizar tabelas existentes com colunas que podem estar faltando
     -- (Esta seção é executada sempre que setup-tables roda)
