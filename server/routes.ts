@@ -4516,34 +4516,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email destinatário é obrigatório" });
       }
 
+      const BRAND_COLOR = '#3C8CAA';
+      const LOGO_URL = 'https://monteeverest.com.br/assets/logo-monteeverest_1757122359057-BNEerdKC.png';
+      const dateTime = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
       const html = `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-              .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
-              .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-            </style>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Email de Teste - Monte Everest</title>
           </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>Monte Everest</h1>
-              </div>
-              <div class="content">
-                <h2>Email de Teste</h2>
-                <p>Este é um email de teste do sistema Monte Everest.</p>
-                <p>Se você recebeu este email, significa que o sistema de envio de emails está funcionando corretamente!</p>
-                <p>Data/Hora: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
-              </div>
-              <div class="footer">
-                <p>Monte Everest - Conectando profissionais e clientes</p>
-              </div>
-            </div>
+          <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; line-height: 1.6;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f7fa;">
+              <tr>
+                <td style="padding: 40px 20px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    <!-- Header with Logo -->
+                    <tr>
+                      <td style="background-color: ${BRAND_COLOR}; padding: 30px 40px; text-align: center;">
+                        <img src="${LOGO_URL}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
+                      </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <h2 style="color: #333333; font-size: 24px; margin: 0 0 20px 0;">Email de Teste</h2>
+                        <p style="color: #555555; font-size: 16px; margin: 0 0 15px 0;">
+                          Este é um email de teste do sistema Monte Everest.
+                        </p>
+                        <p style="color: #555555; font-size: 16px; margin: 0 0 25px 0;">
+                          Se você recebeu este email, significa que o sistema de envio de emails está funcionando corretamente!
+                        </p>
+                        <!-- Info Box -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8f9fa; border-radius: 10px; border: 2px solid ${BRAND_COLOR}20; margin: 25px 0;">
+                          <tr>
+                            <td style="padding: 20px 25px;">
+                              <p style="color: #888888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Data/Hora do Teste</p>
+                              <p style="color: #333333; font-size: 18px; font-weight: 600; margin: 5px 0 0 0;">${dateTime}</p>
+                            </td>
+                          </tr>
+                        </table>
+                        <!-- Success Badge -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #d4edda; border-radius: 8px; margin: 20px 0;">
+                          <tr>
+                            <td style="padding: 15px 20px; text-align: center;">
+                              <p style="color: #155724; font-size: 14px; margin: 0; font-weight: 600;">
+                                Sistema de email configurado corretamente!
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;">
+                        <p style="color: #888888; font-size: 13px; margin: 0;">
+                          Monte Everest - Conectando profissionais e clientes
+                        </p>
+                        <p style="color: #aaaaaa; font-size: 12px; margin: 10px 0 0 0;">
+                          Este é um email automático de teste.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
           </body>
         </html>
       `;
