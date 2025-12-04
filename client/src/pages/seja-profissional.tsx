@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Check, CreditCard, Smartphone, Loader2 } from "lucide-react";
+import { Check, CreditCard, Loader2 } from "lucide-react";
 
 interface SubscriptionPlan {
   id: string;
@@ -25,15 +25,17 @@ export default function SejaProfissional() {
   const [location, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
-  const [professionalId, setProfessionalId] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     cpf: "",
     phone: "",
+    cep: "",
+    city: "",
+    street: "",
+    number: "",
+    neighborhood: "",
   });
 
   // Fetch available plans
@@ -67,11 +69,20 @@ export default function SejaProfissional() {
     onSuccess: (data) => {
       setShowCheckout(false);
       
-      // Open checkout in modal instead of redirecting
-      if (data.checkoutUrl) {
-        setCheckoutUrl(data.checkoutUrl);
-        setProfessionalId(data.professionalId);
-        setShowPaymentModal(true);
+      // Redirect to Pagar.me checkout page (iframe doesn't work due to security restrictions)
+      if (data.checkoutUrl && data.professionalId) {
+        // Store professionalId in localStorage for the aguardando-pagamento page
+        localStorage.setItem('pendingProfessionalId', data.professionalId);
+        
+        toast({
+          title: "Redirecionando para pagamento...",
+          description: "Você será redirecionado para a página de pagamento seguro.",
+        });
+        
+        // Redirect to Pagar.me checkout
+        setTimeout(() => {
+          window.location.href = data.checkoutUrl;
+        }, 1500);
       }
     },
     onError: (error) => {
@@ -452,66 +463,6 @@ export default function SejaProfissional() {
           </DialogContent>
         </Dialog>
 
-        {/* Payment Modal with Pagar.me Checkout */}
-        <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-          <DialogContent className="max-w-4xl h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-0">
-              <DialogTitle className="text-2xl">Finalizar Pagamento</DialogTitle>
-            </DialogHeader>
-            
-            <div className="flex-1 p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <div className="flex items-start gap-3">
-                  <Smartphone className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-medium text-blue-900 mb-1">
-                      Complete seu pagamento
-                    </p>
-                    <p className="text-blue-700">
-                      Escolha entre <strong>PIX</strong> (confirmação rápida) ou <strong>Cartão de Crédito</strong> (aprovação instantânea).
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {checkoutUrl && (
-                <div className="h-[calc(90vh-250px)] rounded-lg overflow-hidden border border-gray-200">
-                  <iframe
-                    src={checkoutUrl}
-                    className="w-full h-full"
-                    title="Checkout Pagar.me"
-                    allow="payment"
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-between items-center pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setCheckoutUrl(null);
-                  }}
-                >
-                  Fechar
-                </Button>
-                
-                <Button
-                  onClick={() => {
-                    if (professionalId) {
-                      setShowPaymentModal(false);
-                      setLocation(`/aguardando-pagamento?professionalId=${professionalId}`);
-                    }
-                  }}
-                  className="bg-green-600 hover:bg-green-700"
-                  data-testid="button-payment-done"
-                >
-                  Já fiz o pagamento
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
