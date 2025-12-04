@@ -17,7 +17,20 @@ export function generateTemporaryPassword(length: number = 12): string {
 
 let connectionSettings: any;
 
+// Default email sender for production
+const DEFAULT_FROM_EMAIL = 'info@monteeverest.com.br';
+
 async function getResendCredentials() {
+  // First, check for direct environment variable (for production/EasyPanel)
+  if (process.env.RESEND_API_KEY) {
+    console.log('📧 [email] Using RESEND_API_KEY from environment variable');
+    return {
+      apiKey: process.env.RESEND_API_KEY,
+      fromEmail: process.env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL
+    };
+  }
+
+  // Fall back to Replit Connector (for development)
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY 
     ? 'repl ' + process.env.REPL_IDENTITY 
@@ -26,9 +39,11 @@ async function getResendCredentials() {
     : null;
 
   if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+    throw new Error('RESEND_API_KEY not found in environment and X_REPLIT_TOKEN not available for Replit Connector');
   }
 
+  console.log('📧 [email] Using Resend via Replit Connector');
+  
   connectionSettings = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=resend',
     {
@@ -40,11 +55,11 @@ async function getResendCredentials() {
   ).then(res => res.json()).then(data => data.items?.[0]);
 
   if (!connectionSettings || (!connectionSettings.settings.api_key)) {
-    throw new Error('Resend not connected');
+    throw new Error('Resend not connected via Replit Connector and RESEND_API_KEY not set');
   }
   return {
     apiKey: connectionSettings.settings.api_key, 
-    fromEmail: connectionSettings.settings.from_email || 'servicosmonteeverest@gmail.com'
+    fromEmail: connectionSettings.settings.from_email || DEFAULT_FROM_EMAIL
   };
 }
 
