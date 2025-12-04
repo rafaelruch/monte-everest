@@ -3852,6 +3852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Check payment status for polling (used in aguardando-pagamento page)
+  // This endpoint also actively checks Pagar.me if the professional is still pending
   app.get("/api/payments/status/:professionalId", async (req, res) => {
     try {
       const { professionalId } = req.params;
@@ -3862,6 +3863,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Professional not found' });
       }
       
+      // If already active, return immediately
+      if (professional.status === 'active' && professional.paymentStatus === 'active') {
+        return res.json({
+          status: professional.status,
+          paymentStatus: professional.paymentStatus,
+          email: professional.email,
+          fullName: professional.fullName
+        });
+      }
+      
+      // If still pending, actively check Pagar.me for a paid order
+      if (professional.status === 'pending_payment' || professional.paymentStatus === 'pending') {
+        console.log(`🔍 [POLL-CHECK] Professional ${professionalId} is pending, checking Pagar.me...`);
+        
+        try {
+          // Search for paid orders matching this professional's email or CPF
+          const ordersResponse = await pagarmeService.listOrders(1, 50);
+          
+          if (ordersResponse.data && Array.isArray(ordersResponse.data)) {
+            const professionalEmail = professional.email?.toLowerCase().trim();
+            const professionalDocument = professional.document?.replace(/\D/g, '');
+            
+            for (const order of ordersResponse.data) {
+              // Check if order is paid
+              if (order.status !== 'paid') continue;
+              
+              // Match by email or CPF
+              const orderEmail = order.customer?.email?.toLowerCase().trim();
+              const orderDocument = order.customer?.document?.replace(/\D/g, '');
+              
+              const emailMatch = orderEmail && professionalEmail && orderEmail === professionalEmail;
+              const cpfMatch = orderDocument && professionalDocument && orderDocument === professionalDocument;
+              
+              if (emailMatch || cpfMatch) {
+                console.log(`✅ [POLL-CHECK] Found paid order for professional ${professionalId}`);
+                console.log(`   Order ID: ${order.id}, Email match: ${emailMatch}, CPF match: ${cpfMatch}`);
+                
+                // Generate new password and activate the professional
+                const newPassword = generateTemporaryPassword(10);
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                
+                // Calculate expiration date (30 days)
+                const expiresAt = new Date();
+                expiresAt.setDate(expiresAt.getDate() + 30);
+                
+                // Update professional to active
+                await storage.updateProfessional(professionalId, {
+                  status: 'active',
+                  paymentStatus: 'active',
+                  password: hashedPassword,
+                  subscriptionExpiresAt: expiresAt
+                });
+                
+                // Create payment record if not exists
+                const transactionId = order.id;
+                const existingPayment = await storage.getPaymentByTransactionId(transactionId);
+                
+                if (!existingPayment) {
+                  const amount = order.amount ? order.amount / 100 : 0;
+                  const dueDate = new Date();
+                  dueDate.setDate(dueDate.getDate() + 30);
+                  
+                  await storage.createPayment({
+                    professionalId: professionalId,
+                    planId: professional.subscriptionPlanId || '',
+                    amount: amount.toString(),
+                    paymentMethod: order.charges?.[0]?.payment_method || 'pix',
+                    status: 'paid',
+                    transactionId: transactionId,
+                    gatewayResponse: JSON.stringify(order),
+                    dueDate: dueDate,
+                    paidAt: new Date()
+                  });
+                }
+                
+                // Get plan name for email
+                let planName = 'Plano Mensal';
+                if (professional.subscriptionPlanId) {
+                  const plan = await storage.getSubscriptionPlan(professional.subscriptionPlanId);
+                  if (plan) planName = plan.name;
+                }
+                
+                // Send credentials email
+                const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+                  ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+                  : process.env.REPLIT_DEPLOYMENT_URL
+                  ? `https://${process.env.REPLIT_DEPLOYMENT_URL}`
+                  : 'http://localhost:5000';
+                
+                try {
+                  await emailService.sendCredentialsEmail({
+                    to: professional.email,
+                    professionalName: professional.fullName,
+                    email: professional.email,
+                    password: newPassword,
+                    planName: planName
+                  });
+                  console.log(`📧 [POLL-CHECK] Credentials email sent to ${professional.email}`);
+                } catch (emailError) {
+                  console.error(`❌ [POLL-CHECK] Failed to send email:`, emailError);
+                }
+                
+                console.log(`✅ [POLL-CHECK] Professional ${professionalId} activated via polling`);
+                
+                return res.json({
+                  status: 'active',
+                  paymentStatus: 'active',
+                  email: professional.email,
+                  fullName: professional.fullName
+                });
+              }
+            }
+          }
+        } catch (pagarmeError) {
+          console.error(`⚠️ [POLL-CHECK] Error checking Pagar.me:`, pagarmeError);
+          // Continue to return current status even if Pagar.me check fails
+        }
+      }
+      
+      // Return current status
       res.json({
         status: professional.status,
         paymentStatus: professional.paymentStatus,

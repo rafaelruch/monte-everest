@@ -1,0 +1,25 @@
+A verificação de pagamento na sua aplicação com o Checkout do Pagar.me é feita consultando o pedido/cobrança pela API e, principalmente, recebendo eventos via Webhook como `order.paid` e `checkout.closed`.[1]
+
+## Onde a documentação fala disso
+
+- A página de Checkout que você está vendo só trata da criação do link de pagamento; ela não descreve a verificação de status dentro da aplicação, apenas orienta a criar o Link de Pagamento e usar a URL retornada.[1]
+- A documentação de Pedido explica que todo pedido gera pelo menos uma cobrança e indica que os detalhes de pedidos e cobranças estão na API Reference, que é onde você consulta status de pagamento via endpoints de `orders` e `charges`. 
+
+## Webhooks para saber se pagou
+
+- A seção de Webhooks descreve que o Pagar.me envia requisições HTTP POST para a URL que você configurar sempre que eventos importantes ocorrem, incluindo pedidos, cobranças e checkouts.   
+- A própria tabela de eventos lista `order.paid`, `charge.paid`, `checkout.closed`, `checkout.canceled` e outros, que são os eventos que sua aplicação deve ouvir para saber se o pagamento foi concluído, falhou, está pendente ou expirou. 
+
+## Fluxo típico dentro da aplicação
+
+- Ao criar o Link de Pagamento/Checkout, você salva no seu banco o `order_id`/`checkout` relacionado ao seu pedido interno; depois, configura um Webhook apontando para uma rota da sua API (ex: `/webhooks/pagarme`).[1]
+- Quando o usuário paga, o Pagar.me envia um POST com o evento (`order.paid`, `charge.paid` ou `checkout.closed`), sua rota valida a assinatura/autenticação, lê o status, e atualiza o pedido na sua aplicação (ex: marca como pago, libera acesso, etc.). 
+
+## Endpoints de consulta (fallback e conferência)
+
+- Além de Webhooks, você pode consultar pela API os recursos de `orders`, `charges`, `invoices` e `checkouts` na API Reference para conferir o status atual, útil como fallback se o Webhook falhar.   
+- A documentação de Webhooks menciona também endpoints para listar e reenviar Webhooks, o que ajuda a recuperar notificações que não chegaram corretamente à sua aplicação. 
+
+Se quiser, na próxima mensagem dá para montar um fluxo específico em Node/React ou no n8n com o mapeamento dos eventos (`order.paid`, `checkout.closed` etc.) para os estados do seu modelo de pedido.
+
+[1](https://docs.pagar.me/docs/checkout-use)
