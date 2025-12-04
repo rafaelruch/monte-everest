@@ -23,7 +23,10 @@ import {
   Globe, 
   Clock,
   User,
-  CheckCircle
+  CheckCircle,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import StarRating from "@/components/star-rating";
@@ -59,6 +62,8 @@ export default function ProfessionalProfile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const professionalId = params?.id;
 
@@ -371,13 +376,85 @@ export default function ProfessionalProfile() {
                         key={index}
                         src={image}
                         alt={`Trabalho ${index + 1} de ${professional.fullName}`}
-                        className="rounded-lg object-cover w-full h-32 hover:scale-105 transition-transform cursor-pointer"
+                        className="rounded-lg object-cover w-full h-32 hover:scale-105 transition-transform cursor-pointer shadow-sm hover:shadow-md"
                         data-testid={`portfolio-image-${index}`}
+                        onClick={() => {
+                          setLightboxIndex(index);
+                          setLightboxOpen(true);
+                        }}
                       />
                     ))}
                   </div>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Portfolio Lightbox */}
+            {lightboxOpen && professional.portfolio && professional.portfolio.length > 0 && (
+              <div 
+                className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+                onClick={() => setLightboxOpen(false)}
+                data-testid="portfolio-lightbox"
+              >
+                {/* Close button */}
+                <button
+                  className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10"
+                  onClick={() => setLightboxOpen(false)}
+                  data-testid="lightbox-close"
+                >
+                  <X className="h-8 w-8" />
+                </button>
+
+                {/* Previous button */}
+                {professional.portfolio.length > 1 && (
+                  <button
+                    className="absolute left-4 text-white hover:text-gray-300 transition-colors z-10 p-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((prev) => 
+                        prev === 0 ? professional.portfolio.length - 1 : prev - 1
+                      );
+                    }}
+                    data-testid="lightbox-prev"
+                  >
+                    <ChevronLeft className="h-10 w-10" />
+                  </button>
+                )}
+
+                {/* Image */}
+                <div 
+                  className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={professional.portfolio[lightboxIndex]}
+                    alt={`Trabalho ${lightboxIndex + 1} de ${professional.fullName}`}
+                    className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                    data-testid="lightbox-image"
+                  />
+                </div>
+
+                {/* Next button */}
+                {professional.portfolio.length > 1 && (
+                  <button
+                    className="absolute right-4 text-white hover:text-gray-300 transition-colors z-10 p-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex((prev) => 
+                        prev === professional.portfolio.length - 1 ? 0 : prev + 1
+                      );
+                    }}
+                    data-testid="lightbox-next"
+                  >
+                    <ChevronRight className="h-10 w-10" />
+                  </button>
+                )}
+
+                {/* Image counter */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                  {lightboxIndex + 1} / {professional.portfolio.length}
+                </div>
+              </div>
             )}
 
             {/* Working Hours */}
