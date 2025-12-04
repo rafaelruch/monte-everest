@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, User, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import NavigationHeader from "@/components/navigation-header";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -95,8 +96,10 @@ export default function ProfessionalLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/20 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md" data-testid="professional-login-form">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/20">
+      <NavigationHeader />
+      <div className="flex items-center justify-center p-4 py-12">
+        <Card className="w-full max-w-md" data-testid="professional-login-form">
         <CardHeader className="space-y-1 text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
             <User className="h-8 w-8 text-primary" />
@@ -236,6 +239,7 @@ export default function ProfessionalLogin() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
