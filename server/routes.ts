@@ -16,7 +16,7 @@ import multer from "multer";
 import { pagarmeService } from "./pagarme";
 import { createDatabaseTables, checkDatabaseConnection, installDatabaseModule, type DatabaseModule } from "./auto-installer";
 import { db } from "./db";
-import { emailService } from "./email";
+import { emailService, generateTemporaryPassword } from "./email";
 
 const JWT_SECRET = process.env.JWT_SECRET || "monte-everest-secret-key";
 
@@ -3307,13 +3307,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         responseData.token = token;
         responseData.redirectTo = '/professional-dashboard';
         
+        // Generate a new temporary password, hash it, and update the professional
+        const tempPassword = generateTemporaryPassword(10);
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+        await storage.updateProfessional(newProfessional.id, { password: hashedPassword });
+        
         // Send email with login credentials for credit card payments
         try {
           const emailSent = await emailService.sendCredentialsEmail({
             to: professionalData.email,
             professionalName: professionalData.name,
             email: professionalData.email,
-            password: 'senha123', // Default temporary password
+            password: tempPassword,
             planName: plan.name
           });
           
@@ -3697,12 +3702,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[REGISTER-CHECKOUT] Creating professional with pending payment status');
 
       // Create professional with pending_payment status
+      // Use a placeholder password - actual password will be generated and sent after payment confirmation
+      const placeholderPassword = await bcrypt.hash(generateTemporaryPassword(32), 10);
       const newProfessional = await storage.createProfessional({
         fullName: name,
         email: email,
         document: cleanCpf,
         phone: phone.replace(/\D/g, ''),
-        password: 'senha123', // Default password
+        password: placeholderPassword, // Placeholder - will be replaced after payment
         status: 'pending_payment',
         paymentStatus: 'pending',
         description: `Cadastro aguardando pagamento - ${plan.name}`,
@@ -4038,13 +4045,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ [SYNC] Professional ${professionalId} activated successfully. Expiry: ${expiryDate.toISOString()}`);
       
+      // Generate new temporary password, hash it, and update the professional
+      const tempPassword = generateTemporaryPassword(10);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+      await storage.updateProfessional(professionalId, { password: hashedPassword });
+      
       // Send credentials email
       try {
         const emailSent = await emailService.sendCredentialsEmail({
           to: professional.email,
           professionalName: professional.fullName,
           email: professional.email,
-          password: 'senha123',
+          password: tempPassword,
           planName: 'Plano Monte Everest'
         });
         
@@ -4205,13 +4217,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
             
+            // Generate new temporary password, hash it, and update the professional
+            const tempPassword = generateTemporaryPassword(10);
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            await storage.updateProfessional(professionalId, { password: hashedPassword });
+            
             // Send email with credentials
             try {
               const emailSent = await emailService.sendCredentialsEmail({
                 to: professional.email,
                 professionalName: professional.fullName,
                 email: professional.email,
-                password: 'senha123',
+                password: tempPassword,
                 planName: 'Plano Monte Everest'
               });
               
@@ -4253,11 +4270,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const plan = await storage.getSubscriptionPlan(data.plan?.id || '6e31f402-53a5-4b6d-a1a1-88eb5a3f9e10');
               
               if (professional) {
+                // Generate new temporary password, hash it, and update the professional
+                const tempPassword = generateTemporaryPassword(10);
+                const hashedPassword = await bcrypt.hash(tempPassword, 10);
+                await storage.updateProfessional(payment.professionalId, { password: hashedPassword });
+                
                 const emailSent = await emailService.sendCredentialsEmail({
                   to: professional.email,
                   professionalName: professional.fullName,
                   email: professional.email,
-                  password: 'senha123', // Default temporary password
+                  password: tempPassword,
                   planName: plan?.name || 'Plano Básico'
                 });
                 
@@ -4331,11 +4353,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const professional = await storage.getProfessional(chargeProfessionalId);
               
               if (professional) {
+                // Generate new temporary password, hash it, and update the professional
+                const tempPassword = generateTemporaryPassword(10);
+                const hashedPassword = await bcrypt.hash(tempPassword, 10);
+                await storage.updateProfessional(chargeProfessionalId, { password: hashedPassword });
+                
                 const emailSent = await emailService.sendCredentialsEmail({
                   to: professional.email,
                   professionalName: professional.fullName,
                   email: professional.email,
-                  password: 'senha123',
+                  password: tempPassword,
                   planName: 'Plano Monte Everest'
                 });
                 

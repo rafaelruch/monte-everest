@@ -1,7 +1,19 @@
 import { Resend } from 'resend';
+import { randomBytes } from 'crypto';
 
 // Resend Integration - Using Replit Connector
 // Documentation: https://resend.com/docs
+
+// Generate a secure random temporary password
+export function generateTemporaryPassword(length: number = 12): string {
+  const charset = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%';
+  const bytes = randomBytes(length);
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += charset[bytes[i] % charset.length];
+  }
+  return password;
+}
 
 let connectionSettings: any;
 
@@ -77,42 +89,75 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   }
 }
 
+const BRAND_COLOR = '#3C8CAA';
+const LOGO_URL = 'https://monteeverest.com.br/assets/logo-monteeverest_1757122359057-BNEerdKC.png';
+
 export function generatePasswordResetEmail(resetUrl: string, professionalName: string): string {
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #3C8BAB; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
-          .button { display: inline-block; background-color: #3C8BAB; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recuperação de Senha - Monte Everest</title>
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Monte Everest</h1>
-          </div>
-          <div class="content">
-            <h2>Olá, ${professionalName}!</h2>
-            <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
-            <p>Se você não solicitou esta alteração, por favor ignore este email. Sua senha permanecerá inalterada.</p>
-            <p>Para criar uma nova senha, clique no botão abaixo:</p>
-            <p style="text-align: center;">
-              <a href="${resetUrl}" class="button">Redefinir Senha</a>
-            </p>
-            <p>Ou copie e cole o seguinte link no seu navegador:</p>
-            <p style="word-break: break-all; background-color: #fff; padding: 10px; border-radius: 3px;">${resetUrl}</p>
-            <p><strong>Este link expirará em 1 hora.</strong></p>
-          </div>
-          <div class="footer">
-            <p>Monte Everest - Conectando profissionais e clientes</p>
-          </div>
-        </div>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; line-height: 1.6;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f7fa;">
+          <tr>
+            <td style="padding: 40px 20px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <!-- Header with Logo -->
+                <tr>
+                  <td style="background-color: ${BRAND_COLOR}; padding: 30px 40px; text-align: center;">
+                    <img src="${LOGO_URL}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
+                  </td>
+                </tr>
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px;">
+                    <h2 style="color: #333333; font-size: 24px; margin: 0 0 20px 0;">Olá, ${professionalName}!</h2>
+                    <p style="color: #555555; font-size: 16px; margin: 0 0 15px 0;">
+                      Recebemos uma solicitação para redefinir a senha da sua conta.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; margin: 0 0 25px 0;">
+                      Se você não solicitou esta alteração, por favor ignore este email. Sua senha permanecerá inalterada.
+                    </p>
+                    <!-- Button -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 30px auto;">
+                      <tr>
+                        <td style="background-color: ${BRAND_COLOR}; border-radius: 8px;">
+                          <a href="${resetUrl}" style="display: inline-block; padding: 16px 40px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600;">
+                            Redefinir Senha
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="color: #777777; font-size: 14px; margin: 25px 0 10px 0;">
+                      Ou copie e cole o link abaixo no seu navegador:
+                    </p>
+                    <p style="background-color: #f8f9fa; padding: 12px 15px; border-radius: 6px; word-break: break-all; font-size: 13px; color: ${BRAND_COLOR}; border: 1px solid #e9ecef;">
+                      ${resetUrl}
+                    </p>
+                    <p style="color: #dc3545; font-size: 14px; font-weight: 600; margin: 20px 0 0 0;">
+                      Este link expirará em 1 hora.
+                    </p>
+                  </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;">
+                    <p style="color: #888888; font-size: 13px; margin: 0;">
+                      Monte Everest - Conectando profissionais e clientes
+                    </p>
+                    <p style="color: #aaaaaa; font-size: 12px; margin: 10px 0 0 0;">
+                      Este é um email automático, por favor não responda.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </body>
     </html>
   `;
@@ -124,37 +169,94 @@ function generateCredentialsEmail(professionalName: string, email: string, passw
     <html>
       <head>
         <meta charset="utf-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background-color: #3C8BAB; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
-          .content { background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px; }
-          .credentials { background-color: #fff; padding: 15px; border-radius: 5px; margin: 15px 0; border: 1px solid #ddd; }
-          .button { display: inline-block; background-color: #3C8BAB; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-          .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bem-vindo ao Monte Everest</title>
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Monte Everest</h1>
-          </div>
-          <div class="content">
-            <h2>Bem-vindo, ${professionalName}!</h2>
-            <p>Seu cadastro foi aprovado e seu pagamento foi confirmado! Abaixo estão suas credenciais de acesso:</p>
-            <div class="credentials">
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Senha:</strong> ${password}</p>
-            </div>
-            <p><strong>Importante:</strong> Por favor, altere sua senha após o primeiro login.</p>
-            <p style="text-align: center;">
-              <a href="${loginUrl}" class="button">Acessar Painel</a>
-            </p>
-          </div>
-          <div class="footer">
-            <p>Monte Everest - Conectando profissionais e clientes</p>
-          </div>
-        </div>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; line-height: 1.6;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f7fa;">
+          <tr>
+            <td style="padding: 40px 20px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <!-- Header with Logo -->
+                <tr>
+                  <td style="background-color: ${BRAND_COLOR}; padding: 30px 40px; text-align: center;">
+                    <img src="${LOGO_URL}" alt="Monte Everest" style="max-width: 200px; height: auto;" />
+                  </td>
+                </tr>
+                <!-- Welcome Banner -->
+                <tr>
+                  <td style="background: linear-gradient(135deg, ${BRAND_COLOR}15 0%, ${BRAND_COLOR}05 100%); padding: 30px 40px; text-align: center;">
+                    <h1 style="color: ${BRAND_COLOR}; font-size: 28px; margin: 0;">Bem-vindo ao Monte Everest!</h1>
+                    <p style="color: #666666; font-size: 16px; margin: 10px 0 0 0;">${professionalName}</p>
+                  </td>
+                </tr>
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px;">
+                    <p style="color: #555555; font-size: 16px; margin: 0 0 20px 0;">
+                      Seu cadastro foi aprovado e seu pagamento foi confirmado! Agora você faz parte da nossa rede de profissionais.
+                    </p>
+                    <p style="color: #555555; font-size: 16px; margin: 0 0 25px 0;">
+                      Abaixo estão suas credenciais de acesso ao painel:
+                    </p>
+                    <!-- Credentials Box -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f8f9fa; border-radius: 10px; border: 2px solid ${BRAND_COLOR}20; margin: 25px 0;">
+                      <tr>
+                        <td style="padding: 25px 30px;">
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                            <tr>
+                              <td style="padding: 8px 0;">
+                                <span style="color: #888888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Email</span>
+                                <p style="color: #333333; font-size: 18px; font-weight: 600; margin: 5px 0 0 0;">${email}</p>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 15px 0 8px 0; border-top: 1px solid #e9ecef;">
+                                <span style="color: #888888; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Senha</span>
+                                <p style="color: #333333; font-size: 18px; font-weight: 600; margin: 5px 0 0 0; font-family: 'Courier New', monospace; background-color: #ffffff; padding: 8px 12px; border-radius: 6px; display: inline-block;">${password}</p>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                    <!-- Security Notice -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fff3cd; border-radius: 8px; margin: 20px 0;">
+                      <tr>
+                        <td style="padding: 15px 20px;">
+                          <p style="color: #856404; font-size: 14px; margin: 0;">
+                            <strong>Importante:</strong> Por segurança, recomendamos que você altere sua senha após o primeiro login.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    <!-- Button -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 30px auto;">
+                      <tr>
+                        <td style="background-color: ${BRAND_COLOR}; border-radius: 8px; box-shadow: 0 4px 12px ${BRAND_COLOR}40;">
+                          <a href="${loginUrl}" style="display: inline-block; padding: 18px 50px; color: #ffffff; text-decoration: none; font-size: 17px; font-weight: 600;">
+                            Acessar Meu Painel
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <!-- Footer -->
+                <tr>
+                  <td style="background-color: #f8f9fa; padding: 25px 40px; text-align: center; border-top: 1px solid #e9ecef;">
+                    <p style="color: #888888; font-size: 13px; margin: 0;">
+                      Monte Everest - Conectando profissionais e clientes
+                    </p>
+                    <p style="color: #aaaaaa; font-size: 12px; margin: 10px 0 0 0;">
+                      Este é um email automático, por favor não responda.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
       </body>
     </html>
   `;
