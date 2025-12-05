@@ -1656,6 +1656,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("[contact] Missing contactMethod");
         return res.status(400).json({ message: "Método de contato é obrigatório" });
       }
+
+      // Check if professional has reached their monthly contact limit
+      const professional = await storage.getProfessional(req.body.professionalId);
+      if (!professional) {
+        console.error("[contact] Professional not found:", req.body.professionalId);
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+
+      // Get plan to check contact limits
+      const plan = await storage.getSubscriptionPlan(professional.subscriptionPlanId || '');
+      const maxContacts = plan?.maxContacts; // null means unlimited
+
+      if (maxContacts !== null) {
+        // Get current month contacts count
+        const currentDate = new Date();
+        const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+
+        const allContacts = await storage.getContacts(req.body.professionalId);
+        const monthlyContacts = allContacts.filter(contact => {
+          const contactDate = new Date(contact.createdAt || '');
+          return contactDate >= monthStart && contactDate <= monthEnd;
+        });
+
+        if (monthlyContacts.length >= maxContacts) {
+          console.log(`[contact] Professional ${req.body.professionalId} has reached contact limit: ${monthlyContacts.length}/${maxContacts}`);
+          return res.status(403).json({ 
+            message: "Este profissional atingiu o limite de contatos do mês",
+            limitReached: true,
+            currentContacts: monthlyContacts.length,
+            maxContacts: maxContacts
+          });
+        }
+      }
       
       console.log("[contact] Starting validation...");
       const validatedData = insertContactSchema.parse(req.body);

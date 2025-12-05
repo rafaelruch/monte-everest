@@ -192,9 +192,14 @@ export default function ProfessionalProfile() {
       whatsappForm.reset();
     },
     onError: (error: any) => {
+      const errorMessage = error.message || "";
+      const isLimitReached = errorMessage.includes("403") && errorMessage.includes("limite");
+      
       toast({
-        title: "Erro ao processar contato",
-        description: error.message || "Tente novamente mais tarde.",
+        title: isLimitReached ? "Limite de contatos atingido" : "Erro ao processar contato",
+        description: isLimitReached 
+          ? "Este profissional atingiu o limite de contatos do mês. Tente novamente no próximo mês."
+          : "Tente novamente mais tarde.",
         variant: "destructive",
       });
     },
@@ -230,9 +235,14 @@ export default function ProfessionalProfile() {
       whatsappForm.reset();
     },
     onError: (error: any) => {
+      const errorMessage = error.message || "";
+      const isLimitReached = errorMessage.includes("403") && errorMessage.includes("limite");
+      
       toast({
-        title: "Erro ao processar contato",
-        description: error.message || "Tente novamente mais tarde.",
+        title: isLimitReached ? "Limite de contatos atingido" : "Erro ao processar contato",
+        description: isLimitReached 
+          ? "Este profissional atingiu o limite de contatos do mês. Tente novamente no próximo mês."
+          : "Tente novamente mais tarde.",
         variant: "destructive",
       });
     },
