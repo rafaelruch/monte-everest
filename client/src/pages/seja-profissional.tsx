@@ -69,14 +69,16 @@ export default function SejaProfissional() {
     onSuccess: (data) => {
       setShowCheckout(false);
       
-      // Redirect to Pagar.me checkout page
-      // After payment, Pagar.me will redirect back to /aguardando-pagamento via success_url
+      // Flow: Navigate to waiting page, then open checkout in new tab
+      // Pagar.me doesn't support automatic redirect after payment,
+      // so we keep the user on our polling page while payment opens in new tab
       if (data.checkoutUrl && data.professionalId) {
-        // Store professionalId as fallback for the aguardando-pagamento page
-        localStorage.setItem('pendingProfessionalId', data.professionalId);
+        // Store checkout URL and professionalId for the aguardando-pagamento page
+        localStorage.setItem('pendingProfessionalId', data.professionalId.toString());
+        localStorage.setItem('pendingCheckoutUrl', data.checkoutUrl);
         
-        // Redirect immediately to Pagar.me checkout
-        window.location.href = data.checkoutUrl;
+        // Navigate to waiting page (it will open checkout automatically)
+        window.location.href = `/aguardando-pagamento?professionalId=${data.professionalId}`;
       }
     },
     onError: (error) => {

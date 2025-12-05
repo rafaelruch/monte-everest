@@ -1,0 +1,27 @@
+Você não consegue configurar um “redirect automático” direto pelo Checkout do Pagar.me; o fluxo padrão é: você cria um Link de Pagamento via API, recebe uma URL, redireciona o usuário para essa URL e, depois do pagamento, usa webhooks ou consultas à API para decidir para qual página da sua aplicação ele deve ir.[1]
+
+## Como o Checkout funciona
+
+O Checkout é sempre uma página hospedada pelo Pagar.me; você cria um “link de pagamento” com os dados do pedido, e a API devolve uma URL única para aquele checkout.  Essa URL é o que você usa para redirecionar o cliente (por exemplo, via `window.location.href` ou abrindo em nova aba) a partir da sua aplicação.[1]
+
+## O que a API retorna
+
+Quando você chama o endpoint de criação de Link de Pagamento (Checkout), a resposta contém, entre outros dados, o campo de URL do checkout que o cliente irá utilizar para pagar.  Não há, na documentação do Checkout V5, parâmetros de callback/redirect na própria URL nem configuração de “success_url”/“cancel_url” como em alguns outros gateways. 
+
+## Como voltar para a sua página
+
+Para direcionar o usuário de volta para sua aplicação depois do pagamento, a documentação orienta a tratar o pós-pagamento via integrações da API, não configurando isso dentro do Checkout.  Na prática, você tem três opções principais:
+
+- Usar webhooks do Pagar.me para ser notificado do status do pagamento, atualizar o pedido na sua base e, na sua interface, mostrar a tela “pedido confirmado” quando o usuário voltar para o seu site (por exemplo, via link “Voltar à loja” que você controla, ou instruções por e-mail/WhatsApp).   
+- Fazer polling da API (consultar o pedido/cobrança) em uma página de “Aguardando confirmação” e, quando o status mudar para pago, redirecionar internamente para a página final de confirmação.   
+- Usar a própria URL de retorno da sua aplicação em comunicações posteriores (e-mail, WhatsApp, etc.), como “Acompanhar pedido”, baseada no ID do pedido que você enviou ao criar o link. 
+
+## Resumindo a implementação
+
+- Backend: criar o Link de Pagamento pelo endpoint indicado em “create-link” e salvar o `link_id` e o `url` retornados.   
+- Frontend: redirecionar o cliente para essa `url` para pagar.   
+- Pós-pagamento: usar webhooks ou consultas à API para saber o status e então direcionar o cliente para a sua rota (por exemplo `/pedido/:id/confirmado`) quando ele voltar ou quando você for renderizar a tela de confirmação.   
+
+Se quiser, dá para montar um exemplo em Node/React com o fluxo completo (criar link, redirecionar, receber webhook e redirecionar para a página final).
+
+[1](https://docs.pagar.me/docs/checkout-about)

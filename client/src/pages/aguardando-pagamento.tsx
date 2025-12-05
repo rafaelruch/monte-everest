@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Clock, ExternalLink } from "lucide-react";
 
 export default function AguardandoPagamento() {
   const [, setLocation] = useLocation();
@@ -12,12 +12,27 @@ export default function AguardandoPagamento() {
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [checkoutOpened, setCheckoutOpened] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const maxRetries = 60; // 60 tentativas * 5 segundos = 5 minutos
   const retryCountRef = useRef(0); // Use ref to track retries without triggering effect
 
   // Get professionalId from URL
   const urlParams = new URLSearchParams(window.location.search);
   const professionalId = urlParams.get('professionalId');
+
+  // Open checkout URL in new tab on page load
+  useEffect(() => {
+    const storedCheckoutUrl = localStorage.getItem('pendingCheckoutUrl');
+    if (storedCheckoutUrl && !checkoutOpened) {
+      setCheckoutUrl(storedCheckoutUrl);
+      // Open in new tab
+      window.open(storedCheckoutUrl, '_blank');
+      setCheckoutOpened(true);
+      // Clear the stored URL after opening
+      localStorage.removeItem('pendingCheckoutUrl');
+    }
+  }, [checkoutOpened]);
 
   useEffect(() => {
     if (!professionalId) {
@@ -142,9 +157,31 @@ export default function AguardandoPagamento() {
         </CardHeader>
         
         <CardContent className="space-y-4">
+          {/* Show button to open checkout if it wasn't opened or was blocked */}
+          {checkoutUrl && status !== 'active' && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+              <h3 className="font-semibold text-amber-900 mb-2">Página de pagamento não abriu?</h3>
+              <p className="text-sm text-amber-800 mb-3">
+                Clique no botão abaixo para abrir a página de pagamento.
+              </p>
+              <Button 
+                onClick={() => window.open(checkoutUrl, '_blank')}
+                className="bg-amber-600 hover:bg-amber-700"
+                data-testid="button-open-checkout"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Abrir Página de Pagamento
+              </Button>
+            </div>
+          )}
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">O que acontece agora?</h3>
             <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-start">
+                <ExternalLink className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Complete o pagamento na <strong>nova aba</strong> que foi aberta</span>
+              </li>
               <li className="flex items-start">
                 <CheckCircle2 className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
                 <span>Se você pagou com <strong>cartão de crédito</strong>, a confirmação é instantânea</span>
