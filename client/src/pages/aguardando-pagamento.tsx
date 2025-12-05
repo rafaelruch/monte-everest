@@ -93,7 +93,7 @@ export default function AguardandoPagamento() {
       return {
         icon: <CheckCircle2 className="h-16 w-16 text-green-500" />,
         title: 'Pagamento Confirmado!',
-        description: 'Seu pagamento foi confirmado com sucesso. Você será redirecionado em instantes...',
+        description: 'Seu pagamento foi confirmado com sucesso! Enviamos suas credenciais de acesso para o seu email. Você será redirecionado em instantes...',
         color: 'text-green-600'
       };
     }
