@@ -1,12 +1,11 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, Check, ChevronsUpDown } from "lucide-react";
+import { Search, Check, ChevronsUpDown, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
@@ -14,19 +13,25 @@ export default function HeroSection() {
   const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
-  const [location, setLocationInput] = useState("");
+  const [locationInput, setLocationInput] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [open, setOpen] = useState(false);
+  const [cityOpen, setCityOpen] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["/api/categories"],
   });
 
+  const { data: cities = [] } = useQuery<string[]>({
+    queryKey: ["/api/cities"],
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedCategory || location) {
+    if (selectedCategory || selectedCity) {
       const searchParams = new URLSearchParams();
       if (selectedCategory) searchParams.set("category", selectedCategory);
-      if (location) searchParams.set("location", location);
+      if (selectedCity) searchParams.set("location", selectedCity);
       setLocation(`/buscar?${searchParams.toString()}`);
     }
   };
@@ -102,14 +107,61 @@ export default function HeroSection() {
                     <Label htmlFor="location-input" className="block text-sm font-medium text-foreground mb-2">
                       Onde você está?
                     </Label>
-                    <Input
-                      id="location-input"
-                      type="text"
-                      placeholder="Digite sua cidade"
-                      value={location}
-                      onChange={(e) => setLocationInput(e.target.value)}
-                      data-testid="input-location"
-                    />
+                    <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={cityOpen}
+                          className="w-full justify-between"
+                          data-testid="input-location"
+                        >
+                          {selectedCity || "Selecione a cidade..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0">
+                        <Command>
+                          <CommandInput 
+                            placeholder="Digite o nome da cidade..." 
+                            value={locationInput}
+                            onValueChange={setLocationInput}
+                          />
+                          <CommandList>
+                            <CommandEmpty>Nenhuma cidade encontrada.</CommandEmpty>
+                            <CommandGroup>
+                              {cities
+                                .filter((city: string) => 
+                                  city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                    .includes(locationInput.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+                                )
+                                .slice(0, 10)
+                                .map((city: string) => (
+                                <CommandItem
+                                  key={city}
+                                  value={city}
+                                  onSelect={() => {
+                                    setSelectedCity(city);
+                                    setLocationInput(city);
+                                    setCityOpen(false);
+                                  }}
+                                  data-testid={`option-city-${city.toLowerCase().replace(/\s+/g, '-')}`}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedCity === city ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                                  {city}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   
                   <div className="flex items-end">

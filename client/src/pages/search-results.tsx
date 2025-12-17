@@ -248,7 +248,8 @@ export default function SearchResults() {
                         <CommandGroup>
                           {(cities as string[])
                             .filter((city: string) => 
-                              city.toLowerCase().includes(location.toLowerCase())
+                              city.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                                .includes(location.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
                             )
                             .slice(0, 10)
                             .map((city: string) => (
