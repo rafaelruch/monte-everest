@@ -801,7 +801,7 @@ export default function ProfessionalDashboard() {
       )}
 
       {/* Contact Limit Warning (close to limit) */}
-      {monthlyStats?.hasLimit && !monthlyStats?.limitReached && monthlyStats?.remainingContacts !== null && monthlyStats.remainingContacts <= 2 && (
+      {monthlyStats?.hasLimit && !monthlyStats?.limitReached && monthlyStats?.remainingContacts !== null && monthlyStats?.remainingContacts !== undefined && monthlyStats.remainingContacts <= 2 && (
         <div className="max-w-6xl mx-auto px-4 py-3">
           <Alert className="border-orange-200 bg-orange-50">
             <AlertCircle className="h-4 w-4 text-orange-600" />
@@ -861,7 +861,7 @@ export default function ProfessionalDashboard() {
       )}
 
       {/* Photo Limit Warning (close to limit) */}
-      {!photoStats?.limitReached && photoStats?.remainingPhotos !== null && photoStats.remainingPhotos <= 1 && photoStats.remainingPhotos > 0 && (
+      {!photoStats?.limitReached && photoStats?.remainingPhotos !== null && photoStats?.remainingPhotos !== undefined && photoStats.remainingPhotos <= 1 && photoStats.remainingPhotos > 0 && (
         <div className="max-w-6xl mx-auto px-4 py-3">
           <Alert className="border-orange-200 bg-orange-50">
             <AlertCircle className="h-4 w-4 text-orange-600" />
