@@ -1834,6 +1834,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get photo usage stats for professional (protected route)
+  app.get("/api/professionals/:id/photos/stats", verifyProfessionalToken, async (req, res) => {
+    try {
+      const professionalId = req.params.id;
+      
+      if (professionalId !== req.professional!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      const professional = await storage.getProfessional(professionalId);
+      if (!professional) {
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+
+      const plan = await storage.getSubscriptionPlan(professional.subscriptionPlanId || '');
+      const maxPhotos = plan?.maxPhotos || 3;
+
+      const currentPhotos = await db
+        .select()
+        .from(images)
+        .where(sql`${images.professionalId} = ${professionalId} AND ${images.type} = 'portfolio'`);
+
+      res.json({
+        currentPhotos: currentPhotos.length,
+        maxPhotos: maxPhotos,
+        remainingPhotos: Math.max(0, maxPhotos - currentPhotos.length),
+        limitReached: currentPhotos.length >= maxPhotos
+      });
+    } catch (error) {
+      console.error("Error fetching photo stats:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Validate CEP
   app.get("/api/validate-cep/:cep", async (req, res) => {
     try {

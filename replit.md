@@ -50,6 +50,24 @@ The application uses PostgreSQL with Drizzle ORM:
 - **Payments**: Subscription management for professional accounts
 - **Contacts**: Interaction tracking between clients and professionals
 - **Password Reset Tokens**: Secure token management for professional password recovery with expiration and single-use validation
+- **Subscription Plans**: Plans with configurable limits for contacts and photos
+
+## Subscription Plan Limits
+
+Each subscription plan has configurable limits that are enforced:
+
+- **maxContacts**: Maximum number of contacts a professional can receive per month (null = unlimited)
+- **maxPhotos**: Maximum number of portfolio photos a professional can upload
+
+### Limit Enforcement:
+- **Contact Limits**: When a client tries to contact a professional who has reached their monthly limit, the contact is blocked and an error message is shown
+- **Photo Limits**: When a professional tries to upload more photos than allowed, the upload is blocked with an error message
+- **Limits Reset**: Contact limits reset on the 1st of each month
+- **Professional Dashboard Notifications**: When limits are reached or close to being reached, alerts are shown in the professional dashboard with upgrade suggestions
+
+### API Endpoints for Limits:
+- `GET /api/professionals/:id/contacts/monthly` - Returns contact usage stats (currentMonth, maxContacts, remainingContacts, limitReached)
+- `GET /api/professionals/:id/photos/stats` - Returns photo usage stats (currentPhotos, maxPhotos, remainingPhotos, limitReached)
 
 ## Authentication & Authorization
 

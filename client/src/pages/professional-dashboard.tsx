@@ -204,6 +204,21 @@ export default function ProfessionalDashboard() {
     enabled: !!professionalAuth?.id,
   });
 
+  // Get photo usage statistics
+  const { data: photoStats } = useQuery({
+    queryKey: ["/api/professionals", professionalAuth?.id, "photos/stats"],
+    queryFn: async () => {
+      const response = await fetch(`/api/professionals/${professionalAuth.id}/photos/stats`, {
+        headers: {
+          "Authorization": `Bearer ${professionalAuth.token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch photo stats");
+      return response.json();
+    },
+    enabled: !!professionalAuth?.id,
+  });
+
   // Get notifications (recent contacts and reviews)
   const { data: notifications = [] } = useQuery({
     queryKey: ["/api/professionals", professionalAuth?.id, "notifications"],
@@ -427,6 +442,7 @@ export default function ProfessionalDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth?.id, "photos/stats"] });
       toast({
         title: "Foto adicionada!",
         description: "A foto foi adicionada ao seu portfólio com sucesso.",
@@ -461,6 +477,7 @@ export default function ProfessionalDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/professionals", professionalAuth?.id, "photos/stats"] });
       toast({
         title: "Foto removida!",
         description: "A foto foi removida do seu portfólio.",
@@ -753,6 +770,126 @@ export default function ProfessionalDashboard() {
         </div>
       )}
 
+      {/* Contact Limit Alert */}
+      {monthlyStats?.limitReached && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Limite de Contatos Atingido:</strong> Você já recebeu {monthlyStats.currentMonth} contatos este mês, 
+              o máximo permitido pelo seu plano atual. Faça upgrade do seu plano para continuar recebendo novos contatos.
+              <div className="mt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="bg-white hover:bg-gray-50 border-red-300 text-red-700"
+                  onClick={() => {
+                    const upgradeSection = document.getElementById('subscription-card');
+                    if (upgradeSection) {
+                      upgradeSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  data-testid="button-upgrade-contacts"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Fazer Upgrade
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Contact Limit Warning (close to limit) */}
+      {monthlyStats?.hasLimit && !monthlyStats?.limitReached && monthlyStats?.remainingContacts !== null && monthlyStats.remainingContacts <= 2 && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertCircle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <strong>Atenção:</strong> Você tem apenas {monthlyStats.remainingContacts} contato(s) restante(s) este mês. 
+              Considere fazer upgrade do seu plano para não perder oportunidades.
+              <div className="mt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="bg-white hover:bg-gray-50 border-orange-300 text-orange-700"
+                  onClick={() => {
+                    const upgradeSection = document.getElementById('subscription-card');
+                    if (upgradeSection) {
+                      upgradeSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  data-testid="button-upgrade-contacts-warning"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Ver Planos
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Photo Limit Alert */}
+      {photoStats?.limitReached && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Limite de Fotos Atingido:</strong> Você já tem {photoStats.currentPhotos} fotos no portfólio, 
+              o máximo permitido pelo seu plano atual. Faça upgrade para adicionar mais fotos.
+              <div className="mt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="bg-white hover:bg-gray-50 border-red-300 text-red-700"
+                  onClick={() => {
+                    const upgradeSection = document.getElementById('subscription-card');
+                    if (upgradeSection) {
+                      upgradeSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  data-testid="button-upgrade-photos"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Fazer Upgrade
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Photo Limit Warning (close to limit) */}
+      {!photoStats?.limitReached && photoStats?.remainingPhotos !== null && photoStats.remainingPhotos <= 1 && photoStats.remainingPhotos > 0 && (
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertCircle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <strong>Atenção:</strong> Você pode adicionar apenas mais {photoStats.remainingPhotos} foto(s). 
+              Faça upgrade do seu plano para ter mais espaço no portfólio.
+              <div className="mt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="bg-white hover:bg-gray-50 border-orange-300 text-orange-700"
+                  onClick={() => {
+                    const upgradeSection = document.getElementById('subscription-card');
+                    if (upgradeSection) {
+                      upgradeSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  data-testid="button-upgrade-photos-warning"
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Ver Planos
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {/* Force Password Change Modal */}
       <Dialog open={forcePasswordChangeOpen} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md" data-testid="force-password-change-dialog">
@@ -853,8 +990,8 @@ export default function ProfessionalDashboard() {
       )}
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* First row: Rating, Reviews, Contacts, Views */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
+        {/* First row: Rating, Reviews, Contacts, Views, Photos */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
           {/* Stats Cards */}
           <Card>
             <CardContent className="p-6">
@@ -923,10 +1060,36 @@ export default function ProfessionalDashboard() {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-2">
+                <Camera className="h-5 w-5 text-orange-500" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl font-bold" data-testid="photo-count">
+                      {photoStats?.currentPhotos || 0}
+                    </p>
+                    <span className="text-sm text-muted-foreground">
+                      / {photoStats?.maxPhotos || 0}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Fotos no portfólio
+                  </p>
+                  {photoStats?.limitReached && (
+                    <Badge variant="destructive" className="text-xs mt-1">
+                      Limite atingido
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Second row: Status and Subscription */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8" id="subscription-card">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
@@ -1451,6 +1614,7 @@ export default function ProfessionalDashboard() {
                               
                               if (addResponse.ok) {
                                 queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
+                                queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth?.id, 'photos/stats'] });
                                 toast({ title: "Sucesso", description: "Foto adicionada ao portfólio com sucesso!" });
                               } else {
                                 throw new Error("Erro ao adicionar foto ao portfólio");
