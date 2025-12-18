@@ -471,6 +471,13 @@ export class DatabaseStorage implements IStorage {
     
     if (filters?.status) {
       conditions.push(eq(professionals.status, filters.status));
+      // Also filter out expired subscriptions for active professionals
+      if (filters.status === 'active') {
+        conditions.push(or(
+          isNull(professionals.subscriptionExpiresAt),
+          gt(professionals.subscriptionExpiresAt, new Date())
+        ));
+      }
     } else {
       // Only show active professionals with valid subscriptions
       conditions.push(eq(professionals.status, 'active'));
