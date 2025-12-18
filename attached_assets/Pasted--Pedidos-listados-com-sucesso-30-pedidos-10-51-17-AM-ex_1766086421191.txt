@@ -1,0 +1,28 @@
+✅ Pedidos listados com sucesso: 30 pedidos
+10:51:17 AM [express] GET /api/admin/pagarme/orders 200 in 804ms :: {"data":[{"id":"or_YaRnrLGc94cOz3…
+🔄 [SYNC] Iniciando sincronização de pagamentos do Pagar.me...
+📋 Listando pedidos do Pagar.me (página 1)...
+✅ Pedidos listados com sucesso: 30 pedidos
+⚠️ [SYNC] No matching professional for order or_alrj80yVtlTWdWQM (email: alexandrebuig@hotmail.com, doc: 04285207150)
+⚠️ [SYNC] No matching professional for order or_Ob4pRvGLTyHBlG58 (email: tiago@netlimpeza.com, doc: 01036248135)
+⏭️ [SYNC] Professional Rafael Miguel de Oliveira already has active payment, skipping order or_aGy5962HN4uN3xLg
+⚠️ [SYNC] No matching professional for order or_JwNBP8YI4puqBM0X (email: tiago@netlimpeza.com, doc: 01036248135)
+⏭️ [SYNC] Professional Lorrany Rodrigues Miranda already has active payment, skipping order or_wykO0oQUzUPLp6YR
+⏭️ [SYNC] Professional Rafael Miguel de Oliveira already has active payment, skipping order or_BZ7RK7KIyJf9RWGm
+⚠️ [SYNC] No matching professional for order or_Y7DAzdlI0IvzqgPw (email: lfranco123@gmail.com, doc: 02717965106)
+⚠️ [SYNC] No matching professional for order or_XypE75ytAtd7MzQg (email: tgwallacecosta@gmail.com, doc: 01036248135)
+⚠️ [SYNC] No matching professional for order or_VEYqwyQtztkwR5Mk (email: tiago@netlimpeza.com, doc: 01036248135)
+🔄 [SYNC] Sincronização concluída: 0 sincronizados, 30 ignorados, 0 erros
+10:52:04 AM [express] POST /api/admin/pagarme/sync 200 in 551ms :: {"success":true,"message":"Sincron…
+10:52:04 AM [express] GET /api/admin/payments 304 in 8ms :: [{"id":"e16e587f-417f-45a0-874a-47e2c1476…
+10:52:04 AM [express] GET /api/admin/dashboard/stats 304 in 28ms :: {"activeProfessionals":2,"monthly…
+📋 [API] Buscando pedidos do Pagar.me (página 1, tamanho 100)...
+[db] Using traditional PostgreSQL database
+[startup] Configurando PUBLIC_OBJECT_SEARCH_PATHS: /replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/public
+[startup] Configurando PRIVATE_OBJECT_DIR: /replit-objstore-e758ac65-b325-4c3b-8be5-1d898e8c54e4/.private
+[db] Initializing database extensions...
+[db] UNACCENT extension is available and working
+[static-server] Serving static files from: /app/server/public
+[static-server] Static server configured successfully
+12:44:31 AM [express] serving on port 5000
+[static-server] Serving index.html for: /qual+o+resultado+da+lotof%C3%A1cil-2?bmw/marcelo+jogador+do+fluminense-0.pdf
