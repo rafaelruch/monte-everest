@@ -792,12 +792,8 @@ export default function ProfessionalDashboard() {
                       if (response.ok) {
                         const data = await response.json();
                         if (data.checkoutUrl) {
-                          window.open(data.checkoutUrl, '_blank');
-                          toast({
-                            title: "Checkout Aberto!",
-                            description: "Complete o pagamento na nova aba"
-                          });
-                          queryClient.invalidateQueries({ queryKey: ['/api/professionals', professionalAuth.id] });
+                          // Redirect in same tab to avoid popup blockers on mobile
+                          window.location.href = data.checkoutUrl;
                         }
                       } else {
                         const error = await response.json();
