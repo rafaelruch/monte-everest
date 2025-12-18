@@ -4327,6 +4327,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upgrade professional's subscription plan
+  app.post("/api/payments/upgrade-plan", verifyProfessionalToken, async (req, res) => {
+    try {
+      const { planId } = req.body;
+      const professionalId = req.professional!.id;
+
+      if (!planId) {
+        return res.status(400).json({ error: 'Missing required field: planId' });
+      }
+
+      // Get professional
+      const professional = await storage.getProfessional(professionalId);
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+
+      // Get new plan
+      const newPlan = await storage.getSubscriptionPlan(planId);
+      if (!newPlan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+
+      // Get current plan to verify upgrade
+      const currentPlan = professional.subscriptionPlanId 
+        ? await storage.getSubscriptionPlan(professional.subscriptionPlanId)
+        : null;
+
+      const currentPrice = currentPlan ? parseFloat(currentPlan.monthlyPrice) : 0;
+      const newPrice = parseFloat(newPlan.monthlyPrice);
+
+      if (newPrice <= currentPrice) {
+        return res.status(400).json({ error: 'O novo plano deve ter um valor maior que o plano atual' });
+      }
+
+      console.log('[UPGRADE-PLAN] Creating upgrade checkout for professional:', professionalId);
+      console.log('[UPGRADE-PLAN] Upgrading from plan:', currentPlan?.name, 'to:', newPlan.name);
+
+      // Get Pagar.me API key
+      const pagarmeApiKey = await storage.getSystemConfig('PAGARME_API_KEY');
+      if (!pagarmeApiKey?.value) {
+        return res.status(500).json({ 
+          error: 'Payment configuration error',
+          message: 'Pagar.me API key not configured'
+        });
+      }
+
+      // Create checkout payload
+      const amountInCents = Math.round(newPrice * 100);
+
+      const checkoutPayload: any = {
+        is_building: false,
+        type: 'order',
+        name: `Upgrade - ${professional.fullName} - ${newPlan.name}`,
+        payment_settings: {
+          accepted_payment_methods: ['pix', 'credit_card'],
+          pix_settings: {
+            expires_in: 2592000, // 30 days in seconds
+            additional_information: [
+              {
+                name: 'Plano',
+                value: newPlan.name
+              },
+              {
+                name: 'Profissional',
+                value: professional.fullName
+              },
+              {
+                name: 'Tipo',
+                value: 'Upgrade'
+              }
+            ]
+          },
+          credit_card_settings: {
+            operation_type: 'auth_and_capture',
+            installments: [
+              { number: 1, total: amountInCents }
+            ]
+          }
+        },
+        cart_settings: {
+          items: [{
+            amount: amountInCents,
+            name: `${newPlan.name} - Upgrade de Plano`,
+            default_quantity: 1,
+            metadata: {
+              professional_id: professional.id,
+              plan_id: newPlan.id,
+              type: 'upgrade'
+            }
+          }]
+        },
+        customer_settings: {
+          name: professional.fullName,
+          email: professional.email,
+          document: professional.document,
+          phone: professional.phone ? {
+            country_code: '55',
+            area_code: professional.phone.replace(/\D/g, '').substring(0, 2),
+            number: professional.phone.replace(/\D/g, '').substring(2)
+          } : undefined
+        },
+        success_url: `${process.env.FRONTEND_BASE_URL || 'https://monteeverest.com.br'}/aguardando-pagamento?professionalId=${professional.id}&upgrade=true`,
+        metadata: {
+          professional_id: professional.id,
+          plan_id: newPlan.id,
+          type: 'upgrade',
+          previous_plan_id: currentPlan?.id || null
+        }
+      };
+
+      // Determine Pagar.me API URL based on key prefix
+      const isTestKey = pagarmeApiKey.value.startsWith('sk_test_');
+      const pagarmeApiUrl = isTestKey 
+        ? 'https://sdx-api.pagar.me/core/v5/paymentlinks'
+        : 'https://api.pagar.me/core/v5/paymentlinks';
+
+      console.log('[UPGRADE-PLAN] Using Pagar.me API URL:', pagarmeApiUrl);
+
+      // Create checkout via Pagar.me API
+      const response = await fetch(pagarmeApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + Buffer.from(pagarmeApiKey.value + ':').toString('base64')
+        },
+        body: JSON.stringify(checkoutPayload)
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        console.error('[UPGRADE-PLAN] Pagar.me API error:', response.status, responseText);
+        
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to create checkout`);
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+        }
+      }
+
+      const checkout = await response.json();
+      console.log('[UPGRADE-PLAN] Checkout created successfully:', checkout.id);
+      console.log('[UPGRADE-PLAN] Payment URL:', checkout.url);
+
+      // Store pending upgrade info (will be processed by webhook)
+      await storage.updateProfessional(professional.id, {
+        pendingUpgradePlanId: newPlan.id
+      });
+
+      res.json({ 
+        success: true, 
+        checkoutUrl: checkout.url,
+        checkoutId: checkout.id,
+        professionalId: professional.id,
+        message: 'Checkout de upgrade criado com sucesso. Complete o pagamento para ativar o novo plano.'
+      });
+    } catch (error) {
+      console.log('[UPGRADE-PLAN] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create upgrade checkout', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Check payment status for polling (used in aguardando-pagamento page)
   // This endpoint also actively checks Pagar.me if the professional is still pending
   app.get("/api/payments/status/:professionalId", async (req, res) => {
@@ -4803,41 +4969,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Continue with activation even if payment record fails
             }
             
-            // Update professional: activate account and set expiry date
-            await storage.updateProfessional(professionalId, {
-              paymentStatus: 'active',
-              status: 'active',
-              lastPaymentDate: new Date(),
-              subscriptionExpiresAt: expiryDate,
-              pendingPixCode: null,
-              pendingPixUrl: null,
-              pendingPixExpiry: null,
-            });
+            // Check if this is an upgrade payment
+            const isUpgrade = professional.pendingUpgradePlanId || data.items?.[0]?.metadata?.type === 'upgrade';
+            const newPlanId = professional.pendingUpgradePlanId || data.items?.[0]?.metadata?.plan_id;
             
-            console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
-            
-            // Generate new temporary password, hash it, and update the professional
-            const tempPassword = generateTemporaryPassword(10);
-            const hashedPassword = await bcrypt.hash(tempPassword, 10);
-            await storage.updateProfessional(professionalId, { password: hashedPassword });
-            
-            // Send email with credentials
-            try {
-              const emailSent = await emailService.sendCredentialsEmail({
-                to: professional.email,
-                professionalName: professional.fullName,
-                email: professional.email,
-                password: tempPassword,
-                planName: 'Plano Monte Everest'
+            if (isUpgrade && newPlanId) {
+              // Handle upgrade - update plan and extend subscription
+              console.log(`📈 [WEBHOOK] Processing upgrade for professional ${professionalId} to plan ${newPlanId}`);
+              
+              await storage.updateProfessional(professionalId, {
+                paymentStatus: 'active',
+                status: 'active',
+                lastPaymentDate: new Date(),
+                subscriptionExpiresAt: expiryDate,
+                subscriptionPlanId: newPlanId,
+                pendingUpgradePlanId: null, // Clear pending upgrade
+                pendingPixCode: null,
+                pendingPixUrl: null,
+                pendingPixExpiry: null,
               });
               
-              if (emailSent) {
-                console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
-              } else {
-                console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
+              console.log(`✅ [WEBHOOK] Professional ${professionalId} upgraded to plan ${newPlanId}. Expiry: ${expiryDate.toISOString()}`);
+              
+              // Don't send new credentials for upgrades - user already has their login
+            } else {
+              // New registration - activate account and send credentials
+              await storage.updateProfessional(professionalId, {
+                paymentStatus: 'active',
+                status: 'active',
+                lastPaymentDate: new Date(),
+                subscriptionExpiresAt: expiryDate,
+                pendingPixCode: null,
+                pendingPixUrl: null,
+                pendingPixExpiry: null,
+              });
+              
+              console.log(`✅ [WEBHOOK] Professional ${professionalId} activated. Expiry: ${expiryDate.toISOString()}`);
+              
+              // Generate new temporary password, hash it, and update the professional
+              const tempPassword = generateTemporaryPassword(10);
+              const hashedPassword = await bcrypt.hash(tempPassword, 10);
+              await storage.updateProfessional(professionalId, { password: hashedPassword });
+              
+              // Send email with credentials
+              try {
+                const emailSent = await emailService.sendCredentialsEmail({
+                  to: professional.email,
+                  professionalName: professional.fullName,
+                  email: professional.email,
+                  password: tempPassword,
+                  planName: 'Plano Monte Everest'
+                });
+                
+                if (emailSent) {
+                  console.log('✅ [WEBHOOK/EMAIL] Credenciais enviadas para:', professional.email);
+                } else {
+                  console.log('⚠️ [WEBHOOK/EMAIL] Falha ao enviar credenciais para:', professional.email);
+                }
+              } catch (emailError) {
+                console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
               }
-            } catch (emailError) {
-              console.error('❌ [WEBHOOK/EMAIL ERROR]:', emailError);
             }
           } else {
             console.error('❌ [WEBHOOK] order.paid received but could not identify professional. Customer document:', data.customer?.document, 'Customer email:', data.customer?.email);

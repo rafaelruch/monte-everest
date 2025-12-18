@@ -67,6 +67,7 @@ export const professionals = pgTable("professionals", {
   document: varchar("document").notNull().unique(), // CPF/CNPJ - must be unique
   categoryId: varchar("category_id").notNull(),
   subscriptionPlanId: varchar("subscription_plan_id"),
+  pendingUpgradePlanId: varchar("pending_upgrade_plan_id"), // Stores plan ID during upgrade payment process
   serviceArea: varchar("service_area").notNull(), // CEP
   city: varchar("city").notNull(), // Cidade
   description: text("description").notNull(),

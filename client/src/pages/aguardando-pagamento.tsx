@@ -17,9 +17,10 @@ export default function AguardandoPagamento() {
   const maxRetries = 60; // 60 tentativas * 5 segundos = 5 minutos
   const retryCountRef = useRef(0); // Use ref to track retries without triggering effect
 
-  // Get professionalId from URL
+  // Get professionalId and upgrade flag from URL
   const urlParams = new URLSearchParams(window.location.search);
   const professionalId = urlParams.get('professionalId');
+  const isUpgrade = urlParams.get('upgrade') === 'true';
 
   // Open checkout URL in new tab on page load
   useEffect(() => {
@@ -54,10 +55,16 @@ export default function AguardandoPagamento() {
         setPaymentStatus(data.paymentStatus);
         setProfessionalName(data.fullName);
 
-        // If payment is confirmed, redirect to professional login (first access)
+        // If payment is confirmed, redirect appropriately
         if (data.status === 'active' && data.paymentStatus === 'active') {
           setTimeout(() => {
-            setLocation('/professional-login?first-access=true');
+            if (isUpgrade) {
+              // For upgrades, go back to dashboard
+              setLocation('/professional-dashboard');
+            } else {
+              // For new registrations, go to login
+              setLocation('/professional-login?first-access=true');
+            }
           }, 2000);
           return; // Stop polling
         }
@@ -92,8 +99,10 @@ export default function AguardandoPagamento() {
     if (status === 'active' && paymentStatus === 'active') {
       return {
         icon: <CheckCircle2 className="h-16 w-16 text-green-500" />,
-        title: 'Pagamento Confirmado!',
-        description: 'Seu pagamento foi confirmado com sucesso! Enviamos suas credenciais de acesso para o seu email. Você será redirecionado em instantes...',
+        title: isUpgrade ? 'Upgrade Confirmado!' : 'Pagamento Confirmado!',
+        description: isUpgrade 
+          ? 'Seu upgrade foi confirmado com sucesso! Seu plano já está ativo. Você será redirecionado para o painel em instantes...'
+          : 'Seu pagamento foi confirmado com sucesso! Enviamos suas credenciais de acesso para o seu email. Você será redirecionado em instantes...',
         color: 'text-green-600'
       };
     }

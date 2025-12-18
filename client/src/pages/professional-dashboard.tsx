@@ -1237,8 +1237,36 @@ export default function ProfessionalDashboard() {
                           <Button 
                             className="w-full"
                             variant={plan.isFeatured ? "default" : "outline"}
-                            onClick={() => {
-                              window.open(`/seja-profissional?upgrade=${plan.id}&professionalId=${professional?.id}`, '_blank');
+                            onClick={async () => {
+                              try {
+                                toast({ title: "Processando...", description: "Criando link de pagamento para upgrade..." });
+                                
+                                const response = await fetch('/api/payments/upgrade-plan', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${professionalAuth?.token}`
+                                  },
+                                  body: JSON.stringify({ planId: plan.id })
+                                });
+                                
+                                const data = await response.json();
+                                
+                                if (!response.ok) {
+                                  throw new Error(data.error || data.message || 'Erro ao criar checkout');
+                                }
+                                
+                                if (data.checkoutUrl) {
+                                  window.location.href = data.checkoutUrl;
+                                }
+                              } catch (error) {
+                                console.error('Upgrade error:', error);
+                                toast({ 
+                                  title: "Erro", 
+                                  description: error instanceof Error ? error.message : "Erro ao iniciar upgrade",
+                                  variant: "destructive"
+                                });
+                              }
                             }}
                             data-testid={`button-upgrade-to-${plan.id}`}
                           >
