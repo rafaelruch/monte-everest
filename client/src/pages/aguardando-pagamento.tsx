@@ -17,10 +17,11 @@ export default function AguardandoPagamento() {
   const maxRetries = 60; // 60 tentativas * 5 segundos = 5 minutos
   const retryCountRef = useRef(0); // Use ref to track retries without triggering effect
 
-  // Get professionalId and upgrade flag from URL
+  // Get professionalId and flags from URL
   const urlParams = new URLSearchParams(window.location.search);
   const professionalId = urlParams.get('professionalId');
   const isUpgrade = urlParams.get('upgrade') === 'true';
+  const isRenewal = urlParams.get('renewal') === 'true';
 
   // Open checkout URL in new tab on page load
   useEffect(() => {
@@ -58,8 +59,8 @@ export default function AguardandoPagamento() {
         // If payment is confirmed, redirect appropriately
         if (data.status === 'active' && data.paymentStatus === 'active') {
           setTimeout(() => {
-            if (isUpgrade) {
-              // For upgrades, go back to dashboard
+            if (isUpgrade || isRenewal) {
+              // For upgrades and renewals, go back to dashboard
               setLocation('/professional-dashboard');
             } else {
               // For new registrations, go to login
@@ -97,12 +98,29 @@ export default function AguardandoPagamento() {
 
   const getStatusMessage = () => {
     if (status === 'active' && paymentStatus === 'active') {
+      const getSuccessInfo = () => {
+        if (isRenewal) {
+          return {
+            title: 'Renovação Confirmada!',
+            description: 'Sua assinatura foi renovada com sucesso! Seu perfil já está ativo novamente na plataforma. Você será redirecionado para o painel em instantes...'
+          };
+        }
+        if (isUpgrade) {
+          return {
+            title: 'Upgrade Confirmado!',
+            description: 'Seu upgrade foi confirmado com sucesso! Seu plano já está ativo. Você será redirecionado para o painel em instantes...'
+          };
+        }
+        return {
+          title: 'Pagamento Confirmado!',
+          description: 'Seu pagamento foi confirmado com sucesso! Enviamos suas credenciais de acesso para o seu email. Você será redirecionado em instantes...'
+        };
+      };
+      const successInfo = getSuccessInfo();
       return {
         icon: <CheckCircle2 className="h-16 w-16 text-green-500" />,
-        title: isUpgrade ? 'Upgrade Confirmado!' : 'Pagamento Confirmado!',
-        description: isUpgrade 
-          ? 'Seu upgrade foi confirmado com sucesso! Seu plano já está ativo. Você será redirecionado para o painel em instantes...'
-          : 'Seu pagamento foi confirmado com sucesso! Enviamos suas credenciais de acesso para o seu email. Você será redirecionado em instantes...',
+        title: successInfo.title,
+        description: successInfo.description,
         color: 'text-green-600'
       };
     }

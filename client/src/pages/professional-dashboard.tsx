@@ -690,6 +690,62 @@ export default function ProfessionalDashboard() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Assinatura Expirada:</strong> Seu perfil foi desativado. Renove sua assinatura para voltar a aparecer nas buscas.
+                  <div className="mt-3">
+                    <Button 
+                      onClick={async () => {
+                        try {
+                          setIsCreatingPayment(true);
+                          toast({ title: "Processando...", description: "Criando link de pagamento para renovação..." });
+                          
+                          const planId = professional?.subscriptionPlanId || plans?.[0]?.id;
+                          if (!planId) {
+                            toast({
+                              title: "Erro",
+                              description: "Nenhum plano disponível para renovação",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+                          
+                          const response = await fetch('/api/payments/renew-subscription', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${professionalAuth?.token}`
+                            },
+                            body: JSON.stringify({ planId })
+                          });
+
+                          const data = await response.json();
+                          
+                          if (!response.ok) {
+                            throw new Error(data.error || data.message || 'Erro ao criar checkout de renovação');
+                          }
+                          
+                          if (data.checkoutUrl) {
+                            window.location.href = data.checkoutUrl;
+                          }
+                        } catch (error) {
+                          console.error('Renewal error:', error);
+                          toast({
+                            title: "Erro",
+                            description: error instanceof Error ? error.message : "Erro ao criar checkout de renovação",
+                            variant: "destructive"
+                          });
+                        } finally {
+                          setIsCreatingPayment(false);
+                        }
+                      }}
+                      className="bg-white hover:bg-gray-50 border-red-300 text-red-700"
+                      variant="outline"
+                      size="sm"
+                      disabled={isCreatingPayment}
+                      data-testid="button-renew-subscription"
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      {isCreatingPayment ? "Processando..." : "Renovar Assinatura"}
+                    </Button>
+                  </div>
                 </AlertDescription>
               </Alert>
             </div>

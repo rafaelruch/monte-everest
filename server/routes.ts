@@ -4514,6 +4514,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Renew professional's subscription
+  app.post("/api/payments/renew-subscription", verifyProfessionalToken, async (req, res) => {
+    try {
+      const { planId } = req.body;
+      const professionalId = req.professional!.id;
+
+      // Get professional
+      const professional = await storage.getProfessional(professionalId);
+      if (!professional) {
+        return res.status(404).json({ error: 'Professional not found' });
+      }
+
+      // Use provided planId or current plan
+      const renewalPlanId = planId || professional.subscriptionPlanId;
+      if (!renewalPlanId) {
+        return res.status(400).json({ error: 'No plan specified for renewal' });
+      }
+
+      // Get plan
+      const plan = await storage.getSubscriptionPlan(renewalPlanId);
+      if (!plan) {
+        return res.status(404).json({ error: 'Plan not found' });
+      }
+
+      console.log('[RENEW-SUBSCRIPTION] Creating renewal checkout for professional:', professionalId);
+      console.log('[RENEW-SUBSCRIPTION] Plan:', plan.name);
+
+      // Get Pagar.me API key
+      const pagarmeApiKey = await storage.getSystemConfig('PAGARME_API_KEY');
+      if (!pagarmeApiKey?.value) {
+        return res.status(500).json({ 
+          error: 'Payment configuration error',
+          message: 'Pagar.me API key not configured'
+        });
+      }
+
+      // Create checkout payload
+      const amountInCents = Math.round(parseFloat(plan.monthlyPrice) * 100);
+
+      const checkoutPayload: any = {
+        is_building: false,
+        type: 'order',
+        name: `Renovação - ${professional.fullName} - ${plan.name}`,
+        payment_settings: {
+          accepted_payment_methods: ['pix', 'credit_card'],
+          pix_settings: {
+            expires_in: 2592000, // 30 days in seconds
+            additional_information: [
+              {
+                name: 'Plano',
+                value: plan.name
+              },
+              {
+                name: 'Profissional',
+                value: professional.fullName
+              },
+              {
+                name: 'Tipo',
+                value: 'Renovação'
+              }
+            ]
+          },
+          credit_card_settings: {
+            operation_type: 'auth_and_capture',
+            installments: [
+              { number: 1, total: amountInCents }
+            ]
+          }
+        },
+        cart_settings: {
+          items: [{
+            amount: amountInCents,
+            name: `${plan.name} - Renovação de Assinatura`,
+            default_quantity: 1,
+            metadata: {
+              professional_id: professional.id,
+              plan_id: plan.id,
+              type: 'renewal'
+            }
+          }]
+        },
+        customer_settings: {
+          name: professional.fullName,
+          email: professional.email,
+          document: professional.document,
+          phone: professional.phone ? {
+            country_code: '55',
+            area_code: professional.phone.replace(/\D/g, '').substring(0, 2),
+            number: professional.phone.replace(/\D/g, '').substring(2)
+          } : undefined
+        },
+        success_url: `${process.env.FRONTEND_BASE_URL || 'https://monteeverest.com.br'}/aguardando-pagamento?professionalId=${professional.id}&renewal=true`,
+        metadata: {
+          professional_id: professional.id,
+          plan_id: plan.id,
+          type: 'renewal'
+        }
+      };
+
+      // Determine Pagar.me API URL based on key prefix
+      const isTestKey = pagarmeApiKey.value.startsWith('sk_test_');
+      const pagarmeApiUrl = isTestKey 
+        ? 'https://sdx-api.pagar.me/core/v5/paymentlinks'
+        : 'https://api.pagar.me/core/v5/paymentlinks';
+
+      console.log('[RENEW-SUBSCRIPTION] Using Pagar.me API URL:', pagarmeApiUrl);
+
+      // Create checkout via Pagar.me API
+      const response = await fetch(pagarmeApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + Buffer.from(pagarmeApiKey.value + ':').toString('base64')
+        },
+        body: JSON.stringify(checkoutPayload)
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        console.error('[RENEW-SUBSCRIPTION] Pagar.me API error:', response.status, responseText);
+        
+        try {
+          const errorData = JSON.parse(responseText);
+          throw new Error(errorData.message || `HTTP ${response.status}: Failed to create checkout`);
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
+        }
+      }
+
+      const checkout = JSON.parse(responseText);
+      console.log('[RENEW-SUBSCRIPTION] Checkout created successfully:', checkout.id);
+      console.log('[RENEW-SUBSCRIPTION] Payment URL:', checkout.url);
+
+      res.json({ 
+        success: true, 
+        checkoutUrl: checkout.url,
+        checkoutId: checkout.id,
+        professionalId: professional.id,
+        message: 'Checkout de renovação criado com sucesso. Complete o pagamento para reativar sua conta.'
+      });
+    } catch (error) {
+      console.log('[RENEW-SUBSCRIPTION] Error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create renewal checkout', 
+        message: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Check payment status for polling (used in aguardando-pagamento page)
   // This endpoint also actively checks Pagar.me if the professional is still pending
   app.get("/api/payments/status/:professionalId", async (req, res) => {
