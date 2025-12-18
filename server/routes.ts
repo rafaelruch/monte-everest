@@ -4267,8 +4267,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             number: phone.replace(/\D/g, '').substring(2)
           }
         },
-        layout_settings: {
-          success_url: `${process.env.FRONTEND_BASE_URL ? process.env.FRONTEND_BASE_URL.replace(/\/$/, '') : process.env.REPLIT_DEPLOYMENT_URL ? `https://${process.env.REPLIT_DEPLOYMENT_URL}` : process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000'}/aguardando-pagamento?professionalId=${newProfessional.id}`
+        success_url: `${process.env.FRONTEND_BASE_URL || 'https://monteeverest.com.br'}/aguardando-pagamento?professionalId=${newProfessional.id}`,
+        metadata: {
+          professional_id: newProfessional.id,
+          plan_id: plan.id
         }
       };
 
