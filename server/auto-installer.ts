@@ -108,6 +108,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         pending_pix_code TEXT,
         pending_pix_url TEXT,
         pending_pix_expiry TIMESTAMP,
+        pending_upgrade_plan_id VARCHAR,
         rating DECIMAL(3,2) DEFAULT 0.00,
         total_reviews INTEGER DEFAULT 0,
         ranking_position INTEGER,
@@ -294,6 +295,14 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
             RAISE NOTICE 'Coluna pending_pix_expiry adicionada à tabela professionals';
         ELSE
             RAISE NOTICE 'Coluna pending_pix_expiry já existe na tabela professionals';
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='professionals' AND column_name='pending_upgrade_plan_id') THEN
+            ALTER TABLE professionals ADD COLUMN pending_upgrade_plan_id VARCHAR;
+            RAISE NOTICE 'Coluna pending_upgrade_plan_id adicionada à tabela professionals';
+        ELSE
+            RAISE NOTICE 'Coluna pending_upgrade_plan_id já existe na tabela professionals';
         END IF;
     END $$;
 
