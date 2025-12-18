@@ -4468,7 +4468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const checkout = await response.json();
+      const checkout = JSON.parse(responseText);
       console.log('[UPGRADE-PLAN] Checkout created successfully:', checkout.id);
       console.log('[UPGRADE-PLAN] Payment URL:', checkout.url);
 
