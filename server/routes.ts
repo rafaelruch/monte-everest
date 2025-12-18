@@ -187,7 +187,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // sortBy removed as it doesn't exist in filter interface
       });
       
-      res.json(professionals);
+      // Fetch subscription plans to determine featured status
+      const plans = await storage.getSubscriptionPlans();
+      const plansMap = new Map(plans.map(p => [p.id, p]));
+      
+      // Add isFeaturedPlan flag to each professional based on their subscription plan
+      const professionalsWithFeatured = professionals.map(prof => {
+        const plan = prof.subscriptionPlanId ? plansMap.get(prof.subscriptionPlanId) : null;
+        return {
+          ...prof,
+          isFeaturedPlan: plan?.isFeatured || false
+        };
+      });
+      
+      res.json(professionalsWithFeatured);
     } catch (error) {
       console.error("Error searching professionals:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
@@ -201,7 +214,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!professional) {
         return res.status(404).json({ message: "Profissional não encontrado" });
       }
-      res.json(professional);
+      
+      // Add isFeaturedPlan flag based on subscription plan
+      let isFeaturedPlan = false;
+      if (professional.subscriptionPlanId) {
+        const plan = await storage.getSubscriptionPlan(professional.subscriptionPlanId);
+        isFeaturedPlan = plan?.isFeatured || false;
+      }
+      
+      res.json({ ...professional, isFeaturedPlan });
     } catch (error) {
       console.error("Error fetching professional:", error);
       res.status(500).json({ message: "Erro interno do servidor" });

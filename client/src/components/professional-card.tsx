@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Phone, MessageCircle } from "lucide-react";
+import { MapPin, Phone, MessageCircle, Award } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import StarRating from "./star-rating";
 import { Link } from "wouter";
@@ -30,6 +30,7 @@ interface ProfessionalCardProps {
       name: string;
       slug: string;
     };
+    isFeaturedPlan?: boolean;
   };
 }
 
@@ -127,7 +128,23 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow overflow-hidden" data-testid={`professional-card-${professional.id}`}>
+    <Card 
+      className={`hover:shadow-md transition-shadow overflow-hidden relative ${
+        professional.isFeaturedPlan 
+          ? 'border-2 border-primary shadow-lg ring-1 ring-primary/20' 
+          : ''
+      }`} 
+      data-testid={`professional-card-${professional.id}`}
+    >
+      {/* Featured Badge */}
+      {professional.isFeaturedPlan && (
+        <div className="absolute -top-0 -right-0 z-10">
+          <div className="bg-primary text-white px-3 py-1 rounded-bl-lg flex items-center gap-1 shadow-md">
+            <Award className="h-3.5 w-3.5" />
+            <span className="text-xs font-semibold">Destaque</span>
+          </div>
+        </div>
+      )}
       <CardContent className="p-6">
         <div className="flex gap-4 mb-4">
           {/* Profile Image */}
@@ -136,11 +153,15 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
               <img
                 src={professional.profileImage}
                 alt={`Foto de ${professional.fullName}`}
-                className="w-16 h-16 rounded-full object-cover border-2 border-border"
+                className={`w-16 h-16 rounded-full object-cover border-2 ${
+                  professional.isFeaturedPlan ? 'border-primary' : 'border-border'
+                }`}
                 data-testid={`professional-image-${professional.id}`}
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+              <div className={`w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 ${
+                professional.isFeaturedPlan ? 'border-primary' : 'border-border'
+              }`}>
                 <span className="text-lg font-semibold text-muted-foreground">
                   {professional.fullName.charAt(0).toUpperCase()}
                 </span>
