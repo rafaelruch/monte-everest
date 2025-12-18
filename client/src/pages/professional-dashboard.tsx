@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   User, 
+  Users,
   Star, 
   MessageSquare, 
   Calendar,
@@ -1177,6 +1178,82 @@ export default function ProfessionalDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Upgrade Plans Section */}
+        {(() => {
+          const currentPlan = plans?.find((p: any) => p.id === professional?.subscriptionPlanId);
+          const currentPrice = currentPlan ? parseFloat(currentPlan.monthlyPrice) : 0;
+          const upgradePlans = plans?.filter((p: any) => 
+            p.isActive && 
+            parseFloat(p.monthlyPrice) > currentPrice
+          ).sort((a: any, b: any) => parseFloat(a.monthlyPrice) - parseFloat(b.monthlyPrice));
+          
+          if (upgradePlans && upgradePlans.length > 0) {
+            return (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Fazer Upgrade do Plano
+                  </CardTitle>
+                  <CardDescription>
+                    Escolha um plano com mais recursos para expandir seu negócio
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {upgradePlans.map((plan: any) => (
+                      <Card 
+                        key={plan.id} 
+                        className={`relative ${plan.isFeatured ? 'border-primary border-2' : ''}`}
+                      >
+                        {plan.isFeatured && (
+                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <Badge className="bg-primary text-white">Mais Popular</Badge>
+                          </div>
+                        )}
+                        <CardContent className="p-4 pt-6">
+                          <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
+                          <p className="text-2xl font-bold text-primary mb-2">
+                            R$ {parseFloat(plan.monthlyPrice).toFixed(2).replace('.', ',')}
+                            <span className="text-sm font-normal text-muted-foreground">/mês</span>
+                          </p>
+                          <ul className="space-y-2 mb-4 text-sm">
+                            <li className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-green-500" />
+                              {plan.maxContacts ? `${plan.maxContacts} contatos/mês` : 'Contatos ilimitados'}
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <Camera className="h-4 w-4 text-orange-500" />
+                              {plan.maxPhotos ? `${plan.maxPhotos} fotos no portfólio` : 'Fotos ilimitadas'}
+                            </li>
+                            {plan.features?.slice(0, 3).map((feature: string, idx: number) => (
+                              <li key={idx} className="flex items-center gap-2">
+                                <Check className="h-4 w-4 text-green-500" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                          <Button 
+                            className="w-full"
+                            variant={plan.isFeatured ? "default" : "outline"}
+                            onClick={() => {
+                              window.open(`/seja-profissional?upgrade=${plan.id}&professionalId=${professional?.id}`, '_blank');
+                            }}
+                            data-testid={`button-upgrade-to-${plan.id}`}
+                          >
+                            Fazer Upgrade
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+          return null;
+        })()}
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList>
