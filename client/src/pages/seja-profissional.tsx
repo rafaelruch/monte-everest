@@ -18,6 +18,9 @@ interface SubscriptionPlan {
   maxContacts?: number;
   maxPhotos?: number;
   isFeatured?: boolean;
+  hasPrioritySupport?: boolean;
+  hasFeaturedProfile?: boolean;
+  hasCompleteProfile?: boolean;
 }
 
 export default function SejaProfissional() {
@@ -255,6 +258,24 @@ export default function SejaProfissional() {
                     <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
                     <span>Até {plan.maxPhotos || 2} fotos no perfil</span>
                   </li>
+                  {plan.hasPrioritySupport && (
+                    <li className="flex items-start text-sm">
+                      <Check className="h-4 w-4 text-yellow-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span>Suporte prioritário</span>
+                    </li>
+                  )}
+                  {plan.hasFeaturedProfile && (
+                    <li className="flex items-start text-sm">
+                      <Check className="h-4 w-4 text-yellow-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span>Perfil destacado com selo</span>
+                    </li>
+                  )}
+                  {plan.hasCompleteProfile && (
+                    <li className="flex items-start text-sm">
+                      <Check className="h-4 w-4 text-yellow-500 mr-3 mt-0.5 flex-shrink-0" />
+                      <span>Perfil completo</span>
+                    </li>
+                  )}
                 </ul>
                 
                 <Button 

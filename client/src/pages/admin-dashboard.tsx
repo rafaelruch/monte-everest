@@ -125,6 +125,9 @@ const planSchema = z.object({
   priority: z.number().min(0).default(0),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
+  hasPrioritySupport: z.boolean().default(false),
+  hasFeaturedProfile: z.boolean().default(false),
+  hasCompleteProfile: z.boolean().default(false),
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
@@ -526,6 +529,9 @@ export default function AdminDashboard() {
       priority: 0,
       isActive: true,
       isFeatured: false,
+      hasPrioritySupport: false,
+      hasFeaturedProfile: false,
+      hasCompleteProfile: false,
     },
   });
 
@@ -2470,7 +2476,10 @@ export default function AdminDashboard() {
                   maxPhotos: 5,
                   priority: 0,
                   isActive: true,
-                  isFeatured: false
+                  isFeatured: false,
+                  hasPrioritySupport: false,
+                  hasFeaturedProfile: false,
+                  hasCompleteProfile: false,
                 });
               }}
             >
@@ -2676,6 +2685,77 @@ export default function AdminDashboard() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={planForm.control}
+                    name="hasPrioritySupport"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Suporte Prioritário</FormLabel>
+                          <FormControl>
+                            <p className="text-sm text-gray-600">
+                              Atendimento prioritário
+                            </p>
+                          </FormControl>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={planForm.control}
+                    name="hasFeaturedProfile"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Perfil Destacado</FormLabel>
+                          <FormControl>
+                            <p className="text-sm text-gray-600">
+                              Perfil com selo especial
+                            </p>
+                          </FormControl>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={planForm.control}
+                    name="hasCompleteProfile"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Perfil Completo</FormLabel>
+                          <FormControl>
+                            <p className="text-sm text-gray-600">
+                              Recursos completos
+                            </p>
+                          </FormControl>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <div className="flex justify-end gap-3">
                   <Button
                     type="button"
@@ -2761,6 +2841,23 @@ export default function AdminDashboard() {
                           <span className="text-gray-500">Prioridade:</span>
                           <span className="ml-2 font-medium">{plan.priority}</span>
                         </div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {plan.hasPrioritySupport && (
+                            <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                              Suporte Prioritário
+                            </Badge>
+                          )}
+                          {plan.hasFeaturedProfile && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                              Perfil Destacado
+                            </Badge>
+                          )}
+                          {plan.hasCompleteProfile && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              Perfil Completo
+                            </Badge>
+                          )}
+                        </div>
                         <div className="text-sm">
                           <span className="text-gray-500">Pagar.me ID:</span>
                           <span className="ml-2 font-medium text-xs">
@@ -2792,6 +2889,9 @@ export default function AdminDashboard() {
                                 priority: plan.priority || 0,
                                 isActive: plan.isActive,
                                 isFeatured: plan.isFeatured,
+                                hasPrioritySupport: plan.hasPrioritySupport || false,
+                                hasFeaturedProfile: plan.hasFeaturedProfile || false,
+                                hasCompleteProfile: plan.hasCompleteProfile || false,
                               });
                               setIsPlanDialogOpen(true);
                             }}

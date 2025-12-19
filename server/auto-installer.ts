@@ -75,6 +75,9 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         priority INTEGER DEFAULT 0,
         is_active BOOLEAN DEFAULT true,
         is_featured BOOLEAN DEFAULT false,
+        has_priority_support BOOLEAN DEFAULT false,
+        has_featured_profile BOOLEAN DEFAULT false,
+        has_complete_profile BOOLEAN DEFAULT false,
         pagarme_product_id VARCHAR,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -303,6 +306,34 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
             RAISE NOTICE 'Coluna pending_upgrade_plan_id adicionada à tabela professionals';
         ELSE
             RAISE NOTICE 'Coluna pending_upgrade_plan_id já existe na tabela professionals';
+        END IF;
+    END $$;
+    
+    -- Adicionar colunas de benefícios na tabela subscription_plans se não existirem
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='subscription_plans' AND column_name='has_priority_support') THEN
+            ALTER TABLE subscription_plans ADD COLUMN has_priority_support BOOLEAN DEFAULT false;
+            RAISE NOTICE 'Coluna has_priority_support adicionada à tabela subscription_plans';
+        ELSE
+            RAISE NOTICE 'Coluna has_priority_support já existe na tabela subscription_plans';
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='subscription_plans' AND column_name='has_featured_profile') THEN
+            ALTER TABLE subscription_plans ADD COLUMN has_featured_profile BOOLEAN DEFAULT false;
+            RAISE NOTICE 'Coluna has_featured_profile adicionada à tabela subscription_plans';
+        ELSE
+            RAISE NOTICE 'Coluna has_featured_profile já existe na tabela subscription_plans';
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='subscription_plans' AND column_name='has_complete_profile') THEN
+            ALTER TABLE subscription_plans ADD COLUMN has_complete_profile BOOLEAN DEFAULT false;
+            RAISE NOTICE 'Coluna has_complete_profile adicionada à tabela subscription_plans';
+        ELSE
+            RAISE NOTICE 'Coluna has_complete_profile já existe na tabela subscription_plans';
         END IF;
     END $$;
 

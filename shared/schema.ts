@@ -52,6 +52,9 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   priority: integer("priority").default(0), // for ordering in selection
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false), // Mark as popular/highlighted
+  hasPrioritySupport: boolean("has_priority_support").default(false), // Suporte prioritário
+  hasFeaturedProfile: boolean("has_featured_profile").default(false), // Perfil destacado com selo
+  hasCompleteProfile: boolean("has_complete_profile").default(false), // Perfil completo
   pagarmeProductId: varchar("pagarme_product_id"), // Pagar.me product reference
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
