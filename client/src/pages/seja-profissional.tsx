@@ -247,17 +247,25 @@ export default function SejaProfissional() {
                       <span>{feature}</span>
                     </li>
                   ))}
-                  {plan.maxContacts && (
-                    <li className="flex items-start text-sm">
-                      <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span>Até {plan.maxContacts} contatos por mês</span>
-                    </li>
-                  )}
-                  {plan.maxPhotos && (
-                    <li className="flex items-start text-sm">
-                      <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
-                      <span>Até {plan.maxPhotos} fotos no perfil</span>
-                    </li>
+                  <li className="flex items-start text-sm">
+                    <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <span>Até {plan.maxContacts || 30} contatos por mês</span>
+                  </li>
+                  <li className="flex items-start text-sm">
+                    <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                    <span>Até {plan.maxPhotos || 2} fotos no perfil</span>
+                  </li>
+                  {plan.isFeatured && (
+                    <>
+                      <li className="flex items-start text-sm">
+                        <Check className="h-4 w-4 text-yellow-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span>Perfil em destaque</span>
+                      </li>
+                      <li className="flex items-start text-sm">
+                        <Check className="h-4 w-4 text-yellow-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span>Suporte prioritário</span>
+                      </li>
+                    </>
                   )}
                 </ul>
                 

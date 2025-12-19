@@ -1273,12 +1273,24 @@ export default function ProfessionalDashboard() {
                           <ul className="space-y-2 mb-4 text-sm">
                             <li className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-green-500" />
-                              {plan.maxContacts ? `${plan.maxContacts} contatos/mês` : 'Contatos ilimitados'}
+                              {plan.maxContacts || 30} contatos/mês
                             </li>
                             <li className="flex items-center gap-2">
                               <Camera className="h-4 w-4 text-orange-500" />
-                              {plan.maxPhotos ? `${plan.maxPhotos} fotos no portfólio` : 'Fotos ilimitadas'}
+                              {plan.maxPhotos || 2} fotos no portfólio
                             </li>
+                            {plan.isFeatured && (
+                              <>
+                                <li className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-yellow-500" />
+                                  Perfil em destaque
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <Check className="h-4 w-4 text-green-500" />
+                                  Suporte prioritário
+                                </li>
+                              </>
+                            )}
                             {plan.features?.slice(0, 3).map((feature: string, idx: number) => (
                               <li key={idx} className="flex items-center gap-2">
                                 <Check className="h-4 w-4 text-green-500" />
