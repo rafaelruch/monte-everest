@@ -2757,18 +2757,6 @@ export default function AdminDashboard() {
                           <span className="text-gray-500">Max. Fotos:</span>
                           <span className="ml-2 font-medium">{plan.maxPhotos || 2}</span>
                         </div>
-                        {plan.isFeatured && (
-                          <>
-                            <div className="text-sm">
-                              <span className="text-gray-500">Perfil Destacado:</span>
-                              <span className="ml-2 font-medium text-yellow-600">Sim</span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-gray-500">Suporte Prioritário:</span>
-                              <span className="ml-2 font-medium text-yellow-600">Sim</span>
-                            </div>
-                          </>
-                        )}
                         <div className="text-sm">
                           <span className="text-gray-500">Prioridade:</span>
                           <span className="ml-2 font-medium">{plan.priority}</span>
