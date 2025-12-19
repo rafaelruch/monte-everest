@@ -2717,7 +2717,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/plans", verifyAdminToken, async (req, res) => {
     try {
-      const plan = await storage.createSubscriptionPlan(req.body);
+      // Clean numeric fields - convert empty strings to null/undefined
+      const cleanedData = { ...req.body };
+      
+      // Decimal fields
+      if (cleanedData.monthlyPrice === "" || cleanedData.monthlyPrice === null) {
+        cleanedData.monthlyPrice = "0";
+      }
+      if (cleanedData.yearlyPrice === "" || cleanedData.yearlyPrice === null) {
+        cleanedData.yearlyPrice = null;
+      }
+      
+      // Integer fields
+      if (cleanedData.maxContacts === "" || cleanedData.maxContacts === null) {
+        cleanedData.maxContacts = null;
+      } else if (typeof cleanedData.maxContacts === 'string') {
+        cleanedData.maxContacts = parseInt(cleanedData.maxContacts) || null;
+      }
+      if (cleanedData.maxPhotos === "" || cleanedData.maxPhotos === null) {
+        cleanedData.maxPhotos = null;
+      } else if (typeof cleanedData.maxPhotos === 'string') {
+        cleanedData.maxPhotos = parseInt(cleanedData.maxPhotos) || null;
+      }
+      if (cleanedData.priority === "" || cleanedData.priority === null) {
+        cleanedData.priority = 0;
+      } else if (typeof cleanedData.priority === 'string') {
+        cleanedData.priority = parseInt(cleanedData.priority) || 0;
+      }
+      
+      const plan = await storage.createSubscriptionPlan(cleanedData);
       
       // Tentar sincronizar automaticamente com Pagar.me
       try {
