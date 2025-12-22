@@ -696,6 +696,32 @@ export default function AdminDashboard() {
     },
   });
 
+  const updateProfessionalPlanMutation = useMutation({
+    mutationFn: async ({ id, planId }: { id: string; planId: string | null }) => {
+      const response = await fetch(`/api/admin/professionals/${id}/plan`, {
+        method: "PATCH",
+        headers: { ...authHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({ planId }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Erro ao atualizar plano");
+      }
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
+      toast({ title: data.message || "Plano atualizado com sucesso!" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar plano",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const syncPaymentMutation = useMutation({
     mutationFn: async (professionalId: string) => {
       return apiRequest("POST", `/api/payments/sync/${professionalId}`, {});
@@ -1458,6 +1484,7 @@ export default function AdminDashboard() {
                       <TableHead>Profissional</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Telefone</TableHead>
+                      <TableHead>Plano</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Pagamento</TableHead>
                       <TableHead>Ações</TableHead>
@@ -1479,6 +1506,29 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell>{professional.email}</TableCell>
                           <TableCell>{professional.phone || "Não informado"}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={professional.subscriptionPlanId || "none"}
+                              onValueChange={(value) =>
+                                updateProfessionalPlanMutation.mutate({
+                                  id: professional.id,
+                                  planId: value === "none" ? null : value,
+                                })
+                              }
+                            >
+                              <SelectTrigger className="w-36">
+                                <SelectValue placeholder="Selecionar..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Sem plano</SelectItem>
+                                {plans.map((plan: SubscriptionPlan) => (
+                                  <SelectItem key={plan.id} value={plan.id}>
+                                    {plan.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
                           <TableCell>{getStatusBadge(professional.status)}</TableCell>
                           <TableCell>{getPaymentStatusBadge(professional.paymentStatus || "pending")}</TableCell>
                           <TableCell>

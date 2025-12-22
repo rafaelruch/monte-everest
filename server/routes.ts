@@ -2099,6 +2099,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update professional's subscription plan (admin only)
+  app.patch("/api/admin/professionals/:id/plan", verifyAdminToken, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { planId } = req.body;
+      
+      if (!id) {
+        return res.status(400).json({ message: "ID do profissional é obrigatório" });
+      }
+
+      const professional = await storage.getProfessional(id);
+      if (!professional) {
+        return res.status(404).json({ message: "Profissional não encontrado" });
+      }
+
+      // If planId is provided, validate it exists
+      let planName = "Nenhum";
+      if (planId) {
+        const plan = await storage.getSubscriptionPlan(planId);
+        if (!plan) {
+          return res.status(404).json({ message: "Plano não encontrado" });
+        }
+        planName = plan.name;
+      }
+
+      // Update the professional's subscriptionPlanId
+      await storage.updateProfessional(id, { 
+        subscriptionPlanId: planId || null 
+      });
+
+      // Log the action
+      await storage.createLog({
+        userId: req.user!.id,
+        action: 'update_professional_plan',
+        entityType: 'professional',
+        entityId: id,
+        details: { 
+          professionalName: professional.fullName,
+          newPlanId: planId || null,
+          newPlanName: planName
+        },
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ message: `Plano alterado para: ${planName}` });
+    } catch (error) {
+      console.error("Error updating professional plan:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Payment management routes
   app.get("/api/admin/payments", verifyAdminToken, async (req, res) => {
     try {
