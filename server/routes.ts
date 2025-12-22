@@ -2103,7 +2103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/admin/professionals/:id/plan", verifyAdminToken, async (req, res) => {
     try {
       const { id } = req.params;
-      const { planId } = req.body;
+      const { planId, expiresAt } = req.body;
       
       if (!id) {
         return res.status(400).json({ message: "ID do profissional é obrigatório" });
@@ -2116,18 +2116,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If planId is provided, validate it exists
       let planName = "Nenhum";
+      let updateData: any = { subscriptionPlanId: planId || null };
+      
       if (planId) {
         const plan = await storage.getSubscriptionPlan(planId);
         if (!plan) {
           return res.status(404).json({ message: "Plano não encontrado" });
         }
         planName = plan.name;
+        
+        // Set expiration date - use provided date or default to 30 days from now
+        const expirationDate = expiresAt 
+          ? new Date(expiresAt) 
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        
+        updateData.subscriptionExpiresAt = expirationDate;
+        updateData.status = 'active';
+        updateData.paymentStatus = 'active';
+      } else {
+        // Removing plan - clear expiration
+        updateData.subscriptionExpiresAt = null;
       }
 
-      // Update the professional's subscriptionPlanId
-      await storage.updateProfessional(id, { 
-        subscriptionPlanId: planId || null 
-      });
+      // Update the professional
+      await storage.updateProfessional(id, updateData);
 
       // Log the action
       await storage.createLog({
@@ -2138,13 +2150,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: { 
           professionalName: professional.fullName,
           newPlanId: planId || null,
-          newPlanName: planName
+          newPlanName: planName,
+          expiresAt: updateData.subscriptionExpiresAt
         },
         ipAddress: req.ip || null,
         userAgent: req.get('User-Agent') || null
       });
 
-      res.json({ message: `Plano alterado para: ${planName}` });
+      const expiresMessage = updateData.subscriptionExpiresAt 
+        ? ` (válido até ${new Date(updateData.subscriptionExpiresAt).toLocaleDateString('pt-BR')})`
+        : '';
+      res.json({ message: `Plano alterado para: ${planName}${expiresMessage}` });
     } catch (error) {
       console.error("Error updating professional plan:", error);
       res.status(500).json({ message: "Erro interno do servidor" });

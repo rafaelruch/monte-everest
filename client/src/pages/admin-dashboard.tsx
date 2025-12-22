@@ -251,6 +251,16 @@ export default function AdminDashboard() {
     adminName: string;
   }>({ open: false, adminId: null, adminName: '' });
   
+  // Estado para modal de vincular plano ao profissional
+  const [assignPlanModal, setAssignPlanModal] = useState<{
+    open: boolean;
+    professionalId: string | null;
+    professionalName: string;
+    currentPlanId: string | null;
+  }>({ open: false, professionalId: null, professionalName: '', currentPlanId: null });
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+  const [selectedExpirationDays, setSelectedExpirationDays] = useState<number>(30);
+  
   const itemsPerPage = 20;
 
   // Check if user is authenticated
@@ -697,11 +707,11 @@ export default function AdminDashboard() {
   });
 
   const updateProfessionalPlanMutation = useMutation({
-    mutationFn: async ({ id, planId }: { id: string; planId: string | null }) => {
+    mutationFn: async ({ id, planId, expiresAt }: { id: string; planId: string | null; expiresAt?: string }) => {
       const response = await fetch(`/api/admin/professionals/${id}/plan`, {
         method: "PATCH",
         headers: { ...authHeaders, "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({ planId, expiresAt }),
       });
       if (!response.ok) {
         const data = await response.json();
@@ -711,6 +721,7 @@ export default function AdminDashboard() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
+      setAssignPlanModal({ open: false, professionalId: null, professionalName: '', currentPlanId: null });
       toast({ title: data.message || "Plano atualizado com sucesso!" });
     },
     onError: (error: any) => {
@@ -1507,27 +1518,31 @@ export default function AdminDashboard() {
                           <TableCell>{professional.email}</TableCell>
                           <TableCell>{professional.phone || "Não informado"}</TableCell>
                           <TableCell>
-                            <Select
-                              value={professional.subscriptionPlanId || "none"}
-                              onValueChange={(value) =>
-                                updateProfessionalPlanMutation.mutate({
-                                  id: professional.id,
-                                  planId: value === "none" ? null : value,
-                                })
-                              }
-                            >
-                              <SelectTrigger className="w-36">
-                                <SelectValue placeholder="Selecionar..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="none">Sem plano</SelectItem>
-                                {plans.map((plan: SubscriptionPlan) => (
-                                  <SelectItem key={plan.id} value={plan.id}>
-                                    {plan.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">
+                                {professional.subscriptionPlanId 
+                                  ? plans.find((p: SubscriptionPlan) => p.id === professional.subscriptionPlanId)?.name || "Plano removido"
+                                  : "Sem plano"}
+                              </span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setAssignPlanModal({
+                                    open: true,
+                                    professionalId: professional.id,
+                                    professionalName: professional.fullName,
+                                    currentPlanId: professional.subscriptionPlanId || null,
+                                  });
+                                  setSelectedPlanId(professional.subscriptionPlanId || "");
+                                  setSelectedExpirationDays(30);
+                                }}
+                                className="text-xs px-2 py-1 h-7"
+                                data-testid={`button-assign-plan-${professional.id}`}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </TableCell>
                           <TableCell>{getStatusBadge(professional.status)}</TableCell>
                           <TableCell>{getPaymentStatusBadge(professional.paymentStatus || "pending")}</TableCell>
@@ -1734,6 +1749,107 @@ export default function AdminDashboard() {
                     </>
                   ) : (
                     'Salvar Nova Senha'
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Modal de Vincular Plano */}
+          <Dialog open={assignPlanModal.open} onOpenChange={(open) => {
+            if (!open) {
+              setAssignPlanModal({ open: false, professionalId: null, professionalName: '', currentPlanId: null });
+              setSelectedPlanId("");
+              setSelectedExpirationDays(30);
+            }
+          }}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Vincular Plano ao Profissional</DialogTitle>
+                <DialogDescription>
+                  Atribuir plano para <strong>{assignPlanModal.professionalName}</strong>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="select-plan">Plano</Label>
+                  <Select
+                    value={selectedPlanId || "none"}
+                    onValueChange={(value) => setSelectedPlanId(value === "none" ? "" : value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione um plano..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem plano</SelectItem>
+                      {plans.map((plan: SubscriptionPlan) => (
+                        <SelectItem key={plan.id} value={plan.id}>
+                          {plan.name} - {formatReais(parseFloat(plan.monthlyPrice))}/mês
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedPlanId && (
+                  <div className="space-y-2">
+                    <Label htmlFor="expiration-days">Validade do Plano</Label>
+                    <Select
+                      value={selectedExpirationDays.toString()}
+                      onValueChange={(value) => setSelectedExpirationDays(parseInt(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="7">7 dias</SelectItem>
+                        <SelectItem value="15">15 dias</SelectItem>
+                        <SelectItem value="30">30 dias</SelectItem>
+                        <SelectItem value="60">60 dias</SelectItem>
+                        <SelectItem value="90">90 dias</SelectItem>
+                        <SelectItem value="180">180 dias (6 meses)</SelectItem>
+                        <SelectItem value="365">365 dias (1 ano)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-gray-500">
+                      Validade até: {new Date(Date.now() + selectedExpirationDays * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setAssignPlanModal({ open: false, professionalId: null, professionalName: '', currentPlanId: null });
+                    setSelectedPlanId("");
+                    setSelectedExpirationDays(30);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (assignPlanModal.professionalId) {
+                      const expiresAt = selectedPlanId 
+                        ? new Date(Date.now() + selectedExpirationDays * 24 * 60 * 60 * 1000).toISOString()
+                        : undefined;
+                      updateProfessionalPlanMutation.mutate({
+                        id: assignPlanModal.professionalId,
+                        planId: selectedPlanId || null,
+                        expiresAt,
+                      });
+                    }
+                  }}
+                  disabled={updateProfessionalPlanMutation.isPending}
+                >
+                  {updateProfessionalPlanMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Salvando...
+                    </>
+                  ) : (
+                    'Salvar'
                   )}
                 </Button>
               </div>
