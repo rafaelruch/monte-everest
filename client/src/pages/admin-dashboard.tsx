@@ -690,6 +690,26 @@ export default function AdminDashboard() {
     },
   });
 
+  const recalculateRankingsMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/admin/recalculate-rankings", {});
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/professionals"] });
+      toast({
+        title: "Rankings Recalculados",
+        description: data.message || "Rankings atualizados com sucesso!",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro",
+        description: "Erro ao recalcular rankings. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateProfessionalStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const response = await fetch(`/api/admin/professionals/${id}/status`, {
@@ -1457,6 +1477,24 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Gerenciar Profissionais</h1>
             <p className="text-gray-600 mt-1">Controle o status e visualize informações dos profissionais cadastrados.</p>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => recalculateRankingsMutation.mutate()}
+            disabled={recalculateRankingsMutation.isPending}
+            className="flex items-center gap-2"
+          >
+            {recalculateRankingsMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Recalculando...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Recalcular Rankings
+              </>
+            )}
+          </Button>
         </div>
 
         <Card>

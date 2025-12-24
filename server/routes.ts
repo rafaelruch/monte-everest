@@ -2772,6 +2772,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recalculate all professional rankings
+  app.post("/api/admin/recalculate-rankings", verifyAdminToken, async (req, res) => {
+    try {
+      const result = await storage.recalculateAllRankings();
+
+      await storage.createLog({
+        userId: req.user!.id,
+        action: 'recalculate_rankings',
+        entityType: 'professional',
+        entityId: null,
+        details: result,
+        ipAddress: req.ip || null,
+        userAgent: req.get('User-Agent') || null
+      });
+
+      res.json({ 
+        message: `Rankings recalculados: ${result.professionalsUpdated} profissionais em ${result.categoriesUpdated} categorias`,
+        ...result
+      });
+    } catch (error) {
+      console.error("Error recalculating rankings:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Manage subscription plans
   app.get("/api/admin/plans", verifyAdminToken, async (req, res) => {
     try {

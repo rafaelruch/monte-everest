@@ -575,22 +575,81 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCategoryRankings(categoryId: string): Promise<void> {
-    const categoryProfessionals = await db.select()
+    // Get all active professionals in this category with their plan priority
+    const categoryProfessionals = await db.select({
+      id: professionals.id,
+      rating: professionals.rating,
+      totalReviews: professionals.totalReviews,
+      subscriptionPlanId: professionals.subscriptionPlanId,
+      createdAt: professionals.createdAt,
+    })
       .from(professionals)
       .where(and(
         eq(professionals.categoryId, categoryId),
         eq(professionals.status, 'active')
-      ))
-      .orderBy(desc(professionals.rating), desc(professionals.totalReviews));
+      ));
 
-    for (let i = 0; i < categoryProfessionals.length; i++) {
+    // Get plan priorities
+    const allPlans = await db.select().from(subscriptionPlans);
+    const planPriorityMap = new Map(allPlans.map(p => [p.id, p.priority || 0]));
+
+    // Sort by: rating DESC, totalReviews DESC, plan priority DESC, createdAt ASC
+    const sortedProfessionals = categoryProfessionals.sort((a, b) => {
+      // First: rating (higher is better)
+      const ratingA = parseFloat(a.rating || '0');
+      const ratingB = parseFloat(b.rating || '0');
+      if (ratingB !== ratingA) return ratingB - ratingA;
+      
+      // Second: total reviews (more is better)
+      const reviewsA = a.totalReviews || 0;
+      const reviewsB = b.totalReviews || 0;
+      if (reviewsB !== reviewsA) return reviewsB - reviewsA;
+      
+      // Third: plan priority (higher is better)
+      const priorityA = planPriorityMap.get(a.subscriptionPlanId || '') || 0;
+      const priorityB = planPriorityMap.get(b.subscriptionPlanId || '') || 0;
+      if (priorityB !== priorityA) return priorityB - priorityA;
+      
+      // Fourth: older accounts first (earlier createdAt is better)
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : Date.now();
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : Date.now();
+      return dateA - dateB;
+    });
+
+    for (let i = 0; i < sortedProfessionals.length; i++) {
       await db.update(professionals)
         .set({ 
           rankingPosition: i + 1,
           updatedAt: new Date()
         })
-        .where(eq(professionals.id, categoryProfessionals[i].id));
+        .where(eq(professionals.id, sortedProfessionals[i].id));
     }
+  }
+
+  async recalculateAllRankings(): Promise<{ categoriesUpdated: number; professionalsUpdated: number }> {
+    // Get all categories with active professionals
+    const categoriesWithProfessionals = await db.selectDistinct({ categoryId: professionals.categoryId })
+      .from(professionals)
+      .where(eq(professionals.status, 'active'));
+
+    let professionalsUpdated = 0;
+    for (const { categoryId } of categoriesWithProfessionals) {
+      if (categoryId) {
+        await this.updateCategoryRankings(categoryId);
+        const count = await db.select({ count: sql<number>`count(*)` })
+          .from(professionals)
+          .where(and(
+            eq(professionals.categoryId, categoryId),
+            eq(professionals.status, 'active')
+          ));
+        professionalsUpdated += Number(count[0]?.count || 0);
+      }
+    }
+
+    return {
+      categoriesUpdated: categoriesWithProfessionals.length,
+      professionalsUpdated
+    };
   }
 
   async getActiveCities(): Promise<string[]> {
