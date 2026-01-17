@@ -1068,7 +1068,10 @@ export class DatabaseStorage implements IStorage {
   // Subscription management
   async deactivateExpiredSubscriptions(): Promise<number> {
     const now = new Date();
-    const [result] = await db.update(professionals)
+    let count = 0;
+    
+    // Deactivate expired paid subscriptions
+    const [paidResult] = await db.update(professionals)
       .set({ 
         status: 'suspended', 
         paymentStatus: 'overdue',
@@ -1076,11 +1079,30 @@ export class DatabaseStorage implements IStorage {
       })
       .where(and(
         lt(professionals.subscriptionExpiresAt, now),
-        eq(professionals.status, 'active')
+        eq(professionals.status, 'active'),
+        sql`${professionals.paymentStatus} != 'trial'`
       ))
       .returning({ id: professionals.id });
     
-    return result ? 1 : 0;
+    if (paidResult) count++;
+    
+    // Deactivate expired trial periods
+    const [trialResult] = await db.update(professionals)
+      .set({ 
+        status: 'suspended', 
+        paymentStatus: 'overdue',
+        updatedAt: new Date()
+      })
+      .where(and(
+        lt(professionals.trialEndsAt, now),
+        eq(professionals.status, 'active'),
+        eq(professionals.paymentStatus, 'trial')
+      ))
+      .returning({ id: professionals.id });
+    
+    if (trialResult) count++;
+    
+    return count;
   }
 
   async getProfessionalsNearExpiry(daysAhead: number = 5): Promise<Professional[]> {
@@ -1099,14 +1121,22 @@ export class DatabaseStorage implements IStorage {
   async isSubscriptionActive(professionalId: string): Promise<boolean> {
     const [professional] = await db.select({
       subscriptionExpiresAt: professionals.subscriptionExpiresAt,
-      status: professionals.status
+      status: professionals.status,
+      paymentStatus: professionals.paymentStatus,
+      trialEndsAt: professionals.trialEndsAt
     }).from(professionals)
       .where(eq(professionals.id, professionalId));
     
     if (!professional) return false;
     if (professional.status !== 'active') return false;
-    if (!professional.subscriptionExpiresAt) return false;
     
+    // Check trial period first
+    if (professional.paymentStatus === 'trial' && professional.trialEndsAt) {
+      return professional.trialEndsAt > new Date();
+    }
+    
+    // Check subscription expiry
+    if (!professional.subscriptionExpiresAt) return false;
     return professional.subscriptionExpiresAt > new Date();
   }
 

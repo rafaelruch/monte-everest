@@ -2874,6 +2874,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (typeof cleanedData.priority === 'string') {
         cleanedData.priority = parseInt(cleanedData.priority) || 0;
       }
+      if (cleanedData.trialDays === "" || cleanedData.trialDays === null || cleanedData.trialDays === undefined) {
+        cleanedData.trialDays = 0;
+      } else if (typeof cleanedData.trialDays === 'string') {
+        cleanedData.trialDays = parseInt(cleanedData.trialDays) || 0;
+      }
       
       const plan = await storage.createSubscriptionPlan(cleanedData);
       
@@ -2934,6 +2939,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (cleanedData.priority === "" || cleanedData.priority === null) {
         cleanedData.priority = undefined;
+      }
+      if (cleanedData.trialDays !== undefined) {
+        if (cleanedData.trialDays === "" || cleanedData.trialDays === null) {
+          cleanedData.trialDays = 0;
+        } else if (typeof cleanedData.trialDays === 'string') {
+          cleanedData.trialDays = parseInt(cleanedData.trialDays) || 0;
+        }
       }
       
       const plan = await storage.updateSubscriptionPlan(req.params.id, cleanedData);
