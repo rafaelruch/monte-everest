@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MapPin, Phone, MessageCircle, Award } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import StarRating from "./star-rating";
+import ShareButton from "./share-button";
 import { Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -220,7 +221,13 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
             <span>{professional.city}</span>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ShareButton 
+              professionalName={professional.fullName} 
+              professionalId={professional.id}
+              variant="icon"
+              size="sm"
+            />
             <Button
               variant="outline"
               size="sm"
