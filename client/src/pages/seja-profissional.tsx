@@ -21,6 +21,7 @@ interface SubscriptionPlan {
   hasPrioritySupport?: boolean;
   hasFeaturedProfile?: boolean;
   hasCompleteProfile?: boolean;
+  trialDays?: number;
 }
 
 export default function SejaProfissional() {
@@ -71,6 +72,20 @@ export default function SejaProfissional() {
     },
     onSuccess: (data) => {
       setShowCheckout(false);
+      
+      // Check if this is a trial registration (no payment needed)
+      if (data.isTrial) {
+        toast({
+          title: "Cadastro realizado com sucesso!",
+          description: data.message || `Você tem ${data.trialDays} dias de período gratuito. Suas credenciais foram enviadas por email.`,
+        });
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+          setLocation('/profissional/login');
+        }, 2000);
+        return;
+      }
       
       // Flow: Navigate to waiting page, then open checkout in new tab
       // Pagar.me doesn't support automatic redirect after payment,
@@ -233,13 +248,32 @@ export default function SejaProfissional() {
                 </div>
               )}
               
+              {plan.trialDays && plan.trialDays > 0 && (
+                <div className="absolute -top-4 right-4">
+                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {plan.trialDays} dias grátis
+                  </span>
+                </div>
+              )}
+              
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
                 <p className="text-muted-foreground text-sm mb-4">{plan.description}</p>
-                <div className="text-4xl font-bold text-foreground mb-2">
-                  {formatCurrency(plan.monthlyPrice)}
-                  <span className="text-lg text-muted-foreground font-normal">/mês</span>
-                </div>
+                {plan.trialDays && plan.trialDays > 0 ? (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 mb-1">
+                      Grátis por {plan.trialDays} dias
+                    </div>
+                    <div className="text-lg text-muted-foreground">
+                      Depois {formatCurrency(plan.monthlyPrice)}/mês
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-4xl font-bold text-foreground mb-2">
+                    {formatCurrency(plan.monthlyPrice)}
+                    <span className="text-lg text-muted-foreground font-normal">/mês</span>
+                  </div>
+                )}
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -312,12 +346,32 @@ export default function SejaProfissional() {
                     <p className="text-sm text-muted-foreground">{selectedPlan?.description}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-[#3C8BAB]">
-                      {selectedPlan && formatCurrency(selectedPlan.monthlyPrice)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">por mês</div>
+                    {selectedPlan?.trialDays && selectedPlan.trialDays > 0 ? (
+                      <>
+                        <div className="text-2xl font-bold text-green-600">
+                          Grátis
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          por {selectedPlan.trialDays} dias
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-2xl font-bold text-[#3C8BAB]">
+                          {selectedPlan && formatCurrency(selectedPlan.monthlyPrice)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">por mês</div>
+                      </>
+                    )}
                   </div>
                 </div>
+                {selectedPlan?.trialDays && selectedPlan.trialDays > 0 && (
+                  <div className="mt-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-md">
+                    <p className="text-sm text-green-700 dark:text-green-400">
+                      Após o período gratuito de {selectedPlan.trialDays} dias, você será cobrado {formatCurrency(selectedPlan.monthlyPrice)}/mês.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Personal Data */}
@@ -430,20 +484,39 @@ export default function SejaProfissional() {
                 </div>
               </div>
 
-              {/* Payment Info */}
-              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                      Escolha sua forma de pagamento
-                    </p>
-                    <p className="text-blue-700 dark:text-blue-300">
-                      Você poderá pagar com <strong>PIX</strong> ou <strong>Cartão de Crédito</strong> na próxima etapa.
-                    </p>
+              {/* Payment Info - only show for non-trial plans */}
+              {!(selectedPlan?.trialDays && selectedPlan.trialDays > 0) && (
+                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Escolha sua forma de pagamento
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300">
+                        Você poderá pagar com <strong>PIX</strong> ou <strong>Cartão de Crédito</strong> na próxima etapa.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Trial Info - only show for trial plans */}
+              {selectedPlan?.trialDays && selectedPlan.trialDays > 0 && (
+                <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Check className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-green-900 dark:text-green-100 mb-1">
+                        Período Gratuito
+                      </p>
+                      <p className="text-green-700 dark:text-green-300">
+                        Seu cadastro será ativado imediatamente e você receberá as credenciais de acesso por email.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Submit Button */}
               <div className="flex gap-4">
@@ -459,7 +532,11 @@ export default function SejaProfissional() {
                 <Button
                   type="submit"
                   disabled={createRegistrationMutation.isPending}
-                  className="flex-1 bg-[#3C8BAB] hover:bg-[#3C8BAB]/90"
+                  className={`flex-1 ${
+                    selectedPlan?.trialDays && selectedPlan.trialDays > 0 
+                      ? 'bg-green-600 hover:bg-green-700' 
+                      : 'bg-[#3C8BAB] hover:bg-[#3C8BAB]/90'
+                  }`}
                   data-testid="button-submit"
                 >
                   {createRegistrationMutation.isPending ? (
@@ -468,7 +545,9 @@ export default function SejaProfissional() {
                       Processando...
                     </>
                   ) : (
-                    `Continuar para Pagamento`
+                    selectedPlan?.trialDays && selectedPlan.trialDays > 0
+                      ? 'Começar Período Gratuito'
+                      : 'Continuar para Pagamento'
                   )}
                 </Button>
               </div>
