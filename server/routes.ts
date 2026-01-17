@@ -181,8 +181,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "categoryId é obrigatório" });
       }
       
-      const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
+      let pageNum = parseInt(page as string);
+      let limitNum = parseInt(limit as string);
+      
+      // Validate and sanitize pagination parameters
+      if (isNaN(pageNum) || pageNum < 1) pageNum = 1;
+      if (isNaN(limitNum) || limitNum < 1) limitNum = 20;
+      if (limitNum > 100) limitNum = 100; // Max limit to prevent abuse
+      
       const offset = (pageNum - 1) * limitNum;
       
       const result = await storage.getRankedProfessionalsByCategory(

@@ -28,6 +28,7 @@ import Installation from "@/pages/installation";
 import EasyPanelInstaller from "@/pages/EasyPanelInstaller";
 import SetupTables from "@/pages/setup-tables";
 import PageContent from "@/pages/page-content";
+import Ranking from "@/pages/ranking";
 import NotFound from "@/pages/not-found";
 
 // Type for install status response
@@ -80,6 +81,7 @@ function Router() {
               <Route path="/seja-profissional" component={SejaProfissional} />
               <Route path="/entrar" component={Entrar} />
               <Route path="/buscar" component={SearchResults} />
+              <Route path="/ranking" component={Ranking} />
               <Route path="/profissional/:id" component={ProfessionalProfile} />
               <Route path="/professional-login" component={ProfessionalLogin} />
               <Route path="/professional-checkout" component={ProfessionalCheckout} />
