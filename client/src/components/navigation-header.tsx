@@ -11,6 +11,7 @@ export default function NavigationHeader() {
 
   const navigation = [
     { name: "Home", href: "/", current: location === "/" },
+    { name: "Ranking", href: "/ranking", current: location === "/ranking" },
     { name: "Como Funciona", href: "/como-funciona", current: location === "/como-funciona" },
     { name: "Seja um Profissional", href: "/seja-profissional", current: location === "/seja-profissional" },
   ];
