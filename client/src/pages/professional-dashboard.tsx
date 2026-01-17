@@ -60,7 +60,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 const updateProfileSchema = z.object({
   fullName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
   phone: z.string().min(10, "Telefone inválido"),
-  description: z.string().min(20, "Descrição deve ter pelo menos 20 caracteres").max(250, "Descrição não pode ter mais de 250 caracteres"),
+  description: z.string().min(20, "Descrição deve ter pelo menos 20 caracteres").max(5000, "Descrição não pode ter mais de 5000 caracteres"),
   serviceArea: z.string().min(8, "CEP inválido"),
   city: z.string().min(2, "Cidade é obrigatória"),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
