@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Share2, Copy, Check } from "lucide-react";
-import { FaWhatsapp, FaFacebook, FaTwitter, FaLinkedin } from "react-icons/fa";
+import { FaWhatsapp, FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { useToast } from "@/hooks/use-toast";
 
 interface ShareButtonProps {
@@ -47,6 +47,22 @@ export default function ShareButton({
   const handleLinkedIn = () => {
     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`;
     window.open(url, "_blank");
+  };
+
+  const handleInstagram = async () => {
+    try {
+      await navigator.clipboard.writeText(profileUrl);
+      toast({
+        title: "Link copiado para Instagram!",
+        description: "Cole o link nos seus Stories ou bio do Instagram.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o link.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyLink = async () => {
@@ -106,6 +122,10 @@ export default function ShareButton({
         <DropdownMenuItem onClick={handleLinkedIn} className="cursor-pointer">
           <FaLinkedin className="h-4 w-4 mr-2 text-blue-700" />
           LinkedIn
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleInstagram} className="cursor-pointer">
+          <FaInstagram className="h-4 w-4 mr-2 text-pink-500" />
+          Instagram
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
           {copied ? (

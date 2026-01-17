@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import StarRating from "@/components/star-rating";
+import ShareButton from "@/components/share-button";
 import { insertReviewSchema, insertContactSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -346,6 +347,11 @@ export default function ProfessionalProfile() {
                     )}
                   </div>
                 </div>
+                <ShareButton 
+                  professionalName={professional.fullName} 
+                  professionalId={professionalId || ""}
+                  variant="button"
+                />
               </div>
               
               <div className="flex items-center gap-4 text-muted-foreground">
