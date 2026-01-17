@@ -78,6 +78,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         has_priority_support BOOLEAN DEFAULT false,
         has_featured_profile BOOLEAN DEFAULT false,
         has_complete_profile BOOLEAN DEFAULT false,
+        trial_days INTEGER DEFAULT 0,
         pagarme_product_id VARCHAR,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -112,6 +113,7 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         pending_pix_url TEXT,
         pending_pix_expiry TIMESTAMP,
         pending_upgrade_plan_id VARCHAR,
+        trial_ends_at TIMESTAMP,
         rating DECIMAL(3,2) DEFAULT 0.00,
         total_reviews INTEGER DEFAULT 0,
         ranking_position INTEGER,
@@ -500,6 +502,20 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
                 (prof_id, 'João Santos', 'joao@email.com', 4, 'Bom trabalho, ficou conforme solicitado. Entrega no prazo.', true),
                 (prof_id, 'Ana Costa', 'ana@email.com', 5, 'Superou minhas expectativas! Qualidade excepcional do serviço.', true)
             ON CONFLICT DO NOTHING;
+        END IF;
+    END $$;
+
+    -- Adicionar colunas novas em tabelas existentes (migrations)
+    DO $$ 
+    BEGIN 
+        -- trial_days em subscription_plans
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='subscription_plans' AND column_name='trial_days') THEN
+            ALTER TABLE subscription_plans ADD COLUMN trial_days INTEGER DEFAULT 0;
+        END IF;
+        
+        -- trial_ends_at em professionals
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professionals' AND column_name='trial_ends_at') THEN
+            ALTER TABLE professionals ADD COLUMN trial_ends_at TIMESTAMP;
         END IF;
     END $$;
 
