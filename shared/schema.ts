@@ -55,6 +55,7 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   hasPrioritySupport: boolean("has_priority_support").default(false), // Suporte prioritário
   hasFeaturedProfile: boolean("has_featured_profile").default(false), // Perfil destacado com selo
   hasCompleteProfile: boolean("has_complete_profile").default(false), // Perfil completo
+  trialDays: integer("trial_days").default(0), // Free trial period in days (0 = no trial)
   pagarmeProductId: varchar("pagarme_product_id"), // Pagar.me product reference
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -92,10 +93,11 @@ export const professionals = pgTable("professionals", {
     sunday?: string;
   }>(),
   status: varchar("status").notNull().default("pending"), // pending, active, suspended
-  paymentStatus: varchar("payment_status").notNull().default("pending"), // pending, active, overdue
+  paymentStatus: varchar("payment_status").notNull().default("pending"), // pending, active, overdue, trial
   lastPaymentDate: timestamp("last_payment_date"),
   nextPaymentDate: timestamp("next_payment_date"),
   subscriptionExpiresAt: timestamp("subscription_expires_at"), // When subscription becomes inactive
+  trialEndsAt: timestamp("trial_ends_at"), // When free trial period ends (null if not on trial)
   firstLogin: boolean("first_login").default(true), // Force password change on first login
   photo: varchar("photo"), // URL to professional's photo
   pendingPixCode: text("pending_pix_code"), // PIX code for pending payment
