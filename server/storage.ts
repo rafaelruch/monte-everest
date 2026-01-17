@@ -154,6 +154,17 @@ export interface IStorage {
   getPasswordResetTokensByProfessional(professionalId: string): Promise<PasswordResetToken[]>;
   markTokenAsUsed(token: string): Promise<void>;
   cleanupExpiredTokens(): Promise<void>;
+
+  // Ranking operations
+  recalculateAllRankings(): Promise<{ categoriesUpdated: number; professionalsUpdated: number }>;
+  getRankedProfessionalsByCategory(categoryId: string, limit?: number, offset?: number): Promise<{
+    professionals: Array<Professional & { 
+      categoryName: string; 
+      planName: string | null; 
+      hasFeaturedProfile: boolean;
+    }>;
+    total: number;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -649,6 +660,54 @@ export class DatabaseStorage implements IStorage {
     return {
       categoriesUpdated: categoriesWithProfessionals.length,
       professionalsUpdated
+    };
+  }
+
+  async getRankedProfessionalsByCategory(categoryId: string, limit: number = 20, offset: number = 0): Promise<{
+    professionals: Array<Professional & { 
+      categoryName: string; 
+      planName: string | null; 
+      hasFeaturedProfile: boolean;
+    }>;
+    total: number;
+  }> {
+    // Get category name
+    const [category] = await db.select().from(categories).where(eq(categories.id, categoryId));
+    const categoryName = category?.name || '';
+
+    // Get total count
+    const [countResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(professionals)
+      .where(and(
+        eq(professionals.categoryId, categoryId),
+        eq(professionals.status, 'active')
+      ));
+    const total = Number(countResult?.count || 0);
+
+    // Get ranked professionals with plan info
+    const result = await db.select({
+      professional: professionals,
+      planName: subscriptionPlans.name,
+      hasFeaturedProfile: subscriptionPlans.hasFeaturedProfile,
+    })
+      .from(professionals)
+      .leftJoin(subscriptionPlans, eq(professionals.subscriptionPlanId, subscriptionPlans.id))
+      .where(and(
+        eq(professionals.categoryId, categoryId),
+        eq(professionals.status, 'active')
+      ))
+      .orderBy(asc(professionals.rankingPosition))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      professionals: result.map(row => ({
+        ...row.professional,
+        categoryName,
+        planName: row.planName,
+        hasFeaturedProfile: row.hasFeaturedProfile || false
+      })),
+      total
     };
   }
 
