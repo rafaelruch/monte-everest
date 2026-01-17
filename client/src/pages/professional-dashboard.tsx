@@ -41,7 +41,8 @@ import {
   ChevronsUpDown,
   Clock,
   Smartphone,
-  Copy
+  Copy,
+  Gift
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,15 @@ type ChangePasswordData = z.infer<typeof changePasswordSchema>;
 function isSubscriptionActive(professional: any): boolean {
   if (!professional) return false;
   if (professional.status !== 'active') return false;
+  
+  // Check trial period first
+  if (professional.paymentStatus === 'trial' && professional.trialEndsAt) {
+    const trialEnd = new Date(professional.trialEndsAt);
+    const today = new Date();
+    return trialEnd >= today;
+  }
+  
+  // Check subscription expiry
   if (!professional.subscriptionExpiresAt) return false;
   
   const expiryDate = new Date(professional.subscriptionExpiresAt);
@@ -665,8 +675,72 @@ export default function ProfessionalDashboard() {
         </div>
       </header>
 
+      {/* Trial Period Warning */}
+      {professional?.paymentStatus === 'trial' && professional?.trialEndsAt && (() => {
+        const trialEnd = new Date(professional.trialEndsAt);
+        const today = new Date();
+        const daysLeft = Math.ceil((trialEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysLeft > 5) {
+          return (
+            <div className="max-w-6xl mx-auto px-4 py-3">
+              <Alert className="border-emerald-200 bg-emerald-50">
+                <Gift className="h-4 w-4 text-emerald-600" />
+                <AlertDescription className="text-emerald-800">
+                  <strong>Período de Teste:</strong> Você está em um período gratuito de avaliação. Seu teste expira em {daysLeft} dias ({trialEnd.toLocaleDateString("pt-BR")}). 
+                  Aproveite para conhecer a plataforma!
+                </AlertDescription>
+              </Alert>
+            </div>
+          );
+        } else if (daysLeft > 0) {
+          return (
+            <div className="max-w-6xl mx-auto px-4 py-3">
+              <Alert className="border-orange-200 bg-orange-50">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800">
+                  <strong>Teste Expirando:</strong> Seu período de teste termina em {daysLeft} dias ({trialEnd.toLocaleDateString("pt-BR")}). 
+                  Assine um plano para manter seu perfil ativo!
+                  <div className="mt-2">
+                    <Button 
+                      onClick={() => window.location.href = '/seja-profissional'}
+                      variant="outline"
+                      size="sm"
+                      className="bg-white hover:bg-gray-50 border-orange-300 text-orange-700"
+                    >
+                      Ver Planos
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          );
+        } else {
+          return (
+            <div className="max-w-6xl mx-auto px-4 py-3">
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Teste Expirado:</strong> Seu período gratuito terminou. Assine um plano para continuar usando a plataforma.
+                  <div className="mt-3">
+                    <Button 
+                      onClick={() => window.location.href = '/seja-profissional'}
+                      className="bg-white hover:bg-gray-50 border-red-300 text-red-700"
+                      variant="outline"
+                      size="sm"
+                    >
+                      Ver Planos
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          );
+        }
+      })()}
+
       {/* Subscription Warning */}
-      {professional?.subscriptionExpiresAt && (() => {
+      {professional?.subscriptionExpiresAt && professional?.paymentStatus !== 'trial' && (() => {
         const expiryDate = new Date(professional.subscriptionExpiresAt);
         const today = new Date();
         const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -1155,7 +1229,9 @@ export default function ProfessionalDashboard() {
                   <Badge 
                     variant={professional?.status === "active" ? "default" : professional?.status === "inactive" ? "secondary" : "outline"}
                     className={`text-xs mt-1 ${
-                      professional?.status === "active" 
+                      professional?.paymentStatus === "trial"
+                        ? "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200"
+                        : professional?.status === "active" 
                         ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-200" 
                         : professional?.status === "inactive"
                         ? "bg-red-100 text-red-800 border-red-200 hover:bg-red-200"
@@ -1163,7 +1239,7 @@ export default function ProfessionalDashboard() {
                     }`}
                     data-testid="status-badge"
                   >
-                    {professional?.status === "active" ? "Ativo" : professional?.status === "inactive" ? "Inativo" : "Pendente"}
+                    {professional?.paymentStatus === "trial" ? "Período de Teste" : professional?.status === "active" ? "Ativo" : professional?.status === "inactive" ? "Inativo" : "Pendente"}
                   </Badge>
                 </div>
               </div>
@@ -1173,9 +1249,47 @@ export default function ProfessionalDashboard() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-blue-500" />
+                {professional?.paymentStatus === 'trial' ? (
+                  <Gift className="h-5 w-5 text-emerald-500" />
+                ) : (
+                  <Clock className="h-5 w-5 text-blue-500" />
+                )}
                 <div>
-                  {professional?.subscriptionExpiresAt ? (
+                  {professional?.paymentStatus === 'trial' && professional?.trialEndsAt ? (
+                    <>
+                      <p className="text-lg font-semibold" data-testid="trial-expiry">
+                        {new Date(professional.trialEndsAt).toLocaleDateString("pt-BR")}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Teste gratuito até
+                      </p>
+                      {(() => {
+                        const trialEnd = new Date(professional.trialEndsAt);
+                        const today = new Date();
+                        const daysLeft = Math.ceil((trialEnd.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysLeft <= 0) {
+                          return (
+                            <Badge variant="destructive" className="text-xs mt-1">
+                              Teste Expirado
+                            </Badge>
+                          );
+                        } else if (daysLeft <= 3) {
+                          return (
+                            <Badge variant="destructive" className="text-xs mt-1 bg-orange-100 text-orange-800 border-orange-200">
+                              {daysLeft} dias de teste
+                            </Badge>
+                          );
+                        } else {
+                          return (
+                            <Badge variant="default" className="text-xs mt-1 bg-emerald-100 text-emerald-800 border-emerald-200">
+                              {daysLeft} dias de teste
+                            </Badge>
+                          );
+                        }
+                      })()}
+                    </>
+                  ) : professional?.subscriptionExpiresAt ? (
                     <>
                       <p className="text-lg font-semibold" data-testid="subscription-expiry">
                         {new Date(professional.subscriptionExpiresAt).toLocaleDateString("pt-BR")}
