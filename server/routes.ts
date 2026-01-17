@@ -4354,6 +4354,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Plan not found' });
       }
 
+      // Check if plan has free trial period
+      const trialDays = plan.trialDays || 0;
+      
+      if (trialDays > 0) {
+        console.log('[REGISTER-CHECKOUT] Plan has free trial:', trialDays, 'days');
+        
+        // Generate password for trial user
+        const tempPassword = generateTemporaryPassword(10);
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+        
+        // Calculate trial end date
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
+        
+        // Create professional with trial status (active immediately)
+        const newProfessional = await storage.createProfessional({
+          fullName: name,
+          email: email,
+          document: cleanCpf,
+          phone: phone.replace(/\D/g, ''),
+          password: hashedPassword,
+          status: 'active',
+          paymentStatus: 'trial',
+          subscriptionPlanId: plan.id,
+          trialEndsAt: trialEndsAt,
+          description: '', // Will be filled by professional after activation
+          categoryId: '', // Will be set when they complete profile
+          serviceArea: '', // Will be set when they complete profile
+          city: '', // Will be set when they complete profile
+          firstLogin: true // Force password change on first login
+        });
+        
+        console.log('[REGISTER-CHECKOUT] Trial professional created:', newProfessional.id);
+        console.log('[REGISTER-CHECKOUT] Trial ends at:', trialEndsAt);
+        
+        // Send credentials email immediately
+        try {
+          const emailSent = await emailService.sendCredentialsEmail({
+            email: email,
+            name: name,
+            password: tempPassword
+          });
+          
+          if (emailSent) {
+            console.log('[REGISTER-CHECKOUT] Credentials email sent for trial user:', email);
+          } else {
+            console.log('[REGISTER-CHECKOUT] Failed to send credentials email for trial user:', email);
+          }
+        } catch (emailError) {
+          console.error('[REGISTER-CHECKOUT] Error sending credentials email:', emailError);
+        }
+        
+        // Return success without checkout URL (no payment needed)
+        return res.json({
+          success: true,
+          isTrial: true,
+          trialDays: trialDays,
+          trialEndsAt: trialEndsAt,
+          professionalId: newProfessional.id,
+          message: `Cadastro realizado com sucesso! Você tem ${trialDays} dias de período gratuito. Suas credenciais foram enviadas para ${email}.`
+        });
+      }
+
       console.log('[REGISTER-CHECKOUT] Creating professional with pending payment status');
 
       // Create professional with pending_payment status
