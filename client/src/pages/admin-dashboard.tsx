@@ -128,6 +128,7 @@ const planSchema = z.object({
   hasPrioritySupport: z.boolean().default(false),
   hasFeaturedProfile: z.boolean().default(false),
   hasCompleteProfile: z.boolean().default(false),
+  trialDays: z.number().min(0).default(0),
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
@@ -542,6 +543,7 @@ export default function AdminDashboard() {
       hasPrioritySupport: false,
       hasFeaturedProfile: false,
       hasCompleteProfile: false,
+      trialDays: 0,
     },
   });
 
@@ -2684,6 +2686,7 @@ export default function AdminDashboard() {
                   hasPrioritySupport: false,
                   hasFeaturedProfile: false,
                   hasCompleteProfile: false,
+                  trialDays: 0,
                 });
               }}
             >
@@ -2958,6 +2961,32 @@ export default function AdminDashboard() {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={planForm.control}
+                    name="trialDays"
+                    render={({ field }) => (
+                      <FormItem className="rounded-lg border p-4">
+                        <div className="space-y-2">
+                          <FormLabel className="text-base">Período Gratuito (dias)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              {...field}
+                              value={field.value || 0}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <p className="text-sm text-gray-600">
+                            Número de dias de teste gratuito. Use 0 para exigir pagamento imediato.
+                          </p>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="flex justify-end gap-3">
@@ -3061,6 +3090,11 @@ export default function AdminDashboard() {
                               Perfil Completo
                             </Badge>
                           )}
+                          {plan.trialDays > 0 && (
+                            <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                              {plan.trialDays} dias grátis
+                            </Badge>
+                          )}
                         </div>
                         <div className="text-sm">
                           <span className="text-gray-500">Pagar.me ID:</span>
@@ -3096,6 +3130,7 @@ export default function AdminDashboard() {
                                 hasPrioritySupport: plan.hasPrioritySupport || false,
                                 hasFeaturedProfile: plan.hasFeaturedProfile || false,
                                 hasCompleteProfile: plan.hasCompleteProfile || false,
+                                trialDays: plan.trialDays || 0,
                               });
                               setIsPlanDialogOpen(true);
                             }}
