@@ -172,6 +172,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get ranked professionals by category (public ranking page)
+  app.get("/api/rankings", async (req, res) => {
+    try {
+      const { categoryId, page = "1", limit = "20" } = req.query;
+      
+      if (!categoryId) {
+        return res.status(400).json({ message: "categoryId é obrigatório" });
+      }
+      
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const offset = (pageNum - 1) * limitNum;
+      
+      const result = await storage.getRankedProfessionalsByCategory(
+        categoryId as string,
+        limitNum,
+        offset
+      );
+      
+      res.json({
+        ...result,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(result.total / limitNum)
+      });
+    } catch (error) {
+      console.error("Error fetching rankings:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Search professionals
   app.get("/api/professionals/search", async (req, res) => {
     try {
