@@ -1575,15 +1575,15 @@ export default function ProfessionalDashboard() {
                               <Textarea 
                                 {...field} 
                                 placeholder="Descreva seus serviços, experiência e diferenciais..."
-                                rows={4}
-                                maxLength={250}
+                                rows={8}
+                                maxLength={5000}
                                 data-testid="textarea-description" 
                               />
                             </FormControl>
                             <div className="flex justify-between items-center">
                               <FormMessage />
                               <p className="text-sm text-muted-foreground">
-                                {field.value?.length || 0}/250 caracteres
+                                {field.value?.length || 0}/5000 caracteres
                               </p>
                             </div>
                           </FormItem>
