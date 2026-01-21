@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Check, CreditCard, Loader2 } from "lucide-react";
+import { Check, CreditCard, Loader2, Mail, ArrowRight } from "lucide-react";
 
 interface SubscriptionPlan {
   id: string;
@@ -29,6 +29,8 @@ export default function SejaProfissional() {
   const [location, setLocation] = useLocation();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showTrialSuccess, setShowTrialSuccess] = useState(false);
+  const [trialEmail, setTrialEmail] = useState("");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -75,15 +77,8 @@ export default function SejaProfissional() {
       
       // Check if this is a trial registration (no payment needed)
       if (data.isTrial) {
-        toast({
-          title: "Cadastro realizado com sucesso!",
-          description: data.message || `Você tem ${data.trialDays} dias de período gratuito. Suas credenciais foram enviadas por email.`,
-        });
-        
-        // Redirect to login page after a short delay
-        setTimeout(() => {
-          setLocation('/profissional/login');
-        }, 2000);
+        setTrialEmail(formData.email);
+        setShowTrialSuccess(true);
         return;
       }
       
@@ -210,6 +205,83 @@ export default function SejaProfissional() {
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p>Carregando planos...</p>
         </div>
+      </div>
+    );
+  }
+
+  // Trial success screen
+  if (showTrialSuccess) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <Card className="max-w-lg w-full">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="mb-6">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-10 w-10 text-green-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">
+                Cadastro Realizado com Sucesso!
+              </h1>
+              <p className="text-muted-foreground">
+                Seu período gratuito foi ativado.
+              </p>
+            </div>
+            
+            <div className="bg-muted/50 rounded-lg p-6 mb-6">
+              <h2 className="font-semibold text-foreground mb-4">
+                Próximos passos:
+              </h2>
+              <div className="space-y-4 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Verifique seu e-mail</p>
+                    <p className="text-sm text-muted-foreground">
+                      Enviamos suas credenciais de acesso para <strong>{trialEmail}</strong>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Acesse o Portal do Profissional</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use o email e senha recebidos para fazer login
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    3
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">Complete seu perfil</p>
+                    <p className="text-sm text-muted-foreground">
+                      Adicione foto, descrição e informações sobre seus serviços
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={() => setLocation('/professional-login')}
+              className="w-full"
+              size="lg"
+            >
+              Acessar Portal do Profissional
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            
+            <p className="text-xs text-muted-foreground mt-4">
+              Não recebeu o e-mail? Verifique sua pasta de spam ou lixo eletrônico.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
