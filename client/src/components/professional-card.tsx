@@ -8,7 +8,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MapPin, Phone, MessageCircle, Award } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import StarRating from "./star-rating";
-import ShareButton from "./share-button";
 import { Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -187,7 +186,13 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
                 />
               </div>
               
-              {/* Category after rating */}
+              {/* City below rating */}
+              <div className="mt-1 text-sm text-muted-foreground" data-testid={`professional-location-${professional.id}`}>
+                <MapPin className="inline h-3.5 w-3.5 mr-1" />
+                <span>{professional.city}</span>
+              </div>
+              
+              {/* Category after location */}
               {professional.category && (
                 <div className="mt-1">
                   <p className="text-primary font-medium text-sm" data-testid={`professional-category-${professional.id}`}>
@@ -215,58 +220,45 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground" data-testid={`professional-location-${professional.id}`}>
-            <MapPin className="inline h-4 w-4 mr-1" />
-            <span>{professional.city}</span>
-          </div>
-          
-          <div className="flex gap-2 items-center">
-            <ShareButton 
-              professionalName={professional.fullName} 
-              professionalId={professional.id}
-              variant="icon"
-              size="sm"
-            />
-            {professional.socialMedia?.instagram && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const instagram = professional.socialMedia?.instagram || "";
-                  let url = instagram;
-                  if (instagram.startsWith("@")) {
-                    url = `https://instagram.com/${instagram.slice(1)}`;
-                  } else if (!instagram.startsWith("http")) {
-                    url = `https://instagram.com/${instagram}`;
-                  }
-                  window.open(url, "_blank");
-                }}
-                className="bg-pink-50 border-pink-200 text-pink-600 hover:bg-pink-100"
-                data-testid={`button-instagram-${professional.id}`}
-              >
-                <FaInstagram className="h-4 w-4" />
-              </Button>
-            )}
+        <div className="flex items-center justify-end gap-2">
+          {professional.socialMedia?.instagram && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleWhatsAppClick}
-              className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-              data-testid={`button-whatsapp-${professional.id}`}
+              onClick={() => {
+                const instagram = professional.socialMedia?.instagram || "";
+                let url = instagram;
+                if (instagram.startsWith("@")) {
+                  url = `https://instagram.com/${instagram.slice(1)}`;
+                } else if (!instagram.startsWith("http")) {
+                  url = `https://instagram.com/${instagram}`;
+                }
+                window.open(url, "_blank");
+              }}
+              className="bg-pink-50 border-pink-200 text-pink-600 hover:bg-pink-100"
+              data-testid={`button-instagram-${professional.id}`}
             >
-              <FaWhatsapp className="h-4 w-4 mr-1" />
-              WhatsApp
+              <FaInstagram className="h-4 w-4" />
             </Button>
-            
-            <Button
-              size="sm"
-              onClick={handleContactClick}
-              data-testid={`button-contact-${professional.id}`}
-            >
-              Ver Perfil
-            </Button>
-          </div>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleWhatsAppClick}
+            className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+            data-testid={`button-whatsapp-${professional.id}`}
+          >
+            <FaWhatsapp className="h-4 w-4 mr-1" />
+            WhatsApp
+          </Button>
+          
+          <Button
+            size="sm"
+            onClick={handleContactClick}
+            data-testid={`button-contact-${professional.id}`}
+          >
+            Ver Perfil
+          </Button>
         </div>
 
         {/* WhatsApp Contact Dialog */}
