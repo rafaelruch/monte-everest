@@ -28,7 +28,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import StarRating from "@/components/star-rating";
 import ShareButton from "@/components/share-button";
 import { insertReviewSchema, insertContactSchema } from "@shared/schema";
@@ -777,6 +777,28 @@ export default function ProfessionalProfile() {
                     >
                       <Globe className="h-4 w-4 mr-2" />
                       Site do profissional
+                    </a>
+                  </div>
+                )}
+
+                {professional.socialMedia?.instagram && (
+                  <div>
+                    <Separator className="my-4" />
+                    <a 
+                      href={
+                        professional.socialMedia.instagram.startsWith("@") 
+                          ? `https://instagram.com/${professional.socialMedia.instagram.slice(1)}`
+                          : professional.socialMedia.instagram.startsWith("http")
+                            ? professional.socialMedia.instagram
+                            : `https://instagram.com/${professional.socialMedia.instagram}`
+                      } 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-pink-600 hover:underline"
+                      data-testid="professional-instagram"
+                    >
+                      <FaInstagram className="h-4 w-4 mr-2" />
+                      Instagram
                     </a>
                   </div>
                 )}

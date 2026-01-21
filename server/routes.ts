@@ -1396,12 +1396,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { fullName, phone, description, serviceArea, city, categoryId } = req.body;
+      const { fullName, phone, description, serviceArea, city, categoryId, instagram } = req.body;
 
       // Validate required fields
       if (!fullName || !phone || !description || !serviceArea || !city || !categoryId) {
         return res.status(400).json({ message: "Todos os campos são obrigatórios" });
       }
+
+      // Build social media object with instagram
+      const socialMedia = {
+        ...professional.socialMedia,
+        instagram: instagram || null
+      };
 
       // Update professional profile
       const updatedProfessional = await storage.updateProfessional(professionalId, {
@@ -1410,7 +1416,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description,
         serviceArea,
         city,
-        categoryId
+        categoryId,
+        socialMedia
       });
 
       res.json(updatedProfessional);

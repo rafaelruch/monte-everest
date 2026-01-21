@@ -65,6 +65,7 @@ const updateProfileSchema = z.object({
   serviceArea: z.string().min(8, "CEP inválido"),
   city: z.string().min(2, "Cidade é obrigatória"),
   categoryId: z.string().min(1, "Categoria é obrigatória"),
+  instagram: z.string().optional(),
 });
 
 type UpdateProfileData = z.infer<typeof updateProfileSchema>;
@@ -311,6 +312,7 @@ export default function ProfessionalDashboard() {
       serviceArea: professional.serviceArea || "",
       city: professional.city || "",
       categoryId: professional.categoryId || "",
+      instagram: professional.socialMedia?.instagram || "",
     } : undefined,
   });
 
@@ -1700,6 +1702,24 @@ export default function ProfessionalDashboard() {
                                 {field.value?.length || 0}/5000 caracteres
                               </p>
                             </div>
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="instagram"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Instagram</FormLabel>
+                            <FormControl>
+                              <Input 
+                                {...field} 
+                                placeholder="https://instagram.com/seu_usuario ou @seu_usuario"
+                                data-testid="input-instagram" 
+                              />
+                            </FormControl>
+                            <FormMessage />
                           </FormItem>
                         )}
                       />

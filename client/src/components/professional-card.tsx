@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MapPin, Phone, MessageCircle, Award } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import StarRating from "./star-rating";
 import ShareButton from "./share-button";
 import { Link } from "wouter";
@@ -228,6 +228,26 @@ export default function ProfessionalCard({ professional }: ProfessionalCardProps
               variant="icon"
               size="sm"
             />
+            {professional.socialMedia?.instagram && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const instagram = professional.socialMedia?.instagram || "";
+                  let url = instagram;
+                  if (instagram.startsWith("@")) {
+                    url = `https://instagram.com/${instagram.slice(1)}`;
+                  } else if (!instagram.startsWith("http")) {
+                    url = `https://instagram.com/${instagram}`;
+                  }
+                  window.open(url, "_blank");
+                }}
+                className="bg-pink-50 border-pink-200 text-pink-600 hover:bg-pink-100"
+                data-testid={`button-instagram-${professional.id}`}
+              >
+                <FaInstagram className="h-4 w-4" />
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
