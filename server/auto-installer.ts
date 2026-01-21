@@ -517,6 +517,11 @@ export async function createDatabaseTables(databaseUrl: string): Promise<boolean
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professionals' AND column_name='trial_ends_at') THEN
             ALTER TABLE professionals ADD COLUMN trial_ends_at TIMESTAMP;
         END IF;
+        
+        -- social_media em professionals (para Instagram e outras redes sociais)
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='professionals' AND column_name='social_media') THEN
+            ALTER TABLE professionals ADD COLUMN social_media JSONB;
+        END IF;
     END $$;
 
     COMMIT;
