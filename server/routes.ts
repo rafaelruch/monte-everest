@@ -4411,9 +4411,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send credentials email immediately
         try {
           const emailSent = await emailService.sendCredentialsEmail({
+            to: email,
+            professionalName: name,
             email: email,
-            name: name,
-            password: tempPassword
+            password: tempPassword,
+            planName: plan.name
           });
           
           if (emailSent) {
